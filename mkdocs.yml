@@ -1,0 +1,119 @@
+# MkDocs configuration — category-first structure
+# URL structure: /python/nucleusiq/...
+
+site_name: NucleusIQ
+site_description: An open-source, agent-first Python framework for building AI agents
+site_url: https://nucleusbox.github.io/nucleusiq-docs/
+repo_url: https://github.com/nucleusbox/NucleusIQ
+docs_dir: documentation
+edit_uri: edit/main/documentation/
+copyright: Copyright &copy; NucleusIQ contributors
+
+theme:
+  name: material
+  custom_dir: overrides
+  logo: assets/images/nucleusiq-logo.png
+  favicon: assets/images/nucleusiq-favicon.png
+  icon:
+    repo: fontawesome/brands/github
+  language: en
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.expand
+    - navigation.top
+    - content.tabs.link
+    - content.code.copy
+    - content.action.edit
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - attr_list
+  - md_in_html  # Required for grid cards
+
+extra_css:
+  - assets/stylesheets/extra.css
+
+nav:
+  - Home: index.md
+  - Get Started:
+    - python/nucleusiq/get-started/index.md
+    - Introduction: python/nucleusiq/overview.md
+    - Installation: python/nucleusiq/install.md
+    - Quickstart: python/nucleusiq/quickstart.md
+  - Core Concepts:
+    - python/nucleusiq/core-concepts/index.md
+    - Agents: python/nucleusiq/agents.md
+    - Tasks: python/nucleusiq/core-concepts/tasks.md
+    - Production Architecture: python/nucleusiq/core-concepts/production-architecture.md
+    - Execution modes: python/nucleusiq/execution-modes.md
+    - LLM and Providers: python/nucleusiq/core-concepts/llm.md
+    - Models: python/nucleusiq/models.md
+    - Providers: python/nucleusiq/providers.md
+    - Prompts: python/nucleusiq/prompts.md
+    - Runtime Components: python/nucleusiq/core-concepts/runtime-components.md
+    - Memory: python/nucleusiq/memory.md
+    - Streaming: python/nucleusiq/streaming.md
+    - Structured output: python/nucleusiq/structured-output.md
+    - Attachments: python/nucleusiq/attachments.md
+    - Plugins overview: python/nucleusiq/plugins/overview.md
+    - Built-in plugins: python/nucleusiq/plugins/built-in.md
+  - Guides:
+    - python/nucleusiq/guides/index.md
+    - Strategy: python/nucleusiq/guides/strategy.md
+    - Agent: python/nucleusiq/guides/agent.md
+    - Agent Config: python/nucleusiq/guides/agent-config.md
+    - MCP Integration: python/nucleusiq/guides/mcp-integration.md
+    - File handling: python/nucleusiq/guides/file-handling.md
+    - OpenAI provider: python/nucleusiq/guides/openai-provider.md
+  - Tools:
+    - python/nucleusiq/tools/index.md
+    - Overview: python/nucleusiq/tools.md
+    - Built-in: python/nucleusiq/tools/built-in.md
+    - File tools: python/nucleusiq/tools/file-tools.md
+    - Integration patterns: python/nucleusiq/tools/integration.md
+  - Observability:
+    - python/nucleusiq/observability/index.md
+    - Usage: python/nucleusiq/usage-tracking.md
+  - Learn:
+    - python/nucleusiq/learn/index.md
+    - Starter path: python/nucleusiq/learn/starter-path.md
+    - Production path: python/nucleusiq/learn/production-path.md
+    - Migration notes: python/nucleusiq/learn/migration-notes.md
+  - Examples:
+    - python/nucleusiq/examples/index.md
+    - Basic agent: python/nucleusiq/examples/basic-agent.md
+    - Streaming: python/nucleusiq/examples/streaming.md
+    - File workflow: python/nucleusiq/examples/file-workflow.md
+    - Autonomous workflow: python/nucleusiq/examples/autonomous-workflow.md
+    - Usage tracking: python/nucleusiq/examples/usage-tracking.md
+  - Reference:
+    - reference/index.md
+    - Changelog: reference/changelog.md
+
+extra:
+  generator: false
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/nucleusbox/NucleusIQ
+      name: NucleusIQ on GitHub
+

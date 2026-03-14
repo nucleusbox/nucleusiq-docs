@@ -1,0 +1,9 @@
+{#-
+  NucleusIQ logo — use theme.logo from assets/images
+-#}
+{% if config.theme.logo %}
+  <img src="{{ config.theme.logo | url }}" alt="NucleusIQ" class="nucleusiq-logo" style="background:#fff;padding:8px;border-radius:6px;max-height:2.5rem;min-width:2rem;display:block !important;visibility:visible !important;opacity:1 !important;">
+{% else %}
+  {% set icon = config.theme.icon.logo or "material/library" %}
+  {% include ".icons/" ~ icon ~ ".svg" %}
+{% endif %}
