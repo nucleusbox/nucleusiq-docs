@@ -39,13 +39,28 @@
   --nq-brand-soft: #4a4a4a;
 }
 
-/* Replace Material indigo with brand gray */
-[data-md-color-scheme="default"],
+/*
+ * Brand gray for chrome (header, primary UI). Keep content links a distinct color —
+ * using --nq-brand for .md-typeset a made links the same as body text ("invisible").
+ */
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color: var(--nq-brand);
+  --md-primary-fg-color--light: var(--nq-brand-soft);
+  --md-primary-fg-color--dark: #2f2f2f;
+  /* Accent for tabs/buttons; body links use --md-typeset-a-color below */
+  --md-accent-fg-color: var(--nq-brand);
+  --md-typeset-a-color: #2563eb;
+  --md-typeset-a-color--hover: #1d4ed8;
+}
+
 [data-md-color-scheme="slate"] {
   --md-primary-fg-color: var(--nq-brand);
   --md-primary-fg-color--light: var(--nq-brand-soft);
   --md-primary-fg-color--dark: #2f2f2f;
-  --md-accent-fg-color: var(--nq-brand);
+  --md-accent-fg-color: #c4c4c4;
+  /* Light blue on dark — readable; dark gray links on slate were nearly invisible */
+  --md-typeset-a-color: #93c5fd;
+  --md-typeset-a-color--hover: #bfdbfe;
 }
 
 /* Header should be white with dark text */
@@ -109,11 +124,7 @@
   display: none !important;
 }
 
-/* Brand links and buttons */
-a,
-.md-typeset a {
-  color: var(--nq-brand);
-}
+/* Buttons keep brand; inline links use Material --md-typeset-a-color (set above) */
 
 .md-typeset .md-button--primary,
 .md-typeset .md-button {
