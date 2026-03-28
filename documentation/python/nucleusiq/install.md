@@ -1,6 +1,6 @@
 # Install NucleusIQ
 
-To install the NucleusIQ core package:
+## Core package
 
 ```bash
 pip install nucleusiq
@@ -9,23 +9,29 @@ pip install nucleusiq
 
 ```bash
 uv add nucleusiq
-# Requires Python 3.10+
 ```
 
-NucleusIQ providers (LLM backends) live in independent packages. Install the ones you need:
+## LLM providers
 
-```bash
-# OpenAI provider (most common)
-pip install nucleusiq-openai
+NucleusIQ providers live in independent packages. Install the ones you need:
 
-# Or with uv
-uv add nucleusiq-openai
-```
+=== "OpenAI"
 
-```bash
-# Core + OpenAI in one command
-pip install nucleusiq nucleusiq-openai
-```
+    ```bash
+    pip install nucleusiq nucleusiq-openai
+    ```
+
+=== "Gemini"
+
+    ```bash
+    pip install nucleusiq nucleusiq-gemini
+    ```
+
+=== "Both"
+
+    ```bash
+    pip install nucleusiq nucleusiq-openai nucleusiq-gemini
+    ```
 
 ### Optional dependencies
 
@@ -39,16 +45,30 @@ pip install "nucleusiq[clustering]"
 ```python
 from importlib.metadata import version
 
-print(version("nucleusiq"))
+print(version("nucleusiq"))        # e.g., 0.6.0
+print(version("nucleusiq-openai")) # e.g., 0.5.0
+print(version("nucleusiq-gemini")) # e.g., 0.1.0
 ```
 
 ## Environment variables
 
-### OpenAI provider
+=== "OpenAI"
 
-```bash
-export OPENAI_API_KEY=sk-...
-# Or create a .env file in your project root
+    ```bash
+    export OPENAI_API_KEY=sk-...
+    ```
+
+=== "Gemini"
+
+    ```bash
+    export GEMINI_API_KEY=your-gemini-api-key
+    ```
+
+Or create a `.env` file in your project root:
+
+```
+OPENAI_API_KEY=sk-...
+GEMINI_API_KEY=your-gemini-api-key
 ```
 
 NucleusIQ automatically loads `.env` files from the project root.
@@ -57,12 +77,13 @@ NucleusIQ automatically loads `.env` files from the project root.
 
 NucleusIQ is a monorepo with independently installable packages:
 
-| Package | Description |
-|---------|-------------|
-| `nucleusiq` | Core framework (agents, tools, memory, plugins) |
-| `nucleusiq-openai` | OpenAI provider |
+| Package | Version | Description | Depends on |
+|---------|---------|-------------|-----------|
+| `nucleusiq` | 0.6.0 | Core framework (agents, tools, memory, plugins) | — |
+| `nucleusiq-openai` | 0.5.0 | OpenAI provider | `nucleusiq>=0.6.0` |
+| `nucleusiq-gemini` | 0.1.0 | Google Gemini provider | `nucleusiq>=0.6.0` |
 
-Each provider depends on `nucleusiq>=0.4.0`—install the core first, then add providers as needed.
+Install the core first, then add providers as needed.
 
 ## Developers (contributing)
 
@@ -78,6 +99,10 @@ uv venv && uv sync --all-groups
 
 # OpenAI provider
 cd ../providers/llms/openai
+uv venv && uv sync --all-groups
+
+# Gemini provider
+cd ../gemini
 uv venv && uv sync --all-groups
 ```
 

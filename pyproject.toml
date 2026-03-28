@@ -1,14 +1,16 @@
-[build-system]
-requires = ["setuptools>=68", "wheel"]
-build-backend = "setuptools.build_meta"
-
-[project]
+[tool.poetry]
 name = "nucleusiq-docs"
 version = "0.1.0"
 description = "Documentation site for NucleusIQ built with MkDocs"
+authors = ["NucleusIQ contributors <noreply@github.com>"]
 readme = "documentation/MAINTENANCE.md"
-requires-python = ">=3.10"
-dependencies = [
-  "mkdocs>=1.5,<2",
-  "mkdocs-material>=9.0,<10",
-]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = ">=3.10,<4.0"
+mkdocs = ">=1.5,<2"
+mkdocs-material = ">=9.0,<10"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

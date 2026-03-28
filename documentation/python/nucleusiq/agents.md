@@ -4,70 +4,134 @@ An agent is a managed runtime with memory, tools, policy, streaming, structure, 
 
 ## Creating an agent
 
-```python
-from nucleusiq.agents import Agent
-from nucleusiq.agents.config import AgentConfig, ExecutionMode
-from nucleusiq_openai import BaseOpenAI
+=== "With OpenAI"
 
-agent = Agent(
-    name="analyst",
-    role="Data analyst",
-    objective="Answer questions and analyze data",
-    llm=BaseOpenAI(model_name="gpt-4o-mini"),
-    config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
-)
-```
+    ```python
+    from nucleusiq.agents import Agent
+    from nucleusiq.agents.config import AgentConfig, ExecutionMode
+    from nucleusiq_openai import BaseOpenAI
+
+    agent = Agent(
+        name="analyst",
+        llm=BaseOpenAI(model_name="gpt-4o-mini"),
+        model="gpt-4o-mini",
+        instructions="You are a data analyst. Answer questions accurately.",
+        config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
+    )
+    ```
+
+=== "With Gemini"
+
+    ```python
+    from nucleusiq.agents import Agent
+    from nucleusiq.agents.config import AgentConfig, ExecutionMode
+    from nucleusiq_gemini import BaseGemini
+
+    agent = Agent(
+        name="analyst",
+        llm=BaseGemini(model_name="gemini-2.5-flash"),
+        model="gemini-2.5-flash",
+        instructions="You are a data analyst. Answer questions accurately.",
+        config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
+    )
+    ```
+
+=== "With MockLLM (testing)"
+
+    ```python
+    from nucleusiq.agents import Agent
+    from nucleusiq.core.llms.mock_llm import MockLLM
+
+    agent = Agent(
+        name="analyst",
+        llm=MockLLM(),
+        instructions="You are a data analyst.",
+    )
+    ```
 
 ## Agent lifecycle
 
-1. **Initialize** — Call `await agent.initialize()` before first use (or let `execute` do it automatically).
-2. **Execute** — `task = Task(id="t1", objective="...")` then `result = await agent.execute(task)`.
-3. **Stream** — `async for event in agent.execute_stream(task):` for real-time output.
+1. **Create** — Instantiate with an LLM, config, tools, plugins, and memory.
+2. **Execute** — `result = await agent.execute({"id": "t1", "objective": "What is 2+2?"})` or pass a `Task` object
+3. **Stream** — `async for event in agent.execute_stream({"id": "t2", "objective": "Write a poem"}):` for real-time output.
+4. **Inspect** — `agent.last_usage` for token counts, then `CostTracker` for cost estimation.
 
 ## End-to-end example
 
 ```python
 import asyncio
 from nucleusiq.agents import Agent
-from nucleusiq.agents.task import Task
 from nucleusiq.agents.config import AgentConfig, ExecutionMode
-from nucleusiq_openai import BaseOpenAI
+from nucleusiq.tools.decorators import tool
+from nucleusiq_gemini import BaseGemini
+
+@tool
+def get_weather(city: str) -> str:
+    """Get current weather for a city."""
+    return f"Weather in {city}: 22°C, Sunny"
 
 async def main():
     agent = Agent(
-        name="research-assistant",
-        role="Research assistant",
-        objective="Answer with concise, verifiable outputs",
-        llm=BaseOpenAI(model_name="gpt-4o-mini"),
+        name="assistant",
+        llm=BaseGemini(model_name="gemini-2.5-flash"),
+        model="gemini-2.5-flash",
+        instructions="You are a helpful assistant. Use tools when needed.",
+        tools=[get_weather],
         config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
     )
-    await agent.initialize()
+    result = await agent.execute({"id": "t3", "objective": "What's the weather in Paris?"})
+    print(result.content)
 
-    task = Task(id="q1", objective="Give 3 facts about the Eiffel Tower.")
-    result = await agent.execute(task)
-    print(result)
+    # Token usage
+    print(agent.last_usage.display())
 
 asyncio.run(main())
 ```
 
+## Usage tracking and cost estimation
 
-## Usage tracking
-
-After execution, inspect token usage:
+After execution, inspect token usage and estimate costs:
 
 ```python
-result = await agent.execute(task)
-print(agent.last_usage.display())
-# or
-summary = agent.last_usage.summary()  # dict for logging/dashboards
+result = await agent.execute({"id": "t4", "objective": "Analyze this data"})
+
+# Token usage
+usage = agent.last_usage
+print(usage.display())
+
+# Cost estimation
+from nucleusiq.agents.components.pricing import CostTracker
+tracker = CostTracker()
+cost = tracker.estimate(usage, model="gemini-2.5-flash")
+print(f"Estimated cost: ${cost.total_cost:.6f}")
 ```
 
 `usage.by_origin` separates user tokens (initial MAIN call) from framework overhead (planning, tool loops, critic, refiner).
 
+## Error handling
+
+All providers raise the same framework-level exceptions:
+
+```python
+from nucleusiq.llms.errors import RateLimitError, AuthenticationError, LLMError
+
+try:
+    result = await agent.execute({"id": "t5", "objective": "Hello"})
+except RateLimitError:
+    print("Rate limited — implement backoff")
+except AuthenticationError:
+    print("Check your API key")
+except LLMError as e:
+    print(f"LLM error from {e.provider}: {e}")
+```
+
 ## See also
 
 - [Execution modes](execution-modes.md) — Direct, Standard, Autonomous
-- [Tools](tools.md) — Built-in and custom tools
+- [Tools](tools.md) — `@tool` decorator, built-in tools, and provider native tools
 - [Memory](memory.md) — Conversation history strategies
-- [Usage tracking](usage-tracking.md) — UsageSummary, by-purpose and by-origin
+- [Providers](providers.md) — OpenAI, Gemini, and provider portability
+- [Usage tracking](usage-tracking.md) — Token usage by purpose and origin
+- [Cost estimation](observability/cost-estimation.md) — Dollar cost tracking
+- [Error handling](core-concepts/error-handling.md) — Framework error taxonomy
 - [Quickstart](quickstart.md) — End-to-end first run

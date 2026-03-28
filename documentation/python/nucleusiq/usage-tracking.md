@@ -69,8 +69,23 @@ print(log_payload)
 
 Use this data to tune mode selection, tool strategy, and LLM settings for cost/performance balance.
 
+## Cost estimation
+
+Convert token usage into dollar costs using the built-in `CostTracker`:
+
+```python
+from nucleusiq.agents.components.pricing import CostTracker
+
+tracker = CostTracker()
+cost = tracker.estimate(agent.last_usage, model="gpt-4o")
+print(cost.display())
+```
+
+See [Cost estimation](observability/cost-estimation.md) for full details, built-in pricing tables, and custom model registration.
+
 ## See also
 
+- [Cost estimation](observability/cost-estimation.md) — Dollar cost tracking
 - [Agents](agents.md) — Lifecycle and execution entry points
 - [Execution modes](execution-modes.md) — Direct vs Standard vs Autonomous behavior
 - [Models](models.md) — LLM config and per-task parameter overrides

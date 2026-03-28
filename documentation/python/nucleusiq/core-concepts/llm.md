@@ -1,24 +1,90 @@
 # Core Concept: LLM and Providers
 
-NucleusIQ core is provider-agnostic. Provider packages implement concrete model APIs.
+NucleusIQ core is provider-agnostic. Provider packages implement concrete model APIs against the `BaseLLM` interface.
 
 ## Base + provider pattern
 
-- Core contracts: `BaseLLM`, `LLMParams`
-- Provider package: e.g., `nucleusiq-openai`
+```
+nucleusiq (core)
+├── BaseLLM          # Abstract interface
+├── LLMParams        # Common parameters
+└── MockLLM          # Built-in for testing
 
-```python
-from nucleusiq_openai import BaseOpenAI
+nucleusiq-openai     # Provider package
+├── BaseOpenAI       # Implements BaseLLM
+└── OpenAILLMParams  # Extends LLMParams
 
-llm = BaseOpenAI(model_name="gpt-4o-mini")
+nucleusiq-gemini     # Provider package
+├── BaseGemini       # Implements BaseLLM
+└── GeminiLLMParams  # Extends LLMParams
 ```
 
-## Per-agent and per-task parameter control
+## Usage
+
+=== "OpenAI"
+
+    ```python
+    from nucleusiq_openai import BaseOpenAI
+    llm = BaseOpenAI(model_name="gpt-4o-mini")
+    ```
+
+=== "Gemini"
+
+    ```python
+    from nucleusiq_gemini import BaseGemini
+    llm = BaseGemini(model_name="gemini-2.5-flash")
+    ```
+
+## Parameter control
+
+Three levels of control — use what you need:
+
+| Level | Who | How |
+|-------|-----|-----|
+| **Agent defaults** | Most users | `AgentConfig(llm_max_output_tokens=1024)` |
+| **Provider params** | Power users | `AgentConfig(llm_params=GeminiLLMParams(thinking_config=...))` |
+| **Per-task override** | Advanced | `agent.execute(task, llm_params=OpenAILLMParams(temperature=0))` |
 
 ```python
 from nucleusiq.agents.config import AgentConfig
-from nucleusiq_openai import OpenAILLMParams
+from nucleusiq_gemini import GeminiLLMParams, GeminiThinkingConfig
 
-config = AgentConfig(llm_params=OpenAILLMParams(temperature=0.2))
-result = await agent.execute(task, llm_params=OpenAILLMParams(reasoning_effort="high"))
+config = AgentConfig(
+    llm_params=GeminiLLMParams(
+        temperature=0.2,
+        thinking_config=GeminiThinkingConfig(thinking_budget=2048),
+    ),
+)
 ```
+
+## Universal parameters
+
+These parameters work across all providers:
+
+| Parameter | Description |
+|-----------|-------------|
+| `temperature` | Sampling temperature (0.0–2.0) |
+| `max_output_tokens` | Maximum tokens in the response |
+| `top_p` | Nucleus sampling threshold |
+
+Provider-specific parameters (e.g., `reasoning_effort` for OpenAI, `thinking_config` for Gemini) are defined in the provider's `LLMParams` subclass.
+
+## Error contract
+
+All providers raise the same [framework-level exceptions](error-handling.md):
+
+```python
+from nucleusiq.llms.errors import RateLimitError, AuthenticationError
+
+try:
+    result = await agent.execute({"id": "l1", "objective": "Hello"})
+except RateLimitError:
+    # Works with any provider
+    pass
+```
+
+## See also
+
+- [Providers](../providers.md) — Full provider architecture
+- [Models](../models.md) — Available models per provider
+- [Error handling](error-handling.md) — Framework error taxonomy

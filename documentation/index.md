@@ -72,6 +72,18 @@ Choose your path based on where you are today:
 
 ---
 
+## What's new in v0.6.0
+
+- **Google Gemini provider** — second LLM provider with streaming, native tools, and structured output
+- **`@tool` decorator** — create tools from plain functions without subclassing
+- **Cost estimation** — dollar cost tracking with built-in pricing for 15 models
+- **Error handling** — provider-agnostic exception hierarchy
+- **Provider portability** — same agent code works with OpenAI and Gemini
+
+See the [full changelog](reference/changelog.md).
+
+---
+
 ## Quick links
 
 - [Get Started](python/nucleusiq/get-started/index.md)

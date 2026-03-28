@@ -7,52 +7,117 @@ NucleusIQ uses a **provider-agnostic** `BaseLLM` interface. Swap providers witho
 | Provider | Package | Install |
 |----------|---------|---------|
 | OpenAI | `nucleusiq-openai` | `pip install nucleusiq-openai` |
+| Google Gemini | `nucleusiq-gemini` | `pip install nucleusiq-gemini` |
 | Mock (testing) | Built-in | `from nucleusiq.core.llms.mock_llm import MockLLM` |
 
 ## Usage
 
-```python
-from nucleusiq_openai import BaseOpenAI
+=== "OpenAI"
 
-llm = BaseOpenAI(model_name="gpt-4o-mini")
-# or
-llm = BaseOpenAI(model_name="gpt-4o", temperature=0.5, timeout=60.0)
-```
+    ```python
+    from nucleusiq_openai import BaseOpenAI
 
-```python
-from nucleusiq.core.llms.mock_llm import MockLLM
+    llm = BaseOpenAI(model_name="gpt-4o-mini")
+    ```
 
-llm = MockLLM()  # No API key needed
-```
+=== "Gemini"
 
-## AgentConfig overrides
+    ```python
+    from nucleusiq_gemini import BaseGemini
 
-Tune LLM parameters per agent:
+    llm = BaseGemini(model_name="gemini-2.5-flash")
+    ```
+
+=== "Mock (testing)"
+
+    ```python
+    from nucleusiq.core.llms.mock_llm import MockLLM
+
+    llm = MockLLM()  # No API key needed
+    ```
+
+## Available models
+
+### OpenAI
+
+| Model | Use case |
+|-------|----------|
+| `gpt-4o` | High capability, multimodal |
+| `gpt-4o-mini` | Fast, cost-effective |
+| `gpt-4.1` | Latest GPT-4 series |
+| `gpt-4.1-mini` | Balanced performance/cost |
+| `gpt-4.1-nano` | Ultra-fast, lowest cost |
+| `o3` | Reasoning model |
+| `o3-mini` | Reasoning, cost-effective |
+| `o4-mini` | Latest reasoning model |
+
+### Gemini
+
+| Model | Context | Thinking |
+|-------|---------|----------|
+| `gemini-2.5-pro` | 1M tokens | Yes |
+| `gemini-2.5-flash` | 1M tokens | Yes |
+| `gemini-2.0-flash` | 1M tokens | No |
+| `gemini-1.5-pro` | 2M tokens | No |
+| `gemini-1.5-flash` | 1M tokens | No |
+
+## Parameter control
+
+### AgentConfig (recommended)
+
+Set LLM parameters at the agent level:
 
 ```python
 from nucleusiq.agents.config import AgentConfig
 
 config = AgentConfig(
-    llm_max_tokens=1024,
+    llm_max_output_tokens=1024,
     verbose=True,
 )
 agent = Agent(..., config=config)
 ```
 
-## Per-task overrides
+### Provider-specific params
+
+Use provider-specific parameter classes for advanced settings:
+
+=== "OpenAI"
+
+    ```python
+    from nucleusiq_openai import OpenAILLMParams
+
+    config = AgentConfig(
+        llm_params=OpenAILLMParams(temperature=0.2, reasoning_effort="high"),
+    )
+    ```
+
+=== "Gemini"
+
+    ```python
+    from nucleusiq_gemini import GeminiLLMParams, GeminiThinkingConfig
+
+    config = AgentConfig(
+        llm_params=GeminiLLMParams(
+            temperature=0.5,
+            thinking_config=GeminiThinkingConfig(thinking_budget=2048),
+        ),
+    )
+    ```
+
+### Per-task overrides
 
 Override parameters for a single execution:
 
 ```python
-from nucleusiq_openai import OpenAILLMParams
-
 result = await agent.execute(
     task,
-    llm_params=OpenAILLMParams(temperature=0.2),
+    llm_params=OpenAILLMParams(temperature=0.0),
 )
 ```
 
 ## See also
 
-- [OpenAI provider guide](guides/openai-provider.md) — Full parameter control and three-layer design
+- [Providers](providers.md) — Provider architecture and portability
+- [OpenAI provider guide](guides/openai-provider.md) — OpenAI-specific features
+- [Gemini provider guide](guides/gemini-provider.md) — Gemini-specific features
 - [Install](install.md) — Setup instructions

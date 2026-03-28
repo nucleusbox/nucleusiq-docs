@@ -91,7 +91,7 @@ agent.execute({"id": "q1", "objective": "What is GDP of Japan?"})
   │     │      "model":      llm.model_name,
   │     │      "messages":   messages,
   │     │      "tools":      tool_specs,
-  │     │      "max_tokens": config.llm_max_tokens,
+  │     │      "max_output_tokens": config.llm_max_output_tokens,
   │     │  }
   │     │  response = await llm.call(**call_kwargs)
   │     │
@@ -204,7 +204,7 @@ agent_writer = Agent(
     llm=llm,
     prompt=writer_prompt,
     config=AgentConfig(
-        llm_max_tokens=4096,
+        llm_max_output_tokens=4096,
         llm_params=OpenAILLMParams(
             temperature=0.9,
             presence_penalty=0.6,
@@ -221,7 +221,7 @@ agent_analyst = Agent(
     prompt=analyst_prompt,
     tools=[OpenAITool.code_interpreter()],
     config=AgentConfig(
-        llm_max_tokens=2048,
+        llm_max_output_tokens=2048,
         llm_params=OpenAILLMParams(
             temperature=0.1,
             seed=42,
@@ -480,7 +480,7 @@ params = OpenAILLMParams(
 | Parameter | BaseOpenAI init | AgentConfig.llm_params | Per-execute llm_params | llm.call() direct |
 |---|---|---|---|---|
 | `temperature` | Default for all calls | Override per agent | Override per task | Full control |
-| `max_tokens` | - | `llm_max_tokens` field | Override per task | Full control |
+| `max_output_tokens` | - | `llm_max_output_tokens` field | Override per task | Full control |
 | `seed` | Default for all calls | Override per agent | Override per task | Full control |
 | `reasoning_effort` | Default for all calls | Override per agent | Override per task | Full control |
 | `service_tier` | Default for all calls | Override per agent | Override per task | Full control |

@@ -1,16 +1,16 @@
 # Memory
 
-NucleusIQ agents support conversation memory across turns. Choose a strategy that fits your workload.
+NucleusIQ agents support conversation memory across turns. Choose a strategy that fits your workload. All strategies work identically with any LLM provider (OpenAI, Gemini, MockLLM).
 
 ## Strategies
 
-| Strategy | Use case |
-|----------|----------|
-| `FULL_HISTORY` | Short conversations, full context |
-| `SLIDING_WINDOW` | Limit recent messages only |
-| `SUMMARY` | Long conversations, compress older turns |
-| `SUMMARY_WINDOW` | Summary + recent messages |
-| `TOKEN_BUDGET` | Hard token limit |
+| Strategy | Use case | How it works |
+|----------|----------|-------------|
+| `FULL_HISTORY` | Short conversations | Keeps all messages |
+| `SLIDING_WINDOW` | Chat applications | Keeps last N messages |
+| `SUMMARY` | Long conversations | Summarizes older turns via LLM |
+| `SUMMARY_WINDOW` | Long-running assistants | Summary of old + recent window |
+| `TOKEN_BUDGET` | Hard cost control | Keeps messages within token budget |
 
 ## Configuration
 
@@ -23,10 +23,7 @@ memory = MemoryFactory.create_memory(
     window_size=10,
 )
 
-agent = Agent(
-    ...,
-    memory=memory,
-)
+agent = Agent(..., memory=memory)
 ```
 
 ## Strategy examples
@@ -34,20 +31,34 @@ agent = Agent(
 ```python
 from nucleusiq.memory import MemoryFactory, MemoryStrategy
 
-full_history = MemoryFactory.create_memory(MemoryStrategy.FULL_HISTORY)
+# Keep everything (default)
+full = MemoryFactory.create_memory(MemoryStrategy.FULL_HISTORY)
+
+# Last 12 messages
 windowed = MemoryFactory.create_memory(MemoryStrategy.SLIDING_WINDOW, window_size=12)
+
+# Hard token limit
 budgeted = MemoryFactory.create_memory(MemoryStrategy.TOKEN_BUDGET, max_tokens=4096)
+
+# Summarize old messages (requires an LLM)
 summary = MemoryFactory.create_memory(MemoryStrategy.SUMMARY)
-summary_window = MemoryFactory.create_memory(MemoryStrategy.SUMMARY_WINDOW, window_size=8)
+
+# Summary + recent window (best of both)
+hybrid = MemoryFactory.create_memory(MemoryStrategy.SUMMARY_WINDOW, window_size=8)
 ```
 
-Use `SLIDING_WINDOW` for most chat apps, `TOKEN_BUDGET` for hard limits, and `SUMMARY_WINDOW` for long-running assistants.
+**Recommendations:**
+
+- **`SLIDING_WINDOW`** for most chat apps
+- **`TOKEN_BUDGET`** when you need hard cost limits
+- **`SUMMARY_WINDOW`** for long-running assistants that need both context and efficiency
 
 ## File-aware metadata
 
-All strategies store attachment metadata alongside messages. User messages with attachments get a `[Attached: ...]` summary prefix for context continuity.
+All strategies store attachment metadata alongside messages. User messages with attachments get a `[Attached: ...]` summary prefix for context continuity across turns.
 
 ## See also
 
 - [Agents](agents.md) — Agent configuration
 - [Attachments](attachments.md) — Multimodal inputs
+- [Usage tracking](usage-tracking.md) — Monitor token consumption
