@@ -5,7 +5,7 @@ NucleusIQ includes a `CostTracker` that estimates dollar costs from token usage 
 ## Quick usage
 
 ```python
-from nucleusiq.agents.components.pricing import CostTracker
+from nucleusiq.agents.usage import CostTracker
 
 result = await agent.execute({"id": "cost-estimation-1", "objective": "Analyze this data"})
 usage = agent.last_usage
@@ -85,7 +85,7 @@ Pricing tables are included for common models:
 Register pricing for custom or fine-tuned models:
 
 ```python
-from nucleusiq.agents.components.pricing import CostTracker, ModelPricing
+from nucleusiq.agents.usage import CostTracker, ModelPricing
 
 tracker = CostTracker()
 tracker.register("my-fine-tuned-model", ModelPricing(

@@ -20,6 +20,19 @@ If you are migrating from a heavier framework:
 4. Introduce AUTONOMOUS mode only where Critic/Refiner verification loops are genuinely needed
 5. Use provider portability to switch LLMs without rewriting agent logic
 
+## From v0.6.0 to v0.7.x
+
+Key changes in v0.7.x:
+
+| Change | Migration |
+|--------|----------|
+| `agent.execute()` returns `AgentResult` not raw string | Use `result.output` for text, `str(result)` for string, `result.status` for outcome |
+| New exception hierarchy | Replace `except ValueError` with `except ToolValidationError`, `except AgentExecutionError`, etc. |
+| `from nucleusiq.agents.components.pricing import CostTracker` moved | Use `from nucleusiq.agents.usage import CostTracker` |
+| `from nucleusiq.agents.components.usage_tracker import UsageTracker` moved | Use `from nucleusiq.agents.usage import UsageTracker` |
+| `AgentConfig.enable_tracing` new field | Set `enable_tracing=True` to populate `AgentResult.tool_calls`, `.llm_calls`, `.warnings` |
+| All errors now have structured attributes | `ToolError` carries `tool_name`, `AgentError` carries `mode`, etc. |
+
 ## From v0.5.0 to v0.6.0
 
 Key changes in v0.6.0:

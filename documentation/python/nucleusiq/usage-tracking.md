@@ -74,7 +74,7 @@ Use this data to tune mode selection, tool strategy, and LLM settings for cost/p
 Convert token usage into dollar costs using the built-in `CostTracker`:
 
 ```python
-from nucleusiq.agents.components.pricing import CostTracker
+from nucleusiq.agents.usage import CostTracker
 
 tracker = CostTracker()
 cost = tracker.estimate(agent.last_usage, model="gpt-4o")

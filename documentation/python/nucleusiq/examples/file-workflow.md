@@ -36,7 +36,7 @@ async def main():
             "objective": "Find all API timeout settings in this project and summarize the values.",
         }
     )
-    print(result.content)
+    print(result.output)
 
 asyncio.run(main())
 ```

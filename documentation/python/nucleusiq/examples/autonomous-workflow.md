@@ -61,7 +61,7 @@ async def main():
             ),
         }
     )
-    print(result.content)
+    print(result.output)
 
     # Check token usage
     usage = agent.last_usage

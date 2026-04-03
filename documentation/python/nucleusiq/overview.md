@@ -37,7 +37,7 @@ NucleusIQ agents support memory, streaming, structured output, cost tracking, an
     result = asyncio.run(
         agent.execute(Task(id="t1", objective="What is the capital of France?"))
     )
-    print(result.content)
+    print(result.output)
     ```
 
 === "With Gemini"
@@ -60,7 +60,7 @@ NucleusIQ agents support memory, streaming, structured output, cost tracking, an
     result = asyncio.run(
         agent.execute(Task(id="t2", objective="What is the capital of France?"))
     )
-    print(result.content)
+    print(result.output)
     ```
 
 === "With MockLLM (no API key)"
@@ -78,7 +78,7 @@ NucleusIQ agents support memory, streaming, structured output, cost tracking, an
     )
 
     result = asyncio.run(agent.execute(Task(id="t3", objective="What is 2 + 2?")))
-    print(result.content)
+    print(result.output)
     ```
 
 See the [Install](install.md) and [Quickstart](quickstart.md) guides to get started.

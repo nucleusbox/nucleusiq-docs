@@ -8,7 +8,7 @@ Track dollar costs of agent execution using the built-in `CostTracker`.
 import asyncio
 from nucleusiq.agents import Agent
 from nucleusiq.agents.config import AgentConfig, ExecutionMode
-from nucleusiq.agents.components.pricing import CostTracker
+from nucleusiq.agents.usage import CostTracker
 from nucleusiq_openai import BaseOpenAI
 
 async def main():

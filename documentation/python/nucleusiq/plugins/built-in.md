@@ -34,6 +34,46 @@ agent = Agent(
 )
 ```
 
+## ContextWindowPlugin
+
+`ContextWindowPlugin` trims conversation history to keep messages within budget, preventing context window overflows.
+
+### Message-count based trimming
+
+```python
+from nucleusiq.plugins.builtin import ContextWindowPlugin
+
+agent = Agent(
+    ...,
+    plugins=[ContextWindowPlugin(max_messages=50, keep_recent=10)],
+)
+```
+
+### Token-based trimming with approximate counting (default)
+
+```python
+agent = Agent(
+    ...,
+    plugins=[ContextWindowPlugin(max_tokens=8000, keep_recent=5)],
+)
+```
+
+### Token-based trimming with provider-accurate counting
+
+```python
+agent = Agent(
+    ...,
+    plugins=[
+        ContextWindowPlugin(
+            max_tokens=8000,
+            token_counter=llm.estimate_tokens,  # Uses tiktoken for OpenAI
+        ),
+    ],
+)
+```
+
+The `token_counter` parameter accepts any `(str) -> int` callable. The default uses `len(text) // 4` as a rough approximation. Providers override `estimate_tokens()` with more accurate implementations — OpenAI uses `tiktoken`, Gemini uses a heuristic.
+
 ## See also
 
 - [Plugins overview](overview.md) — Hook points and APIs

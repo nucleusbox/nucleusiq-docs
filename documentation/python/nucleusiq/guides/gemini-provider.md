@@ -41,7 +41,7 @@ async def main():
         ),
     )
     result = await agent.execute({"id": "gemini-guide-1", "objective": "What is the capital of France?"})
-    print(result.content)
+    print(result.output)
 
 asyncio.run(main())
 ```

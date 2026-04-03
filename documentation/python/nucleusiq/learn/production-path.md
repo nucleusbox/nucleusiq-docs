@@ -50,7 +50,7 @@ usage = agent.last_usage
 print(usage.display())  # Human-readable token summary
 
 # Cost estimation
-from nucleusiq.agents.components.pricing import CostTracker
+from nucleusiq.agents.usage import CostTracker
 tracker = CostTracker()
 cost = tracker.estimate(usage, model="gpt-4o")
 print(f"Cost: ${cost.total_cost:.6f}")

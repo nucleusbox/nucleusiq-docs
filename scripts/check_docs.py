@@ -67,9 +67,13 @@ def check_global_patterns(md_files: list[Path]) -> list[str]:
     """Scan ALL markdown files for known wrong patterns."""
     errors: list[str] = []
 
+    # Files where old patterns are shown intentionally (migration tables)
+    migration_allowlist = {"migration-notes.md"}
+
     for md_file in md_files:
         content = md_file.read_text(encoding="utf-8")
         rel = md_file.relative_to(REPO_ROOT)
+        is_migration = md_file.name in migration_allowlist
         code_text = "\n".join(_extract_code_blocks(content))
 
         if re.search(r"agent\.execute\(\s*[\"']", code_text):
@@ -94,6 +98,42 @@ def check_global_patterns(md_files: list[Path]) -> list[str]:
             errors.append(
                 f"{rel}: llm_max_tokens is stale (v0.5.0). "
                 "Use llm_max_output_tokens (renamed in v0.6.0)."
+            )
+
+        # v0.7.x checks
+
+        if re.search(r"result\.content\b", code_text):
+            errors.append(
+                f"{rel}: result.content is stale (v0.7.2). "
+                "Use result.output — agent.execute() returns AgentResult."
+            )
+
+        if re.search(r"agent\.stream\(", code_text):
+            errors.append(
+                f"{rel}: agent.stream() does not exist. "
+                "Use agent.execute_stream()."
+            )
+
+        if not is_migration and re.search(
+            r"from\s+nucleusiq\.agents\.components\.pricing\b", code_text
+        ):
+            errors.append(
+                f"{rel}: nucleusiq.agents.components.pricing is stale (v0.7.4). "
+                "Use from nucleusiq.agents.usage import CostTracker."
+            )
+
+        if not is_migration and re.search(
+            r"from\s+nucleusiq\.agents\.components\.usage_tracker\b", code_text
+        ):
+            errors.append(
+                f"{rel}: nucleusiq.agents.components.usage_tracker is stale (v0.7.4). "
+                "Use from nucleusiq.agents.usage import UsageTracker."
+            )
+
+        if re.search(r"from\s+nucleusiq\.llms\.base\s+import\s+.*get_tokenizer", code_text):
+            errors.append(
+                f"{rel}: get_tokenizer() was removed in v0.7.4. "
+                "Use llm.estimate_tokens() instead."
             )
 
     return errors

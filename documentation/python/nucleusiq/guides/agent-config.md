@@ -29,6 +29,7 @@ config = AgentConfig(
 | `max_iterations` | `5` | Max iterations (Autonomous mode) |
 | `require_quality_check` | `False` | Enable Critic/Refiner (Autonomous) |
 | `verbose` | `False` | Print debug logs |
+| `enable_tracing` | `False` | Enable ExecutionTracer to populate `AgentResult.tool_calls`, `.llm_calls`, `.warnings` |
 
 ## LLM parameter overrides
 
@@ -59,6 +60,25 @@ Use typed provider params for advanced control:
         ),
     )
     ```
+
+## Execution tracing
+
+Enable tracing to populate detailed execution data in `AgentResult`:
+
+```python
+config = AgentConfig(
+    execution_mode=ExecutionMode.STANDARD,
+    enable_tracing=True,  # Populate tool_calls and llm_calls in AgentResult
+)
+
+result = await agent.execute(task)
+
+# When tracing is enabled, result contains detailed execution data
+for tool_call in result.tool_calls:
+    print(f"{tool_call['name']}: {tool_call['duration_ms']}ms")
+```
+
+Tracing is zero-overhead when disabled (the default). When `enable_tracing=False`, `result.tool_calls` and `result.llm_calls` return empty tuples.
 
 ## Per-task overrides
 

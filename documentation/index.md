@@ -72,13 +72,28 @@ Choose your path based on where you are today:
 
 ---
 
-## What's new in v0.6.0
+## What's new in v0.7.x
 
-- **Google Gemini provider** — second LLM provider with streaming, native tools, and structured output
-- **`@tool` decorator** — create tools from plain functions without subclassing
-- **Cost estimation** — dollar cost tracking with built-in pricing for 15 models
-- **Error handling** — provider-agnostic exception hierarchy
-- **Provider portability** — same agent code works with OpenAI and Gemini
+### v0.7.4 (latest)
+
+- **ExecutionTracer** — full LLM/tool call observability with `AgentConfig(enable_tracing=True)`
+- **Pyrefly static type checking** — 121 type errors fixed, CI-gated
+- **Error package restructure** — `core/errors/` with lazy re-exports
+- **Usage & pricing extraction** — `core/agents/usage/` package
+- **Exhaustive error wiring** — every `ValueError`/`RuntimeError` replaced with typed exceptions
+- **Dead code cleanup** — removed unused GPT-2 tokenizer, added `BaseLLM.estimate_tokens()`
+
+### v0.7.3
+
+- **Gemini tool-calling fixes** — empty `function_response.name`, non-dict response wrapping
+- **`$ref`/`$defs` inlining** for Gemini structured output
+
+### v0.7.2
+
+- **Unified exception hierarchy** — 10 error families (Tool, Agent, Attachment, Memory, Prompt, Streaming, Plugin, StructuredOutput, LLM, Workspace)
+- **AgentResult response contract** — typed, immutable Pydantic model returned from `agent.execute()`
+
+Current packages: `nucleusiq` 0.7.4, `nucleusiq-openai` 0.6.1, `nucleusiq-gemini` 0.2.2
 
 See the [full changelog](reference/changelog.md).
 

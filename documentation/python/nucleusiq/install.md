@@ -36,18 +36,20 @@ NucleusIQ providers live in independent packages. Install the ones you need:
 ### Optional dependencies
 
 ```bash
-# Clustering support (for some memory strategies)
+# Auto Chain-of-Thought clustering (scikit-learn ~50MB)
 pip install "nucleusiq[clustering]"
 ```
+
+The clustering extra is only needed if you use the `AutoChainOfThoughtPrompt` technique. The core framework works without it.
 
 ## Verify installation
 
 ```python
 from importlib.metadata import version
 
-print(version("nucleusiq"))        # e.g., 0.6.0
-print(version("nucleusiq-openai")) # e.g., 0.5.0
-print(version("nucleusiq-gemini")) # e.g., 0.1.0
+print(version("nucleusiq"))        # e.g., 0.7.4
+print(version("nucleusiq-openai")) # e.g., 0.6.1
+print(version("nucleusiq-gemini")) # e.g., 0.2.2
 ```
 
 ## Environment variables
@@ -79,9 +81,9 @@ NucleusIQ is a monorepo with independently installable packages:
 
 | Package | Version | Description | Depends on |
 |---------|---------|-------------|-----------|
-| `nucleusiq` | 0.6.0 | Core framework (agents, tools, memory, plugins) | — |
-| `nucleusiq-openai` | 0.5.0 | OpenAI provider | `nucleusiq>=0.6.0` |
-| `nucleusiq-gemini` | 0.1.0 | Google Gemini provider | `nucleusiq>=0.6.0` |
+| `nucleusiq` | 0.7.4 | Core framework (agents, tools, memory, plugins, error hierarchy, usage tracking) | — |
+| `nucleusiq-openai` | 0.6.1 | OpenAI provider | `nucleusiq>=0.7.4` |
+| `nucleusiq-gemini` | 0.2.2 | Google Gemini provider | `nucleusiq>=0.7.4` |
 
 Install the core first, then add providers as needed.
 

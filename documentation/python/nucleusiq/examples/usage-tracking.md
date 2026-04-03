@@ -83,7 +83,7 @@ log_payload = usage.summary()
 ## Combined with cost estimation
 
 ```python
-from nucleusiq.agents.components.pricing import CostTracker
+from nucleusiq.agents.usage import CostTracker
 
 tracker = CostTracker()
 cost = tracker.estimate(usage, model="gpt-4o-mini")

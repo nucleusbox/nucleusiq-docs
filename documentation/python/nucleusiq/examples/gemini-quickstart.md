@@ -29,7 +29,7 @@ async def main():
         config=AgentConfig(execution_mode=ExecutionMode.DIRECT),
     )
     result = await agent.execute({"id": "g1", "objective": "What is the speed of light?"})
-    print(result.content)
+    print(result.output)
 
 asyncio.run(main())
 ```
@@ -72,7 +72,7 @@ async def main():
             "objective": "What is the total value of 100 shares of AAPL and 50 shares of GOOGL?",
         }
     )
-    print(result.content)
+    print(result.output)
 
 asyncio.run(main())
 ```
@@ -116,7 +116,7 @@ async def main():
             "objective": "Compare the economic impact of AI adoption in healthcare vs manufacturing.",
         }
     )
-    print(result.content)
+    print(result.output)
 
 asyncio.run(main())
 ```

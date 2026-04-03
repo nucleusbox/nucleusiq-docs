@@ -25,7 +25,7 @@ async def main():
         instructions="You are a helpful assistant.",
     )
     result = await agent.execute({"id": "q1", "objective": "What is 2 + 2?"})
-    print(result.content)
+    print(result.output)
 
 asyncio.run(main())
 ```
@@ -48,7 +48,7 @@ async def main():
         config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
     )
     result = await agent.execute({"id": "q2", "objective": "What is the capital of France?"})
-    print(result.content)
+    print(result.output)
 
 asyncio.run(main())
 ```
@@ -73,7 +73,7 @@ async def main():
         config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
     )
     result = await agent.execute({"id": "q3", "objective": "What is the capital of France?"})
-    print(result.content)
+    print(result.output)
 
 asyncio.run(main())
 ```

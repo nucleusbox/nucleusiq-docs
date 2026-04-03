@@ -52,9 +52,37 @@ An agent is a managed runtime with memory, tools, policy, streaming, structure, 
 ## Agent lifecycle
 
 1. **Create** — Instantiate with an LLM, config, tools, plugins, and memory.
-2. **Execute** — `result = await agent.execute({"id": "t1", "objective": "What is 2+2?"})` or pass a `Task` object
+2. **Execute** — `result = await agent.execute({"id": "t1", "objective": "What is 2+2?"})` or pass a `Task` object. Returns an `AgentResult` model (v0.7.2+); access the response via `result.output`.
 3. **Stream** — `async for event in agent.execute_stream({"id": "t2", "objective": "Write a poem"}):` for real-time output.
 4. **Inspect** — `agent.last_usage` for token counts, then `CostTracker` for cost estimation.
+
+## AgentResult
+
+`execute()` returns an `AgentResult` — a structured response contract that provides the LLM output, execution metadata, and optional tracing data.
+
+```python
+result = await agent.execute(task)
+
+# Output text
+print(result.output)       # The LLM's response text
+print(str(result))         # Same — str() returns output
+
+# Status
+print(result.status)       # ResultStatus.SUCCESS, ERROR, or HALTED
+print(result.is_error)     # True if execution failed
+print(result.error)        # Error message if failed
+
+# Identity
+print(result.agent_name)   # Agent name
+print(result.mode)         # Execution mode used
+print(result.model)        # LLM model used
+print(result.duration_ms)  # Execution time in milliseconds
+
+# Observability (requires enable_tracing=True)
+print(result.tool_calls)   # Traced tool calls (empty tuple if tracing disabled)
+print(result.llm_calls)    # Traced LLM calls
+print(result.warnings)     # Any warnings during execution
+```
 
 ## End-to-end example
 
@@ -80,7 +108,7 @@ async def main():
         config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
     )
     result = await agent.execute({"id": "t3", "objective": "What's the weather in Paris?"})
-    print(result.content)
+    print(result.output)
 
     # Token usage
     print(agent.last_usage.display())
@@ -100,7 +128,7 @@ usage = agent.last_usage
 print(usage.display())
 
 # Cost estimation
-from nucleusiq.agents.components.pricing import CostTracker
+from nucleusiq.agents.usage import CostTracker
 tracker = CostTracker()
 cost = tracker.estimate(usage, model="gemini-2.5-flash")
 print(f"Estimated cost: ${cost.total_cost:.6f}")
@@ -113,7 +141,10 @@ print(f"Estimated cost: ${cost.total_cost:.6f}")
 All providers raise the same framework-level exceptions:
 
 ```python
+from nucleusiq.errors import NucleusIQError
 from nucleusiq.llms.errors import RateLimitError, AuthenticationError, LLMError
+from nucleusiq.tools.errors import ToolExecutionError
+from nucleusiq.agents.errors import AgentExecutionError
 
 try:
     result = await agent.execute({"id": "t5", "objective": "Hello"})
@@ -121,8 +152,14 @@ except RateLimitError:
     print("Rate limited — implement backoff")
 except AuthenticationError:
     print("Check your API key")
+except ToolExecutionError as e:
+    print(f"Tool failed: {e}")
+except AgentExecutionError as e:
+    print(f"Agent execution failed: {e}")
 except LLMError as e:
     print(f"LLM error from {e.provider}: {e}")
+except NucleusIQError as e:
+    print(f"Framework error: {e}")
 ```
 
 ## See also
