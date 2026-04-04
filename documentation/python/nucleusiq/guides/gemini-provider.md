@@ -127,6 +127,76 @@ result = await llm.call(
 )
 ```
 
+### Mixing native and custom tools
+
+*New in v0.7.5*
+
+!!! warning "The Gemini 2.5 API limitation"
+
+    Google's `generateContent` API **rejects** requests that combine native tools (`google_search`, `code_execution`, `url_context`, `google_maps`) with custom function declarations in the same `tools` array:
+
+    ```
+    400 INVALID_ARGUMENT
+    Built-in tools ({google_search}) and Function Calling cannot be combined.
+    ```
+
+    This affects all Gemini 2.5 models. Google's native fix (tool combinations) is available only for Gemini 3 models in Preview. No other framework — LangChain, CrewAI, AutoGen, or even Google ADK — provides a transparent single-agent solution.
+
+NucleusIQ v0.7.5 resolves this with a **transparent proxy pattern**. Just pass your tools and it works:
+
+```python
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig
+from nucleusiq.agents.task import Task
+from nucleusiq_gemini import BaseGemini
+from nucleusiq_gemini.tools.gemini_tool import GeminiTool
+from nucleusiq.tools.decorators import tool
+
+@tool
+def convert_temperature(celsius: float) -> str:
+    """Convert Celsius to Fahrenheit."""
+    return f"{celsius}°C = {celsius * 9/5 + 32}°F"
+
+agent = Agent(
+    name="researcher",
+    llm=BaseGemini(model_name="gemini-2.5-flash"),
+    tools=[
+        GeminiTool.google_search(),   # Native tool
+        GeminiTool.code_execution(),  # Native tool
+        convert_temperature,          # Custom tool
+    ],
+    config=AgentConfig(execution_mode="standard", enable_tracing=True),
+    ...
+)
+
+result = await agent.execute(
+    Task(objective="Search for Tokyo's temperature, convert to Fahrenheit.")
+)
+
+for tc in result.tool_calls:
+    print(f"{tc.tool_name}: {tc.duration_ms:.0f}ms, success={tc.success}")
+```
+
+**How it works behind the scenes:**
+
+1. `BaseGemini.convert_tool_specs()` detects mixed native + custom tools
+2. Native tools switch to **proxy mode** — they appear as function declarations to the LLM
+3. The LLM sees all tools as callable functions (no API rejection)
+4. When a native tool is called, the proxy makes a separate `generateContent` sub-call with the real native tool spec
+5. Results flow back as if from a normal tool call
+
+**Key properties:**
+
+- **Zero code changes** — pass tools exactly as you would normally
+- **All execution modes** — Direct, Standard, and Autonomous all work
+- **All Gemini models** — 2.5-flash, 2.5-pro, and future models
+- **Auto-detection** — proxy activates only when tools are mixed; native-only or custom-only configurations have zero overhead
+- **Provider-isolated** — the proxy lives entirely in `nucleusiq-gemini`; the core framework is unaware
+
+!!! tip "Timing expectations"
+
+    Native tools in proxy mode (e.g. `google_search`) take 1.7-4.4 seconds per call because they make real API round-trips. Custom tools execute locally in microseconds. This is expected — the proxy trades one sub-call per native tool invocation for the ability to use all tools together.
+
 ## Gearbox strategy (3 modes)
 
 All three execution modes work identically with Gemini:

@@ -53,7 +53,44 @@ agent = Agent(
 )
 ```
 
-## Pattern 4: Mixed tools with guardrails
+## Pattern 4: Gemini native + custom tool mixing
+
+*New in v0.7.5*
+
+Combine Gemini's native tools with your custom tools in a single agent. NucleusIQ's proxy pattern handles the Gemini API restriction transparently:
+
+```python
+from nucleusiq_gemini import BaseGemini
+from nucleusiq_gemini.tools.gemini_tool import GeminiTool
+from nucleusiq.tools.decorators import tool
+
+@tool
+def unit_converter(value: float, from_unit: str, to_unit: str) -> str:
+    """Convert between units (km/miles, celsius/fahrenheit, kg/pounds)."""
+    conversions = {
+        ("celsius", "fahrenheit"): lambda v: v * 9 / 5 + 32,
+        ("km", "miles"): lambda v: v * 0.621371,
+    }
+    result = conversions.get((from_unit, to_unit), lambda v: v)(value)
+    return f"{value} {from_unit} = {result:.2f} {to_unit}"
+
+agent = Agent(
+    llm=BaseGemini(model_name="gemini-2.5-flash"),
+    tools=[
+        GeminiTool.google_search(),   # Native — searches the web
+        GeminiTool.code_execution(),  # Native — runs Python code
+        unit_converter,               # Custom — your business logic
+    ],
+    config=AgentConfig(execution_mode="standard", enable_tracing=True),
+    ...
+)
+```
+
+!!! note
+
+    On Gemini 2.5 models, mixing native and custom tools would normally produce a `400 INVALID_ARGUMENT` error. NucleusIQ handles this automatically — see the [Gemini provider guide](../guides/gemini-provider.md#mixing-native-and-custom-tools) for details.
+
+## Pattern 5: Mixed tools with guardrails
 
 Combine custom tools, native tools, and plugins for production safety:
 
@@ -74,7 +111,7 @@ agent = Agent(
 )
 ```
 
-## Pattern 5: MCP integration (OpenAI)
+## Pattern 6: MCP integration (OpenAI)
 
 ```python
 from nucleusiq_openai import OpenAITool

@@ -20,6 +20,18 @@ If you are migrating from a heavier framework:
 4. Introduce AUTONOMOUS mode only where Critic/Refiner verification loops are genuinely needed
 5. Use provider portability to switch LLMs without rewriting agent logic
 
+## From v0.7.4 to v0.7.5
+
+Key changes in v0.7.5:
+
+| Change | Migration |
+|--------|----------|
+| Gemini native + custom tool mixing works transparently | No code changes needed. If you were working around the 400 error (separate agents, avoiding native tools), you can now simply pass all tools to a single agent. |
+| `AgentResult` has new tracing fields | `result.plugin_events`, `result.memory_snapshot`, `result.autonomous` are available when `enable_tracing=True`. Empty/`None` when tracing is off — no breaking change. |
+| `AgentResult.display()` enhanced | Shows plugin events, memory snapshot, and autonomous detail sections. Informational only. |
+| `nucleusiq-gemini` 0.2.3 | Upgrade: `pip install --upgrade nucleusiq-gemini`. Contains `tool_splitter.py` and proxy mode. |
+| `LLMCallRecord.prompt_technique` field | New optional field. Existing code unaffected. |
+
 ## From v0.6.0 to v0.7.x
 
 Key changes in v0.7.x:
