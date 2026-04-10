@@ -70,6 +70,7 @@ nav:
     - Models: python/nucleusiq/models.md
     - Providers: python/nucleusiq/providers.md
     - Prompts: python/nucleusiq/prompts.md
+    - Context Management: python/nucleusiq/context-management.md
     - Runtime Components: python/nucleusiq/core-concepts/runtime-components.md
     - Memory: python/nucleusiq/memory.md
     - Streaming: python/nucleusiq/streaming.md

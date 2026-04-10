@@ -2,20 +2,24 @@
 
 Real-time token-by-token output from agent execution.
 
+*Updated for v0.7.6: `prompt` is now mandatory.*
+
 ## Basic streaming
 
 ```python
 import asyncio
 from nucleusiq.agents import Agent
 from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
 from nucleusiq_openai import BaseOpenAI
 
 async def main():
     agent = Agent(
         name="writer",
-        llm=BaseOpenAI(model_name="gpt-4o-mini"),
-        model="gpt-4o-mini",
-        instructions="You are a creative writer.",
+        prompt=ZeroShotPrompt().configure(
+            system="You are a creative writer.",
+        ),
+        llm=BaseOpenAI(model_name="gpt-4.1-mini"),
         config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
     )
 
@@ -52,13 +56,15 @@ async for event in agent.execute_stream({"id": "s2", "objective": "Find and summ
 Gemini 2.5+ models emit thinking tokens during reasoning. These appear as `THINKING` events:
 
 ```python
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
 from nucleusiq_gemini import BaseGemini, GeminiLLMParams, GeminiThinkingConfig
 
 agent = Agent(
     name="reasoner",
+    prompt=ZeroShotPrompt().configure(
+        system="Think step by step.",
+    ),
     llm=BaseGemini(model_name="gemini-2.5-flash"),
-    model="gemini-2.5-flash",
-    instructions="Think step by step.",
     config=AgentConfig(
         llm_params=GeminiLLMParams(
             thinking_config=GeminiThinkingConfig(thinking_budget=2048),

@@ -4,18 +4,22 @@ An agent is a managed runtime with memory, tools, policy, streaming, structure, 
 
 ## Creating an agent
 
+*Changed in v0.7.6: `prompt` is now mandatory. `narrative` has been removed. `role` and `objective` are labels only (not sent to the LLM).*
+
 === "With OpenAI"
 
     ```python
     from nucleusiq.agents import Agent
     from nucleusiq.agents.config import AgentConfig, ExecutionMode
+    from nucleusiq.prompts.zero_shot import ZeroShotPrompt
     from nucleusiq_openai import BaseOpenAI
 
     agent = Agent(
         name="analyst",
-        llm=BaseOpenAI(model_name="gpt-4o-mini"),
-        model="gpt-4o-mini",
-        instructions="You are a data analyst. Answer questions accurately.",
+        prompt=ZeroShotPrompt().configure(
+            system="You are a data analyst. Answer questions accurately.",
+        ),
+        llm=BaseOpenAI(model_name="gpt-4.1-mini"),
         config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
     )
     ```
@@ -25,13 +29,15 @@ An agent is a managed runtime with memory, tools, policy, streaming, structure, 
     ```python
     from nucleusiq.agents import Agent
     from nucleusiq.agents.config import AgentConfig, ExecutionMode
+    from nucleusiq.prompts.zero_shot import ZeroShotPrompt
     from nucleusiq_gemini import BaseGemini
 
     agent = Agent(
         name="analyst",
+        prompt=ZeroShotPrompt().configure(
+            system="You are a data analyst. Answer questions accurately.",
+        ),
         llm=BaseGemini(model_name="gemini-2.5-flash"),
-        model="gemini-2.5-flash",
-        instructions="You are a data analyst. Answer questions accurately.",
         config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
     )
     ```
@@ -40,19 +46,37 @@ An agent is a managed runtime with memory, tools, policy, streaming, structure, 
 
     ```python
     from nucleusiq.agents import Agent
+    from nucleusiq.prompts.zero_shot import ZeroShotPrompt
     from nucleusiq.core.llms.mock_llm import MockLLM
 
     agent = Agent(
         name="analyst",
+        prompt=ZeroShotPrompt().configure(system="You are a data analyst."),
         llm=MockLLM(),
-        instructions="You are a data analyst.",
     )
     ```
+
+## Agent fields
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `name` | Yes | Human-readable identifier |
+| `prompt` | **Yes** | `BasePrompt` instance — the single source of truth for what the LLM sees. Use `ZeroShotPrompt().configure(system="...")` or any prompt technique. |
+| `llm` | Yes | Model backend (`BaseOpenAI`, `BaseGemini`, `MockLLM`) |
+| `config` | No | `AgentConfig` — execution mode, timeouts, context management |
+| `tools` | No | List of tools the agent can call |
+| `memory` | No | Conversation memory strategy |
+| `plugins` | No | Policy and guardrail plugins |
+| `role` | No | Label for logging and sub-agent naming (default: `"Agent"`). **Not sent to the LLM.** |
+| `objective` | No | Label for documentation (default: `""`). **Not sent to the LLM.** |
+
+!!! warning "prompt is the single source of truth"
+    Everything the LLM sees comes from `prompt.system` (system message) and `prompt.user` (optional preamble). Put all LLM instructions in the prompt — not in `role` or `objective`.
 
 ## Agent lifecycle
 
 1. **Create** — Instantiate with an LLM, config, tools, plugins, and memory.
-2. **Execute** — `result = await agent.execute({"id": "t1", "objective": "What is 2+2?"})` or pass a `Task` object. Returns an `AgentResult` model (v0.7.2+); access the response via `result.output`.
+2. **Execute** — `result = await agent.execute({"id": "t1", "objective": "What is 2+2?"})` or pass a `Task` object. Returns an `AgentResult` model; access the response via `result.output`.
 3. **Stream** — `async for event in agent.execute_stream({"id": "t2", "objective": "Write a poem"}):` for real-time output.
 4. **Inspect** — `agent.last_usage` for token counts, then `CostTracker` for cost estimation.
 
@@ -82,6 +106,10 @@ print(result.duration_ms)  # Execution time in milliseconds
 print(result.tool_calls)   # Traced tool calls (empty tuple if tracing disabled)
 print(result.llm_calls)    # Traced LLM calls
 print(result.warnings)     # Any warnings during execution
+
+# Context telemetry (v0.7.6)
+if result.context_telemetry:
+    print(f"Peak utilization: {result.context_telemetry.peak_utilization:.1%}")
 ```
 
 ## End-to-end example
@@ -90,27 +118,27 @@ print(result.warnings)     # Any warnings during execution
 import asyncio
 from nucleusiq.agents import Agent
 from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
 from nucleusiq.tools.decorators import tool
-from nucleusiq_gemini import BaseGemini
+from nucleusiq_openai import BaseOpenAI
 
 @tool
 def get_weather(city: str) -> str:
     """Get current weather for a city."""
-    return f"Weather in {city}: 22°C, Sunny"
+    return f"Weather in {city}: 22C, Sunny"
 
 async def main():
     agent = Agent(
         name="assistant",
-        llm=BaseGemini(model_name="gemini-2.5-flash"),
-        model="gemini-2.5-flash",
-        instructions="You are a helpful assistant. Use tools when needed.",
+        prompt=ZeroShotPrompt().configure(
+            system="You are a helpful assistant. Use tools when needed.",
+        ),
+        llm=BaseOpenAI(model_name="gpt-4.1-mini"),
         tools=[get_weather],
         config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
     )
     result = await agent.execute({"id": "t3", "objective": "What's the weather in Paris?"})
     print(result.output)
-
-    # Token usage
     print(agent.last_usage.display())
 
 asyncio.run(main())
@@ -130,7 +158,7 @@ print(usage.display())
 # Cost estimation
 from nucleusiq.agents.usage import CostTracker
 tracker = CostTracker()
-cost = tracker.estimate(usage, model="gemini-2.5-flash")
+cost = tracker.estimate(usage, model="gpt-4.1-mini")
 print(f"Estimated cost: ${cost.total_cost:.6f}")
 ```
 
@@ -164,7 +192,9 @@ except NucleusIQError as e:
 
 ## See also
 
+- [Context management](context-management.md) — Context window management for tool-heavy agents
 - [Execution modes](execution-modes.md) — Direct, Standard, Autonomous
+- [Prompts](prompts.md) — Prompt techniques and configuration
 - [Tools](tools.md) — `@tool` decorator, built-in tools, and provider native tools
 - [Memory](memory.md) — Conversation history strategies
 - [Providers](providers.md) — OpenAI, Gemini, and provider portability

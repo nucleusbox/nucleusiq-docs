@@ -10,6 +10,7 @@ Core mental model and architecture for NucleusIQ.
 - [Models](../models.md)
 - [Providers](../providers.md)
 - [Prompts](../prompts.md)
+- [Context Management](../context-management.md) — Context window management for tool-heavy agents (v0.7.6)
 - [Runtime components](runtime-components.md)
 - [Memory](../memory.md)
 - [Streaming](../streaming.md)

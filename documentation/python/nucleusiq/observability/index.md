@@ -1,8 +1,59 @@
 # Observability
 
-Track and optimize runtime behavior, token usage, and costs.
+Track and optimize runtime behavior, token usage, costs, and context management.
 
-NucleusIQ provides built-in observability primitives that let you inspect what happened during an agent execution — every LLM call, every tool invocation, token counts, and estimated dollar costs.
+NucleusIQ provides built-in observability primitives that let you inspect what happened during an agent execution — every LLM call, every tool invocation, token counts, estimated dollar costs, and context window management metrics.
+
+## ObservabilityConfig
+
+*New in v0.7.6*
+
+Unified observability configuration that replaces the separate `verbose` and `enable_tracing` fields:
+
+```python
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.agents.config.observability_config import ObservabilityConfig
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+from nucleusiq_openai import BaseOpenAI
+
+agent = Agent(
+    name="analyst",
+    prompt=ZeroShotPrompt().configure(
+        system="You are a data analyst.",
+    ),
+    llm=BaseOpenAI(model_name="gpt-4.1-mini"),
+    config=AgentConfig(
+        execution_mode=ExecutionMode.STANDARD,
+        observability=ObservabilityConfig(
+            tracing=True,
+            verbose=True,
+            log_level="DEBUG",
+            log_llm_calls=True,
+            log_tool_results=True,
+        ),
+    ),
+)
+```
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `tracing` | `False` | Enable execution tracing (populates `AgentResult.tool_calls`, `.llm_calls`) |
+| `verbose` | `False` | Enable debug-level logging |
+| `log_level` | `"INFO"` | Logger level string |
+| `log_llm_calls` | `False` | Log detailed LLM call info |
+| `log_tool_results` | `False` | Log tool execution results |
+
+When `observability` is set on `AgentConfig`, it takes precedence over the legacy `verbose` and `enable_tracing` fields. Both approaches are backward compatible — use whichever you prefer.
+
+### Legacy approach (still works)
+
+```python
+config = AgentConfig(
+    enable_tracing=True,
+    verbose=True,
+)
+```
 
 ## ExecutionTracer
 
@@ -11,38 +62,60 @@ NucleusIQ provides built-in observability primitives that let you inspect what h
 `ExecutionTracer` records every LLM call and tool call that occurs during an agent execution. Enable it via `AgentConfig`:
 
 ```python
+import asyncio
 from nucleusiq.agents import Agent
-from nucleusiq.agents.config import AgentConfig
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+from nucleusiq.tools.decorators import tool
+from nucleusiq_openai import BaseOpenAI
 
-agent = Agent(
-    name="analyst",
-    llm=llm,
-    config=AgentConfig(enable_tracing=True),
-    ...
-)
-result = await agent.execute(task)
+@tool
+def search(query: str) -> str:
+    """Search for information."""
+    return f"Results for: {query}"
 
-# Inspect traced data
-for tc in result.tool_calls:
-    print(f"Tool: {tc['name']}, Duration: {tc['duration_ms']}ms")
+async def main():
+    agent = Agent(
+        name="analyst",
+        prompt=ZeroShotPrompt().configure(
+            system="You are a research analyst. Use tools to gather data.",
+        ),
+        llm=BaseOpenAI(model_name="gpt-4.1-mini"),
+        tools=[search],
+        config=AgentConfig(
+            execution_mode=ExecutionMode.STANDARD,
+            enable_tracing=True,
+        ),
+    )
+    result = await agent.execute({"id": "o1", "objective": "Research AI trends"})
 
-for lc in result.llm_calls:
-    print(f"LLM call: {lc['purpose']}, Tokens: {lc['usage']}")
+    # Inspect traced tool calls
+    for tc in result.tool_calls:
+        print(f"Tool: {tc['name']}, Duration: {tc['duration_ms']}ms")
+
+    # Inspect traced LLM calls
+    for lc in result.llm_calls:
+        print(f"LLM call: {lc['purpose']}, Tokens: {lc['usage']}")
+        print(f"Prompt technique: {lc.get('prompt_technique', 'n/a')}")  # v0.7.6
+
+    # Warnings
+    for w in result.warnings:
+        print(f"Warning: {w}")
+
+asyncio.run(main())
 ```
 
 The trace captures:
 
-| Field | Description |
-|-------|-------------|
-| `result.tool_calls` | Sequence of tool invocations with name, arguments, duration, and return value |
-| `result.llm_calls` | Sequence of LLM calls with purpose, model, token usage, and latency |
-| `result.warnings` | Any warnings emitted during execution (e.g. retries, fallback behavior) |
+| Field | Type | Description |
+|-------|------|-------------|
+| `result.tool_calls` | `tuple[dict, ...]` | Tool invocations with name, arguments, duration, and return value |
+| `result.llm_calls` | `tuple[dict, ...]` | LLM calls with purpose, model, token usage, latency, and prompt technique |
+| `result.warnings` | `tuple[str, ...]` | Warnings emitted during execution (e.g. retries, fallback behavior) |
 
 ### Full observability wiring (v0.7.5)
 
-*New in v0.7.5*
-
-With tracing enabled, `AgentResult` now captures the **complete execution picture** — not just LLM and tool calls, but plugin activity, memory state, and autonomous orchestration details:
+With tracing enabled, `AgentResult` now captures the **complete execution picture**:
 
 ```python
 result = await agent.execute(task)
@@ -68,14 +141,23 @@ if result.autonomous:
 | `result.plugin_events` | `tuple[PluginEvent, ...]` | Every plugin hook fired — hook name, duration, and payload |
 | `result.memory_snapshot` | `MemorySnapshot | None` | Conversation messages and token count at execution end |
 | `result.autonomous` | `AutonomousDetail | None` | Decomposition, sub-task names, validation records, critic scores |
-| `result.llm_calls[].prompt_technique` | `str | None` | Which prompt strategy was used (e.g. `chain_of_thought`) |
+| `result.llm_calls[].prompt_technique` | `str | None` | Which prompt strategy was used (e.g. `zero_shot`) |
 
-**What was previously invisible and is now traced:**
+## Context Telemetry
 
-- **Plugin hooks** — `PluginManager` records timing for all 6 hooks (`before_llm_call`, `after_llm_call`, `before_tool_call`, `after_tool_call`, `before_execution`, `after_execution`)
-- **Decomposer LLM call** — `Decomposer.analyze()` makes a direct LLM call that bypassed the tracer; now manually recorded
-- **Memory state** — captured from the agent's memory at the end of `_build_result()`
-- **Autonomous validation** — critic scores and pass/fail status for each validation round
+*New in v0.7.6*
+
+When context management is configured, `AgentResult` includes a `context_telemetry` field:
+
+```python
+tel = result.context_telemetry
+if tel:
+    print(f"Peak utilization: {tel.peak_utilization:.1%}")
+    print(f"Tokens saved:     {tel.tokens_masked:,}")
+    print(f"Estimated savings: ${tel.estimated_cost_savings:.4f}")
+```
+
+See [Context management](../context-management.md) for configuration and telemetry details.
 
 ### Display
 
@@ -89,29 +171,42 @@ result.display()
 --- AgentResult ---
 Status:   success
 Duration: 31,452 ms
-Output:   The temperature in Tokyo is 15°C (59°F)...
+Output:   The temperature in Tokyo is 15C (59F)...
 LLM calls (6):
-  [main      ] gemini-2.5-pro  4,879ms  tokens_in=473 tokens_out=18
-  [tool_loop ] gemini-2.5-pro  4,505ms  tokens_in=562 tokens_out=32
+  [main      ] gpt-4.1-mini  4,879ms  tokens_in=473 tokens_out=18
+  [tool_loop ] gpt-4.1-mini  4,505ms  tokens_in=562 tokens_out=32
+  [synthesis ] gpt-4.1-mini  8,231ms  tokens_in=1204 tokens_out=2048
   ...
 Tool calls (5):
   Round 1: google_search        success=True  3,306ms
   Round 2: unit_converter       success=True  0.1ms
   ...
-Plugin events (4):
-  before_execution  12.3ms
-  before_llm_call   0.1ms
-  ...
+Context:
+  Peak utilization: 67.2%
+  Observations masked: 5
+  Tokens saved: 12,450
 ```
 
 ## Usage tracking
 
-Token usage is tracked automatically on every execution. Access aggregated counts — broken down by purpose (main, planning, tool loop, critic, refiner) and origin (user vs framework) — via `agent.last_usage`.
+Token usage is tracked automatically on every execution — no configuration needed. Access aggregated counts — broken down by purpose (main, planning, tool loop, critic, refiner, synthesis) and origin (user vs framework) — via `agent.last_usage`.
 
 ```python
+result = await agent.execute(task)
+
 usage = agent.last_usage
-print(usage.display())          # Human-readable summary
-log_payload = usage.summary()   # Dict for dashboards / telemetry
+print(usage.display())
+
+# Programmatic access
+print(f"Total tokens: {usage.total.total_tokens}")
+print(f"LLM calls: {usage.call_count}")
+
+# By purpose
+for purpose, bucket in usage.by_purpose.items():
+    print(f"  {purpose}: {bucket.total_tokens} tokens, {bucket.call_count} calls")
+
+# Export for logging/dashboards
+log_payload = usage.summary()
 ```
 
 See [Usage tracking](../usage-tracking.md) for the full schema, programmatic access, and logging examples.
@@ -124,7 +219,10 @@ Convert token usage into dollar costs using the built-in `CostTracker`, which sh
 from nucleusiq.agents.usage import CostTracker
 
 tracker = CostTracker()
-cost = tracker.estimate(agent.last_usage, model="gpt-4o")
+cost = tracker.estimate(agent.last_usage, model="gpt-4.1-mini")
+print(f"Estimated cost: ${cost.total_cost:.6f}")
+print(f"  Prompt:     ${cost.prompt_cost:.6f}")
+print(f"  Completion: ${cost.completion_cost:.6f}")
 print(cost.display())
 ```
 
@@ -132,9 +230,11 @@ See [Cost estimation](cost-estimation.md) for built-in pricing tables, custom mo
 
 ## Zero overhead by default
 
-Tracing is **off** by default. When `enable_tracing` is not set (or set to `False`), `result.tool_calls`, `result.llm_calls`, and `result.warnings` are empty tuples — no runtime overhead, no memory allocation beyond the empty containers.
+Tracing is **off** by default. When `enable_tracing` is not set (or set to `False`), `result.tool_calls`, `result.llm_calls`, and `result.warnings` are empty tuples — no runtime overhead. Usage tracking (`agent.last_usage`) is always available regardless of tracing.
 
 ## See also
 
+- [Context management](../context-management.md) — Context window management guide
 - [Usage tracking](../usage-tracking.md) — Token usage by purpose and origin
 - [Cost estimation](cost-estimation.md) — Dollar cost tracking with built-in pricing tables
+- [Agent Config guide](../guides/agent-config.md) — ObservabilityConfig configuration

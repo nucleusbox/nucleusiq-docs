@@ -1,6 +1,6 @@
 # MCP Integration (OpenAI)
 
-NucleusIQ supports MCP via OpenAI native tools when using `nucleusiq-openai`.
+NucleusIQ supports MCP (Model Context Protocol) via OpenAI native tools when using `nucleusiq-openai`.
 
 ## When to use
 
@@ -10,6 +10,8 @@ Use MCP when you want the model to call external capability servers through Open
 
 ```python
 from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
 from nucleusiq_openai import BaseOpenAI, OpenAITool
 
 mcp_tool = OpenAITool.mcp(
@@ -21,11 +23,16 @@ mcp_tool = OpenAITool.mcp(
 
 agent = Agent(
     name="mcp-agent",
-    role="Assistant",
-    objective="Use MCP tools when needed",
-    llm=BaseOpenAI(model_name="gpt-4o-mini"),
+    prompt=ZeroShotPrompt().configure(
+        system="You are an assistant. Use MCP tools when needed to answer user questions.",
+    ),
+    llm=BaseOpenAI(model_name="gpt-4.1-mini"),
     tools=[mcp_tool],
+    config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
 )
+
+result = await agent.execute({"id": "mcp-1", "objective": "Roll a d20 for initiative"})
+print(result.output)
 ```
 
 ## Notes
@@ -33,3 +40,8 @@ agent = Agent(
 - MCP support here is provider-specific (OpenAI native tool path).
 - Native tool execution is server-side in the provider flow.
 - Combine with plugin guardrails if you need approval/policy controls.
+
+## See also
+
+- [OpenAI provider](openai-provider.md) — Full OpenAI integration guide
+- [Tools](../tools.md) — All tool types (custom, built-in, provider native)

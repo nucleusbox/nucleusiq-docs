@@ -2,6 +2,8 @@
 
 This example demonstrates NucleusIQ with Google Gemini across all three execution modes.
 
+*Updated for v0.7.6: `prompt` is now mandatory.*
+
 ## Setup
 
 ```bash
@@ -17,15 +19,17 @@ Fast, single LLM call for simple questions:
 import asyncio
 from nucleusiq.agents import Agent
 from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
 from nucleusiq_gemini import BaseGemini
 
 async def main():
     llm = BaseGemini(model_name="gemini-2.5-flash")
     agent = Agent(
         name="quick-answerer",
+        prompt=ZeroShotPrompt().configure(
+            system="Give concise, accurate answers.",
+        ),
         llm=llm,
-        model="gemini-2.5-flash",
-        instructions="Give concise, accurate answers.",
         config=AgentConfig(execution_mode=ExecutionMode.DIRECT),
     )
     result = await agent.execute({"id": "g1", "objective": "What is the speed of light?"})
@@ -42,6 +46,7 @@ Tool-enabled loop for tasks requiring external data:
 import asyncio
 from nucleusiq.agents import Agent
 from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
 from nucleusiq.tools.decorators import tool
 from nucleusiq_gemini import BaseGemini
 
@@ -60,9 +65,10 @@ async def main():
     llm = BaseGemini(model_name="gemini-2.5-flash")
     agent = Agent(
         name="analyst",
+        prompt=ZeroShotPrompt().configure(
+            system="You are a financial analyst. Use tools to look up data.",
+        ),
         llm=llm,
-        model="gemini-2.5-flash",
-        instructions="You are a financial analyst. Use tools to look up data.",
         tools=[get_stock_price, calculate],
         config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
     )
@@ -85,6 +91,7 @@ Complex multi-step task with Critic verification:
 import asyncio
 from nucleusiq.agents import Agent
 from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
 from nucleusiq.tools.decorators import tool
 from nucleusiq_gemini import BaseGemini, GeminiLLMParams, GeminiThinkingConfig
 
@@ -97,9 +104,10 @@ async def main():
     llm = BaseGemini(model_name="gemini-2.5-flash")
     agent = Agent(
         name="researcher",
+        prompt=ZeroShotPrompt().configure(
+            system="You are a thorough researcher. Break down complex questions.",
+        ),
         llm=llm,
-        model="gemini-2.5-flash",
-        instructions="You are a thorough researcher. Break down complex questions.",
         tools=[search_knowledge],
         config=AgentConfig(
             execution_mode=ExecutionMode.AUTONOMOUS,
@@ -126,20 +134,51 @@ asyncio.run(main())
 Use Gemini's server-side Google Search for real-time grounding:
 
 ```python
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
 from nucleusiq_gemini import GeminiTool
 
 agent = Agent(
     name="news-agent",
+    prompt=ZeroShotPrompt().configure(
+        system="Answer with the latest information from the web.",
+    ),
     llm=BaseGemini(model_name="gemini-2.5-flash"),
-    model="gemini-2.5-flash",
-    instructions="Answer with the latest information from the web.",
     tools=[GeminiTool.google_search()],
     config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
 )
 result = await agent.execute({"id": "g4", "objective": "What are the top AI news stories today?"})
 ```
 
+## Mixing native + custom tools
+
+*New in v0.7.5*
+
+NucleusIQ handles the Gemini API restriction transparently — just pass all tools to a single agent:
+
+```python
+from nucleusiq.tools.decorators import tool
+from nucleusiq_gemini import GeminiTool
+
+@tool
+def summarize(text: str) -> str:
+    """Summarize the given text."""
+    return f"Summary of: {text[:50]}..."
+
+agent = Agent(
+    name="hybrid-researcher",
+    prompt=ZeroShotPrompt().configure(
+        system="Search the web for information, then summarize findings.",
+    ),
+    llm=BaseGemini(model_name="gemini-2.5-flash"),
+    tools=[GeminiTool.google_search(), summarize],
+    config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
+)
+```
+
+See [Gemini provider guide — Mixing native and custom tools](../guides/gemini-provider.md#mixing-native-and-custom-tools).
+
 ## See also
 
 - [Gemini provider guide](../guides/gemini-provider.md) — Full Gemini documentation
 - [Basic agent example](basic-agent.md) — OpenAI-based example
+- [Context management](../context-management.md) — Context window management

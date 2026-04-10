@@ -2,6 +2,8 @@
 
 Use built-in file tools for agent-driven file exploration, search, reading, and extraction.
 
+*Updated for v0.7.6: `prompt` is now mandatory.*
+
 ## Search then read
 
 The agent searches for relevant files, then reads specific sections:
@@ -10,18 +12,20 @@ The agent searches for relevant files, then reads specific sections:
 import asyncio
 from nucleusiq.agents import Agent
 from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
 from nucleusiq.tools.builtin import FileReadTool, FileSearchTool, DirectoryListTool
 from nucleusiq_openai import BaseOpenAI
 
 async def main():
     agent = Agent(
         name="code-reviewer",
-        llm=BaseOpenAI(model_name="gpt-4o-mini"),
-        model="gpt-4o-mini",
-        instructions=(
-            "You are a code reviewer. Use directory listing to understand the project structure, "
-            "file search to find relevant code, and file read to examine specific sections."
+        prompt=ZeroShotPrompt().configure(
+            system=(
+                "You are a code reviewer. Use directory listing to understand the project structure, "
+                "file search to find relevant code, and file read to examine specific sections."
+            ),
         ),
+        llm=BaseOpenAI(model_name="gpt-4.1-mini"),
         tools=[
             DirectoryListTool(workspace_root="./my-project", max_entries=200),
             FileSearchTool(workspace_root="./my-project", include_extensions=[".py", ".md"]),
@@ -50,9 +54,10 @@ from nucleusiq.tools.builtin import FileExtractTool
 
 agent = Agent(
     name="data-analyst",
+    prompt=ZeroShotPrompt().configure(
+        system="Extract and analyze data from files. Use column filtering for CSV files.",
+    ),
     llm=llm,
-    model="gpt-4o-mini",
-    instructions="Extract and analyze data from files. Use column filtering for CSV files.",
     tools=[
         FileExtractTool(workspace_root="./data"),
         FileReadTool(workspace_root="./data"),
@@ -74,9 +79,10 @@ from nucleusiq.tools.builtin import FileWriteTool
 
 agent = Agent(
     name="report-writer",
+    prompt=ZeroShotPrompt().configure(
+        system="Analyze data and write reports. Save results to the reports directory.",
+    ),
     llm=llm,
-    model="gpt-4o-mini",
-    instructions="Analyze data and write reports. Save results to the reports directory.",
     tools=[
         FileReadTool(workspace_root="./workspace"),
         FileExtractTool(workspace_root="./workspace"),

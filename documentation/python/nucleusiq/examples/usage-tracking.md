@@ -8,6 +8,7 @@ Track token usage by purpose (main, planning, tool loop, critic, refiner) and or
 import asyncio
 from nucleusiq.agents import Agent
 from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
 from nucleusiq.tools.decorators import tool
 from nucleusiq_openai import BaseOpenAI
 
@@ -19,9 +20,10 @@ def lookup(query: str) -> str:
 async def main():
     agent = Agent(
         name="assistant",
-        llm=BaseOpenAI(model_name="gpt-4o-mini"),
-        model="gpt-4o-mini",
-        instructions="Use tools when needed.",
+        prompt=ZeroShotPrompt().configure(
+            system="Use tools when needed.",
+        ),
+        llm=BaseOpenAI(model_name="gpt-4.1-mini"),
         tools=[lookup],
         config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
     )

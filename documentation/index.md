@@ -74,63 +74,66 @@ Choose your path based on where you are today:
 
 ## What's new in v0.7.x
 
-### v0.7.5 (latest)
+### v0.7.6 (latest)
 
-!!! success "Gemini Native + Custom Tool Mixing"
+!!! success "Context Window Management"
 
-    **The problem:** Google's Gemini 2.5 API rejects requests that combine native tools (`google_search`, `code_execution`) with custom function declarations — a 400 error that blocks the most common agent pattern.
-
-    **No other framework solves this.** LangChain blocks it. Google ADK requires sub-agent restructuring. CrewAI and AutoGen don't address it.
-
-    **NucleusIQ v0.7.5 fixes it transparently** with a proxy pattern — zero code changes, works across all execution modes, all Gemini models. Just pass your tools and it works.
+    Automatic context management for tool-heavy agents — prevents context overflow and ensures the LLM always has room to respond.
 
     ```python
-    agent = Agent(
-        llm=BaseGemini(model_name="gemini-2.5-flash"),
-        tools=[
-            GeminiTool.google_search(),      # Native
-            GeminiTool.code_execution(),     # Native
-            my_unit_converter,               # Custom
-            my_note_taker,                   # Custom
-        ],
-        ...
+    from nucleusiq.agents.context import ContextConfig, ContextStrategy
+
+    config = AgentConfig(
+        context=ContextConfig(strategy=ContextStrategy.PROGRESSIVE),
     )
-    result = await agent.execute(task)  # Just works.
     ```
 
-    [Read the full guide](python/nucleusiq/guides/gemini-provider.md#mixing-native-and-custom-tools){ .md-button }
+    [Context management guide](python/nucleusiq/context-management.md){ .md-button }
 
-!!! info "Full Observability Wiring"
+!!! warning "Breaking: Prompt System Refactor"
 
-    `AgentResult` now captures the complete execution picture when tracing is enabled:
+    `prompt` is now **mandatory** on `Agent`. The `narrative` field has been removed. `role` and `objective` are labels only — they are **not** sent to the LLM.
 
-    - **Plugin events** — every plugin hook with timing (`result.plugin_events`)
-    - **Memory snapshot** — conversation state at execution end (`result.memory_snapshot`)
-    - **Autonomous detail** — decomposition, sub-tasks, validation, and critic scores (`result.autonomous`)
-    - **Decomposer LLM call** — previously invisible `Decomposer.analyze()` call now traced
+    ```python
+    from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+
+    agent = Agent(
+        name="analyst",
+        prompt=ZeroShotPrompt().configure(
+            system="You are a data analyst. Provide detailed analysis.",
+        ),
+        llm=llm,
+    )
+    ```
+
+    [Migration guide](python/nucleusiq/learn/migration-notes.md#from-v075-to-v076){ .md-button }
+
+!!! info "Synthesis Pass + ObservabilityConfig"
+
+    - **Synthesis pass** — after multi-round tool loops, the agent makes one final LLM call without tools to produce the full deliverable
+    - **ObservabilityConfig** — unified config replacing `verbose` + `enable_tracing`
+    - **Context telemetry** — peak utilization, compaction events, token savings in `AgentResult`
 
     [Observability docs](python/nucleusiq/observability/index.md){ .md-button }
 
+### v0.7.5
+
+- **Gemini native + custom tool mixing** — transparent proxy pattern, zero code changes
+- **Full observability wiring** — PluginEvent, MemorySnapshot, AutonomousDetail in AgentResult
+
 ### v0.7.4
 
-- **ExecutionTracer** — full LLM/tool call observability with `AgentConfig(enable_tracing=True)`
+- **ExecutionTracer** — full LLM/tool call observability
 - **Pyrefly static type checking** — 121 type errors fixed, CI-gated
-- **Error package restructure** — `core/errors/` with lazy re-exports
-- **Usage & pricing extraction** — `core/agents/usage/` package
-- **Exhaustive error wiring** — every `ValueError`/`RuntimeError` replaced with typed exceptions
-- **Dead code cleanup** — removed unused GPT-2 tokenizer, added `BaseLLM.estimate_tokens()`
+- **Exhaustive error wiring** — typed exceptions everywhere
 
-### v0.7.3
+### v0.7.2-0.7.3
 
-- **Gemini tool-calling fixes** — empty `function_response.name`, non-dict response wrapping
-- **`$ref`/`$defs` inlining** for Gemini structured output
+- **Unified exception hierarchy** — 10 error families
+- **AgentResult response contract** — typed, immutable Pydantic model
+- **Gemini tool-calling fixes** — `$ref`/`$defs` inlining
 
-### v0.7.2
-
-- **Unified exception hierarchy** — 10 error families (Tool, Agent, Attachment, Memory, Prompt, Streaming, Plugin, StructuredOutput, LLM, Workspace)
-- **AgentResult response contract** — typed, immutable Pydantic model returned from `agent.execute()`
-
-Current packages: `nucleusiq` 0.7.5, `nucleusiq-openai` 0.6.1, `nucleusiq-gemini` 0.2.3
+Current packages: `nucleusiq` 0.7.6, `nucleusiq-openai` 0.6.2, `nucleusiq-gemini` 0.2.4
 
 See the [full changelog](reference/changelog.md).
 

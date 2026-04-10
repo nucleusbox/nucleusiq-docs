@@ -2,9 +2,11 @@
 
 Detailed practical examples for common NucleusIQ workflows.
 
+*Updated for v0.7.6: all examples use the mandatory `prompt=` API.*
+
 ## Getting started
 
-- [Basic agent](basic-agent.md) — Your first agent with tools
+- [Basic agent](basic-agent.md) — Your first agent with tools (OpenAI, Gemini, context management)
 - [Streaming](streaming.md) — Real-time token-by-token output
 
 ## Workflows
@@ -28,3 +30,4 @@ Full runnable scripts are available in the GitHub repository:
 - [Core examples](https://github.com/nucleusbox/NucleusIQ/tree/main/src/nucleusiq/examples)
 - [OpenAI examples](https://github.com/nucleusbox/NucleusIQ/tree/main/src/providers/llms/openai/examples)
 - [Gemini examples](https://github.com/nucleusbox/NucleusIQ/tree/main/src/providers/llms/gemini/examples)
+- [Notebooks](https://github.com/nucleusbox/NucleusIQ/tree/main/notebooks) — Jupyter notebooks for context management showcase and more

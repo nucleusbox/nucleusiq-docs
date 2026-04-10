@@ -9,14 +9,16 @@ import asyncio
 from nucleusiq.agents import Agent
 from nucleusiq.agents.config import AgentConfig, ExecutionMode
 from nucleusiq.agents.usage import CostTracker
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
 from nucleusiq_openai import BaseOpenAI
 
 async def main():
     agent = Agent(
         name="assistant",
-        llm=BaseOpenAI(model_name="gpt-4o-mini"),
-        model="gpt-4o-mini",
-        instructions="You are a helpful assistant.",
+        prompt=ZeroShotPrompt().configure(
+            system="You are a helpful assistant.",
+        ),
+        llm=BaseOpenAI(model_name="gpt-4.1-mini"),
         config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
     )
 

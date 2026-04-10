@@ -1,24 +1,126 @@
 # Migration notes
 
-## From simpler chat wrappers
+## From v0.7.5 to v0.7.6
 
-If you are migrating from direct API calls or thin wrappers:
+v0.7.6 includes **breaking changes** to the prompt system and adds context window management.
 
-1. Move from `prompt → response` to `Agent + execute()`
-2. Introduce tools gradually using the `@tool` decorator in STANDARD mode
-3. Add memory with `MemoryFactory.create_memory(MemoryStrategy.SLIDING_WINDOW)`
-4. Use `agent.last_usage` and `CostTracker` to monitor costs — prevents billing surprises
-5. Add plugins for guardrails: `ModelCallLimitPlugin`, `ToolGuardPlugin`
+### Breaking changes
 
-## From heavier workflow systems (LangChain, etc.)
+| Change | Migration |
+|--------|----------|
+| `prompt` is now **mandatory** on `Agent` | Add `prompt=ZeroShotPrompt().configure(system="...")` to all agent constructors. |
+| `narrative` field **removed** | Move content from `narrative=` to `prompt.system`. |
+| `role` and `objective` are **labels only** | They are no longer sent to the LLM. Move any LLM instructions to `prompt.system`. |
+| `MessageBuilder.build()` no longer accepts `role`, `objective`, `narrative` | If you call `MessageBuilder` directly, pass `prompt=` instead. |
+| `ZeroShotPrompt` — `user` is now optional | Only `system` is required. The task objective provides the user query. |
 
-If you are migrating from a heavier framework:
+### Before / After
 
-1. Start with one Agent + STANDARD mode — NucleusIQ's single-agent model covers most cases
-2. Replace chain/graph abstractions with execution modes (Direct → Standard → Autonomous)
-3. Add plugins for policy and retries instead of custom middleware
-4. Introduce AUTONOMOUS mode only where Critic/Refiner verification loops are genuinely needed
-5. Use provider portability to switch LLMs without rewriting agent logic
+**Agent creation:**
+
+```python
+# BEFORE (v0.7.5) — narrative was silently ignored, role/objective built the system message
+agent = Agent(
+    name="MyBot",
+    role="Analyst",
+    objective="Analyze data",
+    narrative="You are a data analyst. Provide detailed analysis.",
+    llm=llm,
+)
+
+# AFTER (v0.7.6) — prompt is mandatory and is the single source of truth
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+
+agent = Agent(
+    name="MyBot",
+    role="Analyst",              # label only — NOT sent to LLM
+    objective="Analyze data",    # label only — NOT sent to LLM
+    prompt=ZeroShotPrompt().configure(
+        system="You are a data analyst. Provide detailed analysis.",
+    ),
+    llm=llm,
+)
+```
+
+**With tools and context management (new in v0.7.6):**
+
+```python
+# AFTER (v0.7.6) — full agent with context management
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.agents.context import ContextConfig, ContextStrategy
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+from nucleusiq_openai import BaseOpenAI
+
+agent = Agent(
+    name="researcher",
+    prompt=ZeroShotPrompt().configure(
+        system="You are a research analyst. Gather data, then write a comprehensive report.",
+        user="Use all available tools to gather data before writing.",
+    ),
+    llm=BaseOpenAI(model_name="gpt-4.1-mini"),
+    tools=[...],
+    config=AgentConfig(
+        execution_mode=ExecutionMode.STANDARD,
+        context=ContextConfig(
+            optimal_budget=50_000,
+            strategy=ContextStrategy.PROGRESSIVE,
+        ),
+    ),
+)
+
+result = await agent.execute({"id": "t1", "objective": "Analyze annual report"})
+print(result.output)
+
+# New: context telemetry
+if result.context_telemetry:
+    print(f"Peak utilization: {result.context_telemetry.peak_utilization:.1%}")
+```
+
+**MessageBuilder (if you use it directly):**
+
+```python
+# BEFORE (v0.7.5)
+messages = MessageBuilder.build(
+    role="Analyst",
+    objective="Analyze data",
+    narrative="You are a data analyst.",
+    memory_messages=memory_messages,
+)
+
+# AFTER (v0.7.6)
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+
+prompt = ZeroShotPrompt().configure(system="You are a data analyst.")
+messages = MessageBuilder.build(
+    prompt=prompt,
+    memory_messages=memory_messages,
+)
+```
+
+### New features (non-breaking)
+
+| Feature | What to do |
+|---------|-----------|
+| Context window management | Add `context=ContextConfig(...)` to `AgentConfig` for tool-heavy agents. Optional — no context management applied if omitted. |
+| Synthesis pass | Enabled by default (`enable_synthesis=True`). Set `False` to disable. |
+| `ObservabilityConfig` | Optional replacement for `verbose` + `enable_tracing`. Backward compatible. |
+| `ContextStrategy` enum | Use `ContextStrategy.PROGRESSIVE`, `.TRUNCATE_ONLY`, or `.NONE`. |
+| Context telemetry | `result.context_telemetry` available when context management is configured. |
+
+### Package versions
+
+| Package | Version | Requires |
+|---------|---------|----------|
+| `nucleusiq` | **0.7.6** | — |
+| `nucleusiq-openai` | **0.6.2** | `nucleusiq>=0.7.6` |
+| `nucleusiq-gemini` | **0.2.4** | `nucleusiq>=0.7.6` |
+
+Upgrade all three:
+
+```bash
+pip install --upgrade nucleusiq nucleusiq-openai nucleusiq-gemini
+```
 
 ## From v0.7.4 to v0.7.5
 
@@ -45,13 +147,34 @@ Key changes in v0.7.x:
 | `AgentConfig.enable_tracing` new field | Set `enable_tracing=True` to populate `AgentResult.tool_calls`, `.llm_calls`, `.warnings` |
 | All errors now have structured attributes | `ToolError` carries `tool_name`, `AgentError` carries `mode`, etc. |
 
+## From simpler chat wrappers
+
+If you are migrating from direct API calls or thin wrappers:
+
+1. Move from `prompt -> response` to `Agent + execute()`
+2. Create a `ZeroShotPrompt().configure(system="...")` for your LLM instructions
+3. Introduce tools gradually using the `@tool` decorator in STANDARD mode
+4. Add memory with `MemoryFactory.create_memory(MemoryStrategy.SLIDING_WINDOW)`
+5. Use `agent.last_usage` and `CostTracker` to monitor costs
+6. Add plugins for guardrails: `ModelCallLimitPlugin`, `ToolGuardPlugin`
+
+## From heavier workflow systems (LangChain, etc.)
+
+If you are migrating from a heavier framework:
+
+1. Start with one Agent + STANDARD mode — NucleusIQ's single-agent model covers most cases
+2. Replace chain/graph abstractions with execution modes (Direct -> Standard -> Autonomous)
+3. Add plugins for policy and retries instead of custom middleware
+4. Introduce AUTONOMOUS mode only where Critic/Refiner verification loops are genuinely needed
+5. Use provider portability to switch LLMs without rewriting agent logic
+
 ## From v0.5.0 to v0.6.0
 
 Key changes in v0.6.0:
 
 | Change | Migration |
 |--------|----------|
-| `max_tokens` → `max_output_tokens` | Update `AgentConfig` and `LLMParams` usages |
+| `max_tokens` -> `max_output_tokens` | Update `AgentConfig` and `LLMParams` usages |
 | `nucleusiq-openai` now requires `nucleusiq>=0.6.0` | Upgrade core first: `pip install --upgrade nucleusiq` |
 | New error types in `nucleusiq.llms.errors` | Replace bare `except Exception` with specific error catches |
 | `@tool` decorator available | Optional — existing `BaseTool` subclasses still work |

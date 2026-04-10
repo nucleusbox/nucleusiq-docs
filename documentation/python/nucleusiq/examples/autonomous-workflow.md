@@ -2,12 +2,15 @@
 
 Autonomous mode decomposes complex tasks, executes subtasks, and verifies output via Critic/Refiner loops.
 
+*Updated for v0.7.6: `prompt` is now mandatory.*
+
 ## Setup
 
 ```python
 import asyncio
 from nucleusiq.agents import Agent
 from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
 from nucleusiq.tools.decorators import tool
 from nucleusiq.tools.builtin import FileReadTool, FileSearchTool
 from nucleusiq_openai import BaseOpenAI
@@ -35,13 +38,14 @@ def propose_mitigation(risk: str, severity: str) -> str:
 async def main():
     agent = Agent(
         name="risk-analyst",
-        llm=BaseOpenAI(model_name="gpt-4o"),
-        model="gpt-4o",
-        instructions=(
-            "You are a risk analyst. Break down complex risk assessments into subtasks. "
-            "Use tools to analyze each risk factor and propose mitigations. "
-            "Verify your final assessment is comprehensive."
+        prompt=ZeroShotPrompt().configure(
+            system=(
+                "You are a risk analyst. Break down complex risk assessments into subtasks. "
+                "Use tools to analyze each risk factor and propose mitigations. "
+                "Verify your final assessment is comprehensive."
+            ),
         ),
+        llm=BaseOpenAI(model_name="gpt-4.1-mini"),
         tools=[analyze_risk, propose_mitigation],
         config=AgentConfig(
             execution_mode=ExecutionMode.AUTONOMOUS,
@@ -69,6 +73,9 @@ async def main():
     print(f"LLM calls: {usage.call_count}")
     print(usage.display())
 
+    if result.context_telemetry:
+        print(f"Peak utilization: {result.context_telemetry.peak_utilization:.1%}")
+
 asyncio.run(main())
 ```
 
@@ -78,7 +85,8 @@ asyncio.run(main())
 2. **Execution** — Each subtask calls `analyze_risk` and `propose_mitigation` tools
 3. **Critic** — An independent verification pass checks if the assessment is comprehensive
 4. **Refiner** — If the Critic finds gaps, the Refiner corrects them
-5. **Final output** — The verified, complete assessment is returned
+5. **Synthesis** — A final LLM call (without tools) produces the full deliverable (v0.7.6)
+6. **Final output** — The verified, complete assessment is returned
 
 ## With Gemini
 
@@ -89,9 +97,31 @@ from nucleusiq_gemini import BaseGemini
 
 agent = Agent(
     name="risk-analyst",
+    prompt=ZeroShotPrompt().configure(
+        system="You are a thorough risk analyst...",
+    ),
     llm=BaseGemini(model_name="gemini-2.5-pro"),
-    model="gemini-2.5-pro",
-    # ... same tools, config, and instructions
+    # ... same tools and config
+)
+```
+
+## With context management
+
+*New in v0.7.6*
+
+For long-running autonomous tasks, add context management:
+
+```python
+from nucleusiq.agents.context import ContextConfig, ContextStrategy
+
+config = AgentConfig(
+    execution_mode=ExecutionMode.AUTONOMOUS,
+    require_quality_check=True,
+    max_iterations=5,
+    context=ContextConfig(
+        optimal_budget=40_000,
+        strategy=ContextStrategy.PROGRESSIVE,
+    ),
 )
 ```
 
@@ -99,4 +129,5 @@ agent = Agent(
 
 - [Execution modes](../execution-modes.md) — Direct vs Standard vs Autonomous
 - [Gemini quickstart](gemini-quickstart.md) — Autonomous mode with Gemini
+- [Context management](../context-management.md) — Context window management guide
 - [Production path](../learn/production-path.md) — When to use Autonomous mode

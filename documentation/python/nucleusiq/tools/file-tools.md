@@ -92,7 +92,9 @@ agent = Agent(
         FileSearchTool(workspace_root="./project"),
         FileReadTool(workspace_root="./project"),
     ],
-    instructions="Search for relevant files first, then read specific sections.",
+    prompt=ZeroShotPrompt().configure(
+        system="Search for relevant files first, then read specific sections.",
+    ),
 )
 result = await agent.execute({"id": "file-tools-1", "objective": "Find all API timeout settings in this codebase"})
 ```
@@ -103,7 +105,9 @@ result = await agent.execute({"id": "file-tools-1", "objective": "Find all API t
 agent = Agent(
     ...,
     tools=[FileExtractTool(workspace_root="./data")],
-    instructions="Extract data from files and provide analysis.",
+    prompt=ZeroShotPrompt().configure(
+        system="Extract data from files and provide analysis.",
+    ),
 )
 result = await agent.execute({"id": "file-tools-2", "objective": "What are the top 5 regions by revenue in sales.csv?"})
 ```

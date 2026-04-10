@@ -26,15 +26,17 @@ GEMINI_API_KEY=your-gemini-api-key
 import asyncio
 from nucleusiq.agents import Agent
 from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
 from nucleusiq_gemini import BaseGemini, GeminiLLMParams
 
 async def main():
     llm = BaseGemini(model_name="gemini-2.5-flash")
     agent = Agent(
         name="assistant",
+        prompt=ZeroShotPrompt().configure(
+            system="You are a helpful assistant.",
+        ),
         llm=llm,
-        model="gemini-2.5-flash",
-        instructions="You are a helpful assistant.",
         config=AgentConfig(
             execution_mode=ExecutionMode.STANDARD,
             llm_params=GeminiLLMParams(temperature=0.7, max_output_tokens=1024),
@@ -82,7 +84,7 @@ params = GeminiLLMParams(
 )
 
 config = AgentConfig(llm_params=params)
-agent = Agent(llm=llm, config=config, ...)
+agent = Agent(prompt=prompt, llm=llm, config=config, ...)
 ```
 
 ## Native server-side tools
@@ -109,10 +111,11 @@ Use them like any other tool:
 
 ```python
 agent = Agent(
+    name="search-bot",
+    prompt=ZeroShotPrompt().configure(system="Answer with the latest info."),
     llm=llm,
-    config=config,
     tools=[GeminiTool.google_search(), GeminiTool.code_execution()],
-    ...
+    config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
 )
 ```
 
@@ -159,13 +162,16 @@ def convert_temperature(celsius: float) -> str:
 
 agent = Agent(
     name="researcher",
+    prompt=ZeroShotPrompt().configure(
+        system="Search the web and do calculations. Provide accurate answers.",
+    ),
     llm=BaseGemini(model_name="gemini-2.5-flash"),
     tools=[
         GeminiTool.google_search(),   # Native tool
         GeminiTool.code_execution(),  # Native tool
         convert_temperature,          # Custom tool
     ],
-    config=AgentConfig(execution_mode="standard", enable_tracing=True),
+    config=AgentConfig(execution_mode=ExecutionMode.STANDARD, enable_tracing=True),
     ...
 )
 
@@ -207,7 +213,7 @@ All three execution modes work identically with Gemini:
 
     ```python
     config = AgentConfig(execution_mode=ExecutionMode.DIRECT)
-    agent = Agent(llm=BaseGemini(model_name="gemini-2.5-flash"), config=config, ...)
+    agent = Agent(name="fast", prompt=prompt, llm=BaseGemini(model_name="gemini-2.5-flash"), config=config)
     result = await agent.execute({"id": "gemini-guide-2", "objective": "What is quantum computing?"})
     ```
 
@@ -224,7 +230,7 @@ All three execution modes work identically with Gemini:
         return "22°C, Sunny"
 
     config = AgentConfig(execution_mode=ExecutionMode.STANDARD)
-    agent = Agent(llm=llm, config=config, tools=[get_weather], ...)
+    agent = Agent(name="weather", prompt=prompt, llm=llm, config=config, tools=[get_weather])
     result = await agent.execute({"id": "gemini-guide-3", "objective": "What's the weather in Tokyo?"})
     ```
 
@@ -238,7 +244,7 @@ All three execution modes work identically with Gemini:
         require_quality_check=True,
         max_iterations=5,
     )
-    agent = Agent(llm=llm, config=config, tools=[...], ...)
+    agent = Agent(name="researcher", prompt=prompt, llm=llm, config=config, tools=[...])
     result = await agent.execute({"id": "gemini-guide-4", "objective": "Compare Python and Rust for AI applications."})
     ```
 
@@ -327,8 +333,8 @@ llm = BaseGemini(model_name="gemini-2.5-flash")
 from nucleusiq_openai import BaseOpenAI
 llm = BaseOpenAI(model_name="gpt-4o")
 
-# Same agent works with either
-agent = Agent(llm=llm, config=config, tools=tools, plugins=plugins, ...)
+# Same agent works with either — just swap the llm
+agent = Agent(name="my-agent", prompt=prompt, llm=llm, config=config, tools=tools, plugins=plugins)
 ```
 
 Tools, plugins, memory, and streaming all work identically across providers.

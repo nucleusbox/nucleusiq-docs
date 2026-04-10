@@ -2,7 +2,7 @@
 
 > NucleusIQ is an open-source, agent-first Python framework with execution modes, built-in tools, and provider-agnostic LLM support — so you can build agents that adapt to your workflow without lock-in.
 
-NucleusIQ is the practical way to build AI agents that work in real environments. Connect to OpenAI, Google Gemini, or MockLLM for testing — with the same agent code. NucleusIQ provides three execution modes, built-in file tools, the `@tool` decorator, memory strategies, plugins, streaming, structured output, usage tracking, and cost estimation.
+NucleusIQ is the practical way to build AI agents that work in real environments. Connect to OpenAI, Google Gemini, or MockLLM for testing — with the same agent code. NucleusIQ provides three execution modes, built-in file tools, the `@tool` decorator, memory strategies, plugins, streaming, structured output, usage tracking, cost estimation, and **context window management**.
 
 !!! tip "Direct vs Standard vs Autonomous"
     NucleusIQ uses the **Gearbox Strategy** — three execution modes that scale from simple chat to autonomous reasoning:
@@ -13,9 +13,16 @@ NucleusIQ is the practical way to build AI agents that work in real environments
 
     See [Execution modes](execution-modes.md) for details.
 
+!!! success "New in v0.7.6: Context Window Management"
+    Automatic context management for tool-heavy agents — prevents context overflow and keeps token usage under control.
+
+    See [Context management](context-management.md) for details.
+
 NucleusIQ agents support memory, streaming, structured output, cost tracking, and 10 built-in plugins. Sensible defaults get you running quickly — add complexity only when the task needs it.
 
 ## Create an agent
+
+*Changed in v0.7.6: `prompt` is mandatory. `narrative` removed. `role`/`objective` are labels only.*
 
 === "With OpenAI"
 
@@ -24,13 +31,15 @@ NucleusIQ agents support memory, streaming, structured output, cost tracking, an
     from nucleusiq.agents import Agent
     from nucleusiq.agents.config import AgentConfig, ExecutionMode
     from nucleusiq.agents.task import Task
+    from nucleusiq.prompts.zero_shot import ZeroShotPrompt
     from nucleusiq_openai import BaseOpenAI
 
     agent = Agent(
         name="analyst",
-        llm=BaseOpenAI(model_name="gpt-4o-mini"),
-        model="gpt-4o-mini",
-        instructions="You are a helpful data analyst.",
+        prompt=ZeroShotPrompt().configure(
+            system="You are a helpful data analyst.",
+        ),
+        llm=BaseOpenAI(model_name="gpt-4.1-mini"),
         config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
     )
 
@@ -47,13 +56,15 @@ NucleusIQ agents support memory, streaming, structured output, cost tracking, an
     from nucleusiq.agents import Agent
     from nucleusiq.agents.config import AgentConfig, ExecutionMode
     from nucleusiq.agents.task import Task
+    from nucleusiq.prompts.zero_shot import ZeroShotPrompt
     from nucleusiq_gemini import BaseGemini
 
     agent = Agent(
         name="analyst",
+        prompt=ZeroShotPrompt().configure(
+            system="You are a helpful data analyst.",
+        ),
         llm=BaseGemini(model_name="gemini-2.5-flash"),
-        model="gemini-2.5-flash",
-        instructions="You are a helpful data analyst.",
         config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
     )
 
@@ -69,12 +80,15 @@ NucleusIQ agents support memory, streaming, structured output, cost tracking, an
     import asyncio
     from nucleusiq.agents import Agent
     from nucleusiq.agents.task import Task
+    from nucleusiq.prompts.zero_shot import ZeroShotPrompt
     from nucleusiq.core.llms.mock_llm import MockLLM
 
     agent = Agent(
         name="analyst",
+        prompt=ZeroShotPrompt().configure(
+            system="You are a helpful assistant.",
+        ),
         llm=MockLLM(),
-        instructions="You are a helpful assistant.",
     )
 
     result = asyncio.run(agent.execute(Task(id="t3", objective="What is 2 + 2?")))
@@ -101,6 +115,11 @@ See the [Install](install.md) and [Quickstart](quickstart.md) guides to get star
     ---
     `@tool` decorator, built-in file tools, and provider native tools (Google Search, Code Execution, etc.).
     [:octicons-arrow-right-24: Tools](tools.md)
+
+-   :material-memory: **Context management**
+    ---
+    Automatic context management prevents overflow in tool-heavy agents. *New in v0.7.6.*
+    [:octicons-arrow-right-24: Context management](context-management.md)
 
 -   :material-chart-line: **Observability**
     ---
