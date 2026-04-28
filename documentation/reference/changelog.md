@@ -35,6 +35,7 @@ All notable changes to NucleusIQ are documented in the [CHANGELOG.md](https://gi
 
 ### Agent execution & results
 
+- **Mode default tool budgets** when `max_tool_calls` is unset: **Direct 25**, **Standard 80**, **Autonomous 300** tool invocations per run (and the same ceiling applies to how many user tools you register, excluding recall tools). Older docs listed **5 / 30 / 100**; current behavior matches `AgentConfig.get_effective_max_tool_calls()` in the framework.
 - **`AgentResult`:** legacy mode error-string outcomes surface as `status=error` when agent state is already `ERROR`, including stable `ToolCallLimitError` when the tool budget is exhausted.
 - **Standard mode:** when the configured tool-call cap is reached and synthesis is enabled, the runtime forces a **tools-free synthesis** pass so autonomous flows can still reach validation/refinement instead of stopping on a raw limit string.
 

@@ -9,7 +9,7 @@ from nucleusiq.agents.config import AgentConfig, ExecutionMode
 
 config = AgentConfig(
     execution_mode=ExecutionMode.STANDARD,
-    max_tool_calls=30,
+    max_tool_calls=80,
     llm_max_output_tokens=2048,
     llm_call_timeout=90,
     step_timeout=60,
@@ -21,7 +21,7 @@ config = AgentConfig(
 | Field | Default | Description |
 |-------|---------|-------------|
 | `execution_mode` | `STANDARD` | Direct, Standard, or Autonomous |
-| `max_tool_calls` | Mode-based (5/30/100) | Maximum tool calls per execution |
+| `max_tool_calls` | Mode-based (**25** / **80** / **300**) | Maximum tool invocations per run; also caps how many user tools you can register (recall tools excluded). Override with an explicit int. |
 | `llm_max_output_tokens` | `None` | Max output tokens per LLM call |
 | `llm_call_timeout` | `60` | Timeout per LLM call (seconds) |
 | `step_timeout` | `30` | Timeout per tool step (seconds) |
@@ -168,9 +168,9 @@ If `max_tool_calls` is not set, defaults are mode-based:
 
 | Mode | Default tool limit |
 |------|--------------------|
-| DIRECT | 5 |
-| STANDARD | 30 |
-| AUTONOMOUS | 100 |
+| DIRECT | 25 |
+| STANDARD | 80 |
+| AUTONOMOUS | 300 |
 
 ```python
 effective = config.get_effective_max_tool_calls()

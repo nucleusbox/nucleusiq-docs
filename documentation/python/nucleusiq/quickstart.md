@@ -91,11 +91,11 @@ Set `GEMINI_API_KEY` in your environment or `.env` file.
 
 NucleusIQ uses the **Gearbox Strategy** — three modes that scale from simple chat to autonomous reasoning:
 
-| Mode | Best for | Tool calls |
-|------|----------|-----------|
-| **DIRECT** | Fast Q&A, classification | Up to 5 |
-| **STANDARD** | Tool-enabled workflows (default) | Up to 30 |
-| **AUTONOMOUS** | Complex multi-step tasks with verification | Up to 100 |
+| Mode | Best for | Default tool budget |
+|------|----------|---------------------|
+| **DIRECT** | Fast Q&A, classification | 25 invocations / run |
+| **STANDARD** | Tool-enabled workflows (default) | 80 invocations / run |
+| **AUTONOMOUS** | Complex multi-step tasks with verification | 300 invocations / run |
 
 ```python
 from nucleusiq.agents.config import AgentConfig, ExecutionMode

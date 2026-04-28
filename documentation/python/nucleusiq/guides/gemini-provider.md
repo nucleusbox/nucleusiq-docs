@@ -231,7 +231,7 @@ All three execution modes work identically with Gemini. The tabs below assume yo
 
 === "Gear 2: STANDARD"
 
-    Iterative tool calling (up to 30 calls). Best for tasks needing external data.
+    Iterative tool calling (default **80** tool invocations per run unless you set `max_tool_calls`). Best for tasks needing external data.
 
     ```python
     from nucleusiq.tools.decorators import tool

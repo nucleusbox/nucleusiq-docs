@@ -8,7 +8,7 @@ NucleusIQ uses the **Gearbox Strategy** — three execution modes that scale fro
 |------------|--------|----------|------------|
 | Memory | Yes | Yes | Yes |
 | Plugins | Yes | Yes | Yes |
-| Tools | Yes (max 5) | Yes (max 30) | Yes (max 100) |
+| Tools | Yes (default **25** / run) | Yes (default **80** / run) | Yes (default **300** / run) |
 | Tool loop | Yes | Yes | Yes |
 | Streaming | Yes | Yes | Yes |
 | Structured output | Yes | Yes | Yes |
@@ -19,7 +19,7 @@ NucleusIQ uses the **Gearbox Strategy** — three execution modes that scale fro
 | Refiner (correction) | No | No | **Yes** |
 | Validation pipeline | No | No | **Yes** |
 
-Tool limits are configurable via `AgentConfig(max_tool_calls=N)`.
+Default **tool-call budgets** (and the maximum number of **user-registered** tools on the agent, excluding framework recall tools) are **25 / 80 / 300** for Direct / Standard / Autonomous. Override any time with `AgentConfig(max_tool_calls=N)` or read the resolved value via `config.get_effective_max_tool_calls()`.
 
 ## Direct
 

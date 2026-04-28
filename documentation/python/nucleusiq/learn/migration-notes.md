@@ -133,6 +133,7 @@ v0.7.7 is **backward compatible** for typical agent code. No prompt or `Agent` c
 | Area | Change |
 |------|--------|
 | **Context V2** | Stabilized compaction/masking pipeline; default `squeeze_threshold` remains **0.70**. Rehydration after masking now respects auto-detected model context windows. |
+| **Tool budgets** | When `max_tool_calls` is **not** set, mode defaults are **25 / 80 / 300** (Direct / Standard / Autonomous) — higher than the early **5 / 30 / 100** values. Set `max_tool_calls` explicitly if you need a lower cap. Same value limits **tool invocations per run** and how many **user-registered** tools the agent may carry (framework recall tools excluded). |
 | **Tools** | Optional **`idempotent=True`** on `@tool` / `BaseTool` — identical `(name, args)` replays can short-circuit. **Default is still `False`** (safe for APIs, DB, time-dependent tools). |
 | **`AgentResult`** | Error paths and exhausted **tool-call limits** map to **`status=error`** (and `ToolCallLimitError` where applicable) instead of looking like success with a bare error string. |
 | **Standard + synthesis** | When the **tool cap** is hit and **`enable_synthesis`** is on, the runtime runs a **final tools-off synthesis** so downstream autonomous validation can still run. |

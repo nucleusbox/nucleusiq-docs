@@ -4,11 +4,11 @@ NucleusIQ strategy starts with selecting the right execution mode.
 
 ## Gearbox strategy
 
-| Mode | Best for | Tool budget |
-|------|----------|-------------|
-| DIRECT | Fast answers, simple requests | up to 5 |
-| STANDARD | Most production workflows | up to 30 |
-| AUTONOMOUS | Complex/high-stakes workflows | up to 100 |
+| Mode | Best for | Default tool budget |
+|------|----------|-------------------|
+| DIRECT | Fast answers, simple requests | 25 calls / run (configurable) |
+| STANDARD | Most production workflows | 80 calls / run (configurable) |
+| AUTONOMOUS | Complex/high-stakes workflows | 300 calls / run (configurable) |
 
 ```python
 from nucleusiq.agents.config import AgentConfig, ExecutionMode

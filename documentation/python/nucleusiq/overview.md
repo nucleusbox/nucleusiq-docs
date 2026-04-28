@@ -7,9 +7,9 @@ NucleusIQ is the practical way to build AI agents that work in real environments
 !!! tip "Direct vs Standard vs Autonomous"
     NucleusIQ uses the **Gearbox Strategy** — three execution modes that scale from simple chat to autonomous reasoning:
 
-    - **DIRECT** — Fast, single LLM call, up to 5 tool calls. Best for Q&A and simple lookups.
-    - **STANDARD** — Tool-enabled, linear execution, up to 30 tool calls. Default for most workflows.
-    - **AUTONOMOUS** — Planning, Critic/Refiner verification, up to 100 tool calls. For complex, high-stakes tasks.
+    - **DIRECT** — Fast, single LLM call; default tool budget **25** invocations per run (override with `max_tool_calls`). Best for Q&A and simple lookups.
+    - **STANDARD** — Tool-enabled, linear execution; default **80** invocations per run. Default mode for most workflows.
+    - **AUTONOMOUS** — Planning, Critic/Refiner verification; default **300** invocations per run. For complex, high-stakes tasks.
 
     See [Execution modes](execution-modes.md) for details.
 
