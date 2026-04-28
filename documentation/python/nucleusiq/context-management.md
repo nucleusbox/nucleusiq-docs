@@ -1,6 +1,6 @@
 # Context Window Management
 
-*New in v0.7.6*
+*Introduced in v0.7.6; stabilized and extended in v0.7.7 (Context Management v2).*
 
 Tool-heavy agents can fill the context window, leaving no room for the LLM's final response. NucleusIQ automatically tracks and compacts context to keep it within budget.
 
@@ -11,6 +11,7 @@ from nucleusiq.agents import Agent
 from nucleusiq.agents.config import AgentConfig, ExecutionMode
 from nucleusiq.agents.context import ContextConfig, ContextStrategy
 from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+from nucleusiq.tools.builtin import FileReadTool, FileSearchTool
 from nucleusiq_openai import BaseOpenAI
 
 agent = Agent(
@@ -19,7 +20,10 @@ agent = Agent(
         system="You are a research analyst. Gather data, then write a report.",
     ),
     llm=BaseOpenAI(model_name="gpt-4.1-mini", timeout=120.0),
-    tools=[...],
+    tools=[
+        FileReadTool(workspace_root="./workspace"),
+        FileSearchTool(workspace_root="./workspace"),
+    ],
     config=AgentConfig(
         execution_mode=ExecutionMode.STANDARD,
         context=ContextConfig(
@@ -88,6 +92,16 @@ if tel:
 ## Without ContextConfig
 
 If you don't pass a `ContextConfig`, no context management is applied — the agent behaves exactly as in v0.7.5.
+
+## v0.7.7 — V2 stability notes
+
+- **Single compaction pipeline** — masking, tool-result compaction, conversation compaction, and emergency compaction share one coherent `Compactor` story.
+- **Default `squeeze_threshold`** stays **0.70** — tuned so later masking still respects hard context limits on PDF-heavy runs.
+- **Markers stay small** — large tool results get a short orientation preview in markers so markers don’t become a second evidence store.
+- **Rehydration** — when the model context window is **auto-detected** from the provider, synthesis-time rehydration uses that resolved window (fixes cases where `max_context_tokens` was `None` and rehydration was skipped).
+- **Advanced** — for autonomous critique/refinement, the runtime may rebuild a richer trace from the `ContentStore` via **`extract_raw_trace`** (see `nucleusiq.agents.context.store` in the core package). Most users only need `ContextConfig` + `AgentResult.context_telemetry`.
+
+**Notebooks:** `context_management_tcs_deep_dive.ipynb` and `context_window_management_showcase.ipynb` in the main repo demonstrate end-to-end behavior.
 
 ## See also
 

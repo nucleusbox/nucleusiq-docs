@@ -63,7 +63,13 @@ asyncio.run(main())
 Use `GeminiLLMParams` for parameters beyond the common set:
 
 ```python
-from nucleusiq_gemini import GeminiLLMParams, GeminiThinkingConfig, GeminiSafetySettings
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+from nucleusiq_gemini import BaseGemini, GeminiLLMParams, GeminiThinkingConfig, GeminiSafetySettings
+
+llm = BaseGemini(model_name="gemini-2.5-flash")
+prompt = ZeroShotPrompt().configure(system="You are a helpful assistant.")
 
 params = GeminiLLMParams(
     temperature=0.7,
@@ -84,7 +90,12 @@ params = GeminiLLMParams(
 )
 
 config = AgentConfig(llm_params=params)
-agent = Agent(prompt=prompt, llm=llm, config=config, ...)
+agent = Agent(
+    name="gemini-params-demo",
+    prompt=prompt,
+    llm=llm,
+    config=config,
+)
 ```
 
 ## Native server-side tools
@@ -151,6 +162,7 @@ NucleusIQ v0.7.5 resolves this with a **transparent proxy pattern**. Just pass y
 from nucleusiq.agents import Agent
 from nucleusiq.agents.config import AgentConfig
 from nucleusiq.agents.task import Task
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
 from nucleusiq_gemini import BaseGemini
 from nucleusiq_gemini.tools.gemini_tool import GeminiTool
 from nucleusiq.tools.decorators import tool
@@ -205,7 +217,7 @@ for tc in result.tool_calls:
 
 ## Gearbox strategy (3 modes)
 
-All three execution modes work identically with Gemini:
+All three execution modes work identically with Gemini. The tabs below assume you already defined `prompt` (for example `ZeroShotPrompt().configure(system="...")`) and `llm` (`BaseGemini(...)`) like in [Quick start](#quick-start).
 
 === "Gear 1: DIRECT"
 
@@ -239,12 +251,20 @@ All three execution modes work identically with Gemini:
     Task decomposition, Critic verification, Refiner loop.
 
     ```python
+    from nucleusiq_gemini.tools.gemini_tool import GeminiTool
+
     config = AgentConfig(
         execution_mode=ExecutionMode.AUTONOMOUS,
         require_quality_check=True,
         max_iterations=5,
     )
-    agent = Agent(name="researcher", prompt=prompt, llm=llm, config=config, tools=[...])
+    agent = Agent(
+        name="researcher",
+        prompt=prompt,
+        llm=llm,
+        config=config,
+        tools=[GeminiTool.google_search(), GeminiTool.code_execution()],
+    )
     result = await agent.execute({"id": "gemini-guide-4", "objective": "Compare Python and Rust for AI applications."})
     ```
 
@@ -286,14 +306,14 @@ async for event in agent.execute_stream({"id": "s1", "objective": "Write a poem 
 Gemini natively supports images, PDFs, and files:
 
 ```python
+from nucleusiq.agents.attachments import Attachment, AttachmentType
 from nucleusiq.agents.task import Task
-from nucleusiq.core.attachments.models import Attachment, AttachmentType
 
 task = Task(
     id="analyze",
     objective="Describe this image",
     attachments=[
-        Attachment(type=AttachmentType.IMAGE_URL, content="https://example.com/photo.jpg"),
+        Attachment(type=AttachmentType.IMAGE_URL, data="https://example.com/photo.jpg"),
     ],
 )
 result = await agent.execute(task)
@@ -325,16 +345,29 @@ Built-in retry with exponential backoff handles transient errors automatically (
 Switch between providers with zero agent code changes:
 
 ```python
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+
+prompt = ZeroShotPrompt().configure(system="You are a helpful assistant.")
+config = AgentConfig(execution_mode=ExecutionMode.STANDARD)
+
 # Gemini
 from nucleusiq_gemini import BaseGemini
 llm = BaseGemini(model_name="gemini-2.5-flash")
 
-# OpenAI (same agent code)
-from nucleusiq_openai import BaseOpenAI
-llm = BaseOpenAI(model_name="gpt-4o")
+# OpenAI (same agent shape) — swap llm only:
+# from nucleusiq_openai import BaseOpenAI
+# llm = BaseOpenAI(model_name="gpt-4o")
 
-# Same agent works with either — just swap the llm
-agent = Agent(name="my-agent", prompt=prompt, llm=llm, config=config, tools=tools, plugins=plugins)
+agent = Agent(
+    name="my-agent",
+    prompt=prompt,
+    llm=llm,
+    config=config,
+    tools=[],
+    plugins=[],
+)
 ```
 
 Tools, plugins, memory, and streaming all work identically across providers.

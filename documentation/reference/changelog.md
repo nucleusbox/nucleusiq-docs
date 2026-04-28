@@ -4,6 +4,7 @@ All notable changes to NucleusIQ are documented in the [CHANGELOG.md](https://gi
 
 ## Recent releases
 
+- **[0.7.7](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#077)** — Context Management v2 stability, idempotent tool opt-in, AgentResult / synthesis fixes, provider sync (OpenAI 0.6.3, Gemini 0.2.5)
 - **[0.7.6](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#076)** — Context window management, prompt system refactor, synthesis pass, ObservabilityConfig
 - **[0.7.5](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#075)** — Gemini native + custom tool mixing (proxy pattern), full observability wiring
 - **[0.7.4](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#074)** — ExecutionTracer, Pyrefly type checking, error package restructure, usage extraction, exhaustive error wiring
@@ -11,6 +12,46 @@ All notable changes to NucleusIQ are documented in the [CHANGELOG.md](https://gi
 - **[0.7.2](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#072)** — Unified exception hierarchy (10 families), AgentResult response contract
 - **[0.6.0](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#060--2026-03-13)** — Gemini provider, `@tool` decorator, cost estimation, framework error taxonomy
 - **[0.5.0](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#050--2026-03-11)** — Token origin split, UsageSummary schema, FileWriteTool, FileExtractTool query filtering
+
+## v0.7.7 highlights
+
+### Packages
+
+| Package | Version | What's new |
+|---------|---------|-----------|
+| `nucleusiq` | **0.7.7** | Stable Context Management v2 (single `Compactor`, bounded markers, recall/rehydration), idempotent tool metadata, clearer `AgentResult` on errors and tool-cap exhaustion |
+| `nucleusiq-openai` | **0.6.3** | Sync with v0.7.7 core message/tool contracts |
+| `nucleusiq-gemini` | **0.2.5** | Sync with v0.7.7 core message/tool contracts |
+
+### Context Management v2
+
+- One compaction pipeline, bounded observation markers, recallable offload, synthesis-time rehydration.
+- Default `ContextConfig.squeeze_threshold=0.70` kept after validation on PDF-heavy runs.
+- **Fixed:** rehydration uses the engine’s resolved model context window when `max_context_tokens` is auto-detected (was skipping when the field was `None`).
+
+### Tools
+
+- **Opt-in idempotent tools:** `BaseTool.idempotent` and `@tool(idempotent=True)`. Default remains `False` so live-data tools are never deduplicated unless you declare them safe. Identical `(tool_name, args)` short-circuits to the prior result.
+
+### Agent execution & results
+
+- **`AgentResult`:** legacy mode error-string outcomes surface as `status=error` when agent state is already `ERROR`, including stable `ToolCallLimitError` when the tool budget is exhausted.
+- **Standard mode:** when the configured tool-call cap is reached and synthesis is enabled, the runtime forces a **tools-free synthesis** pass so autonomous flows can still reach validation/refinement instead of stopping on a raw limit string.
+
+### Telemetry
+
+- Compaction telemetry distinguishes **tokens freed by the observation masker** vs **by compactors** (finer-grained than a single `tokens_freed` where applicable).
+
+### Autonomous mode
+
+- **Critic / Refiner** wired with context helpers (e.g. `extract_raw_trace` from `ContentStore`) so critique passes can work from masked traces where appropriate.
+
+### Tests & validation
+
+- Broad recall/masking tests (policy, squeeze gating, markers, synthesis rehydration, streaming vs non-streaming symmetry).
+- Autonomous stability tests (critic/refiner routing, abstention, compute-budget escalation, tool-budget synthesis).
+
+See the full [CHANGELOG.md on GitHub](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#077--2026-04-27) for known limitations and CI notes.
 
 ## v0.7.6 highlights
 
@@ -56,7 +97,7 @@ Unified config replacing `verbose` + `enable_tracing`: `tracing`, `verbose`, `lo
 
 - 97 new context management unit tests + 4 agent-level integration tests
 - 27 existing test files updated for prompt system refactor
-- All 2,621 tests pass (core 2,106 + OpenAI 224 + Gemini 291)
+- For current test counts and gates, see the [upstream CHANGELOG](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md) for the release you are on (v0.7.7 focused gates: ~1,340+ on context/agent slices; full suite ~2,469+ with skips per environment).
 
 ## v0.7.5 highlights
 

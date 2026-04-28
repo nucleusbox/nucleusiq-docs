@@ -38,6 +38,23 @@ def my_tool(x: str) -> str:
     return x
 ```
 
+## Idempotent tools (same args → same result)
+
+*New in v0.7.7*
+
+By default, every tool call is executed — even if the model repeats the same tool with identical arguments. For **pure, cacheable** helpers (static lists, deterministic transforms, read-only config), you can opt in to **deduplication**: the framework short-circuits a second call with the same `(tool_name, arguments)` and reuses the prior result.
+
+```python
+@tool(idempotent=True)
+def list_report_sections() -> str:
+    """Fixed table of contents for the annual report pipeline."""
+    return "financials,md&a,risks,subsidiaries"
+```
+
+**Do not** set `idempotent=True` on tools that hit live APIs, databases, clocks, or anything that should change between calls. The default remains **`idempotent=False`** on both `@tool` and `BaseTool`.
+
+`BaseTool` subclasses can pass `idempotent=True` in their constructor when applicable.
+
 ## Async functions
 
 Both sync and async functions work:
@@ -160,6 +177,7 @@ Decorated tools work with any provider and any execution mode:
 ```python
 from nucleusiq.agents import Agent
 from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
 from nucleusiq.tools.decorators import tool
 
 @tool
@@ -174,6 +192,9 @@ async def lookup_stock(symbol: str) -> str:
 
 agent = Agent(
     name="analyst",
+    prompt=ZeroShotPrompt().configure(
+        system="You are a helpful analyst. Use tools when needed.",
+    ),
     llm=llm,
     tools=[calculate, lookup_stock],
     config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
@@ -186,17 +207,22 @@ result = await agent.execute({"id": "tool-decorator-1", "objective": "What is 15
 You can mix `@tool` functions with `BaseTool` subclasses and provider native tools:
 
 ```python
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
 from nucleusiq.tools.builtin import FileReadTool
-from nucleusiq_gemini import GeminiTool
+from nucleusiq_gemini import BaseGemini, GeminiTool
 
 agent = Agent(
-    llm=llm,
+    name="mixed-tool-kinds",
+    prompt=ZeroShotPrompt().configure(system="You are a helpful assistant."),
+    llm=BaseGemini(model_name="gemini-2.5-flash"),
     tools=[
         calculate,                                  # @tool decorator
         FileReadTool(workspace_root="./data"),       # BaseTool subclass
         GeminiTool.google_search(),                  # Provider native tool
     ],
-    ...
+    config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
 )
 ```
 

@@ -74,7 +74,17 @@ Choose your path based on where you are today:
 
 ## What's new in v0.7.x
 
-### v0.7.6 (latest)
+### v0.7.7 (latest)
+
+!!! success "Context Management v2 + execution fixes"
+    - **Stable V2 pipeline** — compaction, masking, recall/rehydration tuned for PDF-heavy agents (`squeeze_threshold=0.70` default).
+    - **Optional `@tool(idempotent=True)`** — safe dedup for pure tools; default remains non-idempotent.
+    - **`AgentResult` + tool caps** — clearer `status=error` and `ToolCallLimitError` when limits bite; **tools-free synthesis** when the tool cap is hit (synthesis on).
+    - **Providers:** `nucleusiq-openai` **0.6.3**, `nucleusiq-gemini` **0.2.5** — aligned with core 0.7.7.
+
+    [Changelog](reference/changelog.md){ .md-button } · [Migration (0.7.6 → 0.7.7)](python/nucleusiq/learn/migration-notes.md#from-v076-to-v077){ .md-button }
+
+### v0.7.6
 
 !!! success "Context Window Management"
 
@@ -133,7 +143,7 @@ Choose your path based on where you are today:
 - **AgentResult response contract** — typed, immutable Pydantic model
 - **Gemini tool-calling fixes** — `$ref`/`$defs` inlining
 
-Current packages: `nucleusiq` 0.7.6, `nucleusiq-openai` 0.6.2, `nucleusiq-gemini` 0.2.4
+Current packages: `nucleusiq` **0.7.7**, `nucleusiq-openai` **0.6.3**, `nucleusiq-gemini` **0.2.5**
 
 See the [full changelog](reference/changelog.md).
 

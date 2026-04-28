@@ -48,7 +48,17 @@ is sent once and the LLM sees it in full.
 ```python
 from nucleusiq.agents import Agent
 from nucleusiq.agents.attachments import Attachment, AttachmentType
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
 from nucleusiq.agents.task import Task
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+from nucleusiq_openai import BaseOpenAI
+
+agent = Agent(
+    name="attachment-summarize",
+    prompt=ZeroShotPrompt().configure(system="You are a helpful assistant."),
+    llm=BaseOpenAI(model_name="gpt-4.1-mini"),
+    config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
+)
 
 task = Task(
     id="summarize",
@@ -115,6 +125,7 @@ symlink escape, and absolute path injection are blocked.
 from nucleusiq.agents import Agent
 from nucleusiq.agents.config import AgentConfig, ExecutionMode
 from nucleusiq.agents.task import Task
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
 from nucleusiq.tools.builtin import (
     FileReadTool,
     FileSearchTool,
@@ -124,8 +135,9 @@ from nucleusiq.tools.builtin import (
 
 agent = Agent(
     name="DataAnalyst",
-    role="Data analyst",
-    objective="Analyze files and extract insights",
+    prompt=ZeroShotPrompt().configure(
+        system="You are a data analyst. Analyze files and extract insights.",
+    ),
     llm=llm,
     tools=[
         FileReadTool(workspace_root="./data"),
@@ -155,12 +167,18 @@ immediate context, and provide tools for the agent to explore related files.
 **Example:**
 
 ```python
+from nucleusiq.agents import Agent
 from nucleusiq.agents.attachments import Attachment, AttachmentType
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.agents.task import Task
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+from nucleusiq.tools.builtin import FileReadTool, FileSearchTool
 
 agent = Agent(
     name="Researcher",
-    role="Research assistant",
-    objective="Cross-reference attached and workspace files",
+    prompt=ZeroShotPrompt().configure(
+        system="You are a research assistant. Cross-reference attached and workspace files.",
+    ),
     llm=llm,
     tools=[
         FileReadTool(workspace_root="./data"),
@@ -192,10 +210,17 @@ result = await agent.execute(task)
 Control which attachments are allowed via the plugin system:
 
 ```python
+from nucleusiq.agents import Agent
+from nucleusiq.agents.attachments import AttachmentType
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
 from nucleusiq.plugins.builtin import AttachmentGuardPlugin
+from nucleusiq_openai import BaseOpenAI
 
 agent = Agent(
-    ...,
+    name="attachment-policy",
+    prompt=ZeroShotPrompt().configure(system="You are a helpful assistant."),
+    llm=BaseOpenAI(model_name="gpt-4.1-mini"),
     plugins=[
         AttachmentGuardPlugin(
             allowed_types=[AttachmentType.TEXT, AttachmentType.IMAGE_URL],
@@ -204,6 +229,7 @@ agent = Agent(
             allowed_extensions=[".txt", ".csv", ".png", ".jpg"],
         ),
     ],
+    config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
 )
 ```
 

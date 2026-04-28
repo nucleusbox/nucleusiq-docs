@@ -18,21 +18,28 @@ config = AgentConfig(
 ## 2. Add guardrail plugins
 
 ```python
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
 from nucleusiq.plugins.builtin import (
     ModelCallLimitPlugin,
     ToolRetryPlugin,
     ToolGuardPlugin,
     PIIGuardPlugin,
 )
+from nucleusiq_openai import BaseOpenAI
 
 agent = Agent(
-    ...,
+    name="production-guardrails",
+    prompt=ZeroShotPrompt().configure(system="You are a helpful assistant."),
+    llm=BaseOpenAI(model_name="gpt-4.1-mini"),
     plugins=[
         ModelCallLimitPlugin(max_calls=20),
         ToolRetryPlugin(max_retries=2),
         ToolGuardPlugin(allowed_tools=["file_read", "file_search", "calculate"]),
         PIIGuardPlugin(redact_patterns=["email", "phone"]),
     ],
+    config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
 )
 ```
 

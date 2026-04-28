@@ -20,17 +20,24 @@ NucleusIQ includes 10 built-in plugins for common use cases.
 ## Example
 
 ```python
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
 from nucleusiq.plugins.builtin import (
     ToolRetryPlugin,
     PIIGuardPlugin,
 )
+from nucleusiq_openai import BaseOpenAI
 
 agent = Agent(
-    ...,
+    name="plugins-example",
+    prompt=ZeroShotPrompt().configure(system="You are a helpful assistant."),
+    llm=BaseOpenAI(model_name="gpt-4.1-mini"),
     plugins=[
         ToolRetryPlugin(max_retries=2),
         PIIGuardPlugin(redact_patterns=["email", "phone"]),
     ],
+    config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
 )
 ```
 
@@ -41,11 +48,19 @@ agent = Agent(
 ### Message-count based trimming
 
 ```python
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
 from nucleusiq.plugins.builtin import ContextWindowPlugin
+from nucleusiq_openai import BaseOpenAI
 
+llm = BaseOpenAI(model_name="gpt-4.1-mini")
 agent = Agent(
-    ...,
+    name="context-window-msgs",
+    prompt=ZeroShotPrompt().configure(system="You are a helpful assistant."),
+    llm=llm,
     plugins=[ContextWindowPlugin(max_messages=50, keep_recent=10)],
+    config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
 )
 ```
 
@@ -53,8 +68,11 @@ agent = Agent(
 
 ```python
 agent = Agent(
-    ...,
+    name="context-window-tokens",
+    prompt=ZeroShotPrompt().configure(system="You are a helpful assistant."),
+    llm=llm,
     plugins=[ContextWindowPlugin(max_tokens=8000, keep_recent=5)],
+    config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
 )
 ```
 
@@ -62,13 +80,16 @@ agent = Agent(
 
 ```python
 agent = Agent(
-    ...,
+    name="context-window-accurate",
+    prompt=ZeroShotPrompt().configure(system="You are a helpful assistant."),
+    llm=llm,
     plugins=[
         ContextWindowPlugin(
             max_tokens=8000,
             token_counter=llm.estimate_tokens,  # Uses tiktoken for OpenAI
         ),
     ],
+    config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
 )
 ```
 

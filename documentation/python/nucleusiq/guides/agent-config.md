@@ -30,8 +30,8 @@ config = AgentConfig(
 | `require_quality_check` | `False` | Enable Critic/Refiner (Autonomous) |
 | `verbose` | `False` | Print debug logs |
 | `enable_tracing` | `False` | Enable ExecutionTracer |
-| `enable_synthesis` | `True` | Enable synthesis pass after multi-round tool loops (v0.7.6) |
-| `context` | `None` | `ContextConfig` for context window management (v0.7.6) |
+| `enable_synthesis` | `True` | Enable synthesis pass after multi-round tool loops (v0.7.6). From **v0.7.7**, when the **tool-call cap** is reached, Standard mode still runs a **tools-free synthesis** step if synthesis is enabled, so validation/refinement can proceed. |
+| `context` | `None` | `ContextConfig` for context window management (v0.7.6; **v0.7.7** stabilizes V2 compaction/masking — see [Context management](../context-management.md)) |
 | `observability` | `None` | `ObservabilityConfig` for unified tracing/logging (v0.7.6) |
 
 ## Context window management

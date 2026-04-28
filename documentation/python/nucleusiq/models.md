@@ -68,13 +68,20 @@ NucleusIQ uses a **provider-agnostic** `BaseLLM` interface. Swap providers witho
 Set LLM parameters at the agent level:
 
 ```python
+from nucleusiq.agents import Agent
 from nucleusiq.agents.config import AgentConfig
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
 
 config = AgentConfig(
     llm_max_output_tokens=1024,
     verbose=True,
 )
-agent = Agent(..., config=config)
+agent = Agent(
+    name="configured-agent",
+    prompt=ZeroShotPrompt().configure(system="You are a helpful assistant."),
+    llm=llm,  # e.g. BaseOpenAI / BaseGemini from the sections above
+    config=config,
+)
 ```
 
 ### Provider-specific params

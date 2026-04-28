@@ -70,25 +70,30 @@ config = AgentConfig(
 The OpenAI provider supports server-side native tools:
 
 ```python
-from nucleusiq_openai import OpenAITool
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+from nucleusiq_openai import BaseOpenAI, OpenAITool
 
-# Web search
-agent = Agent(..., tools=[OpenAITool.web_search()])
+# Example: web search (repeat the same shape for other native tools)
+agent = Agent(
+    name="native-tools",
+    prompt=ZeroShotPrompt().configure(system="You are a helpful assistant."),
+    llm=BaseOpenAI(model_name="gpt-4.1-mini"),
+    tools=[OpenAITool.web_search()],
+    config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
+)
 
-# Code interpreter
-agent = Agent(..., tools=[OpenAITool.code_interpreter()])
-
-# File search
-agent = Agent(..., tools=[OpenAITool.file_search()])
-
-# MCP (Model Context Protocol)
-agent = Agent(..., tools=[
-    OpenAITool.mcp(
-        server_label="my-mcp",
-        server_description="My MCP server",
-        server_url="https://my-server.example.com/sse",
-    ),
-])
+# Code interpreter: tools=[OpenAITool.code_interpreter()]
+# File search: tools=[OpenAITool.file_search()]
+# MCP:
+# tools=[
+#     OpenAITool.mcp(
+#         server_label="my-mcp",
+#         server_description="My MCP server",
+#         server_url="https://my-server.example.com/sse",
+#     ),
+# ]
 ```
 
 | Tool type | Description |

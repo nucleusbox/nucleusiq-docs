@@ -16,14 +16,23 @@ NucleusIQ agents support conversation memory across turns. Choose a strategy tha
 
 ```python
 from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
 from nucleusiq.memory import MemoryFactory, MemoryStrategy
+from nucleusiq_openai import BaseOpenAI
 
 memory = MemoryFactory.create_memory(
     MemoryStrategy.SLIDING_WINDOW,
     window_size=10,
 )
 
-agent = Agent(..., memory=memory)
+agent = Agent(
+    name="memory-demo",
+    prompt=ZeroShotPrompt().configure(system="You are a helpful assistant."),
+    llm=BaseOpenAI(model_name="gpt-4.1-mini"),
+    memory=memory,
+    config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
+)
 ```
 
 ## Strategy examples

@@ -13,7 +13,11 @@ NucleusIQ provides three ways to create tools:
 The fastest way to create tools:
 
 ```python
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
 from nucleusiq.tools.decorators import tool
+from nucleusiq_openai import BaseOpenAI
 
 @tool
 def get_weather(city: str, unit: str = "celsius") -> str:
@@ -25,7 +29,13 @@ def get_weather(city: str, unit: str = "celsius") -> str:
     """
     return f"Weather in {city}: 22°{unit[0].upper()}"
 
-agent = Agent(..., tools=[get_weather])
+agent = Agent(
+    name="weather-tool",
+    prompt=ZeroShotPrompt().configure(system="You are a helpful assistant."),
+    llm=BaseOpenAI(model_name="gpt-4.1-mini"),
+    tools=[get_weather],
+    config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
+)
 ```
 
 The decorator auto-generates a JSON schema spec from type hints and docstring. Both sync and async functions are supported.
@@ -60,7 +70,18 @@ tools = [
     DirectoryListTool(workspace_root="./data", max_entries=200),
     FileExtractTool(workspace_root="./data"),
 ]
-agent = Agent(..., tools=tools)
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+from nucleusiq_openai import BaseOpenAI
+
+agent = Agent(
+    name="file-tools",
+    prompt=ZeroShotPrompt().configure(system="You are a helpful assistant."),
+    llm=BaseOpenAI(model_name="gpt-4.1-mini"),
+    tools=tools,
+    config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
+)
 ```
 
 ## Custom tools (BaseTool)
@@ -101,31 +122,43 @@ class DatabaseQueryTool(BaseTool):
 ### OpenAI native tools
 
 ```python
-from nucleusiq_openai import OpenAITool
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+from nucleusiq_openai import BaseOpenAI, OpenAITool
 
 agent = Agent(
-    ...,
+    name="openai-native",
+    prompt=ZeroShotPrompt().configure(system="You are a helpful assistant."),
+    llm=BaseOpenAI(model_name="gpt-4.1-mini"),
     tools=[
         OpenAITool.web_search(),         # Web search
         OpenAITool.code_interpreter(),   # Code execution
         OpenAITool.file_search(),        # File search
     ],
+    config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
 )
 ```
 
 ### Gemini native tools
 
 ```python
-from nucleusiq_gemini import GeminiTool
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+from nucleusiq_gemini import BaseGemini, GeminiTool
 
 agent = Agent(
-    ...,
+    name="gemini-native",
+    prompt=ZeroShotPrompt().configure(system="You are a helpful assistant."),
+    llm=BaseGemini(model_name="gemini-2.5-flash"),
     tools=[
         GeminiTool.google_search(),    # Google Search grounding
         GeminiTool.code_execution(),   # Python sandbox
         GeminiTool.url_context(),      # Fetch and understand web pages
         GeminiTool.google_maps(),      # Location-aware grounding
     ],
+    config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
 )
 ```
 
@@ -134,12 +167,22 @@ agent = Agent(
 All tool types can be mixed in a single agent:
 
 ```python
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+from nucleusiq.tools.decorators import tool
+from nucleusiq.tools.builtin import FileReadTool
+from nucleusiq_gemini import BaseGemini, GeminiTool
+
 @tool
 def calculate(expression: str) -> str:
     """Evaluate a math expression."""
     return str(eval(expression))
 
+llm = BaseGemini(model_name="gemini-2.5-flash")
 agent = Agent(
+    name="mixed-tool-types",
+    prompt=ZeroShotPrompt().configure(system="You are a helpful assistant."),
     llm=llm,
     tools=[
         calculate,                                  # @tool decorator

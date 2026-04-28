@@ -47,9 +47,9 @@ The clustering extra is only needed if you use the `AutoChainOfThoughtPrompt` te
 ```python
 from importlib.metadata import version
 
-print(version("nucleusiq"))        # e.g., 0.7.4
-print(version("nucleusiq-openai")) # e.g., 0.6.1
-print(version("nucleusiq-gemini")) # e.g., 0.2.2
+print(version("nucleusiq"))        # e.g., 0.7.7
+print(version("nucleusiq-openai")) # e.g., 0.6.3
+print(version("nucleusiq-gemini")) # e.g., 0.2.5
 ```
 
 ## Environment variables

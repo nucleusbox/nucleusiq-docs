@@ -86,15 +86,23 @@ Query-focused extraction:
 ### Search then read
 
 ```python
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+from nucleusiq.tools.builtin import FileReadTool, FileSearchTool
+from nucleusiq_openai import BaseOpenAI
+
 agent = Agent(
-    ...,
+    name="search-then-read",
+    prompt=ZeroShotPrompt().configure(
+        system="Search for relevant files first, then read specific sections.",
+    ),
+    llm=BaseOpenAI(model_name="gpt-4.1-mini"),
     tools=[
         FileSearchTool(workspace_root="./project"),
         FileReadTool(workspace_root="./project"),
     ],
-    prompt=ZeroShotPrompt().configure(
-        system="Search for relevant files first, then read specific sections.",
-    ),
+    config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
 )
 result = await agent.execute({"id": "file-tools-1", "objective": "Find all API timeout settings in this codebase"})
 ```
@@ -102,12 +110,20 @@ result = await agent.execute({"id": "file-tools-1", "objective": "Find all API t
 ### Extract and analyze
 
 ```python
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+from nucleusiq.tools.builtin import FileExtractTool
+from nucleusiq_openai import BaseOpenAI
+
 agent = Agent(
-    ...,
-    tools=[FileExtractTool(workspace_root="./data")],
+    name="extract-analyze",
     prompt=ZeroShotPrompt().configure(
         system="Extract data from files and provide analysis.",
     ),
+    llm=BaseOpenAI(model_name="gpt-4.1-mini"),
+    tools=[FileExtractTool(workspace_root="./data")],
+    config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
 )
 result = await agent.execute({"id": "file-tools-2", "objective": "What are the top 5 regions by revenue in sales.csv?"})
 ```

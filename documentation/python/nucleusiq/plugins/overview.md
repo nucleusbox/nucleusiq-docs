@@ -38,7 +38,18 @@ def log(request):
 ## Adding plugins
 
 ```python
-agent = Agent(..., plugins=[LogPlugin(), log])
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+from nucleusiq_openai import BaseOpenAI
+
+agent = Agent(
+    name="plugins-demo",
+    prompt=ZeroShotPrompt().configure(system="You are a helpful assistant."),
+    llm=BaseOpenAI(model_name="gpt-4.1-mini"),
+    plugins=[LogPlugin(), log],
+    config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
+)
 ```
 
 ## See also

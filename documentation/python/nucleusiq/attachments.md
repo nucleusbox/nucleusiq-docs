@@ -62,14 +62,25 @@ print(llm.SUPPORTED_FILE_EXTENSIONS)
 Validate attachments with policy controls:
 
 ```python
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+from nucleusiq.agents.attachments import AttachmentType
 from nucleusiq.plugins.builtin import AttachmentGuardPlugin
+from nucleusiq_openai import BaseOpenAI
 
 plugin = AttachmentGuardPlugin(
     allowed_types=[AttachmentType.PDF, AttachmentType.TEXT],
     max_file_size=5_000_000,  # 5 MB
     max_count=3,
 )
-agent = Agent(..., plugins=[plugin])
+agent = Agent(
+    name="attachment-guard",
+    prompt=ZeroShotPrompt().configure(system="You are a helpful assistant."),
+    llm=BaseOpenAI(model_name="gpt-4.1-mini"),
+    plugins=[plugin],
+    config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
+)
 ```
 
 ## When to use attachments vs tools

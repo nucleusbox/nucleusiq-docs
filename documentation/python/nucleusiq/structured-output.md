@@ -6,13 +6,23 @@ Parse agent responses into typed schemas using Pydantic, dataclass, or TypedDict
 
 ```python
 from pydantic import BaseModel
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+from nucleusiq_openai import BaseOpenAI
 
 class Summary(BaseModel):
     title: str
     bullets: list[str]
     confidence: float
 
-agent = Agent(..., response_format=Summary)
+agent = Agent(
+    name="structured-output",
+    prompt=ZeroShotPrompt().configure(system="You are a helpful assistant."),
+    llm=BaseOpenAI(model_name="gpt-4.1-mini"),
+    response_format=Summary,
+    config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
+)
 result = await agent.execute({"id": "structured-output-1", "objective": "Summarize the key points of quantum computing"})
 # result is a Summary instance
 print(result.title, result.bullets)
@@ -22,6 +32,10 @@ print(result.title, result.bullets)
 
 ```python
 from dataclasses import dataclass
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+from nucleusiq_openai import BaseOpenAI
 
 @dataclass
 class Contact:
@@ -29,7 +43,13 @@ class Contact:
     email: str
     role: str
 
-agent = Agent(..., response_format=Contact)
+agent = Agent(
+    name="structured-dataclass",
+    prompt=ZeroShotPrompt().configure(system="You are a helpful assistant."),
+    llm=BaseOpenAI(model_name="gpt-4.1-mini"),
+    response_format=Contact,
+    config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
+)
 result = await agent.execute({"id": "structured-output-2", "objective": "Extract contact info from: John Doe, john@example.com, CTO"})
 ```
 

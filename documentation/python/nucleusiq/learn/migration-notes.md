@@ -112,15 +112,45 @@ messages = MessageBuilder.build(
 
 | Package | Version | Requires |
 |---------|---------|----------|
-| `nucleusiq` | **0.7.6** | — |
-| `nucleusiq-openai` | **0.6.2** | `nucleusiq>=0.7.6` |
-| `nucleusiq-gemini` | **0.2.4** | `nucleusiq>=0.7.6` |
+| `nucleusiq` | **0.7.7** (current) | — |
+| `nucleusiq-openai` | **0.6.3** | `nucleusiq>=0.7.7` |
+| `nucleusiq-gemini` | **0.2.5** | `nucleusiq>=0.7.7` |
 
 Upgrade all three:
 
 ```bash
 pip install --upgrade nucleusiq nucleusiq-openai nucleusiq-gemini
 ```
+
+If you must stay on v0.7.6 for a short period, use `nucleusiq==0.7.6` with `nucleusiq-openai==0.6.2` and `nucleusiq-gemini==0.2.4`.
+
+## From v0.7.6 to v0.7.7
+
+v0.7.7 is **backward compatible** for typical agent code. No prompt or `Agent` constructor changes are required beyond staying on the v0.7.6 API (`prompt` mandatory, etc.).
+
+### What changed (behavior you may notice)
+
+| Area | Change |
+|------|--------|
+| **Context V2** | Stabilized compaction/masking pipeline; default `squeeze_threshold` remains **0.70**. Rehydration after masking now respects auto-detected model context windows. |
+| **Tools** | Optional **`idempotent=True`** on `@tool` / `BaseTool` — identical `(name, args)` replays can short-circuit. **Default is still `False`** (safe for APIs, DB, time-dependent tools). |
+| **`AgentResult`** | Error paths and exhausted **tool-call limits** map to **`status=error`** (and `ToolCallLimitError` where applicable) instead of looking like success with a bare error string. |
+| **Standard + synthesis** | When the **tool cap** is hit and **`enable_synthesis`** is on, the runtime runs a **final tools-off synthesis** so downstream autonomous validation can still run. |
+| **Telemetry** | Finer breakdown of **tokens freed** (masker vs compactor) in compaction-related telemetry where exposed. |
+| **Autonomous** | Critic/Refiner paths use **`extract_raw_trace`**-style rehydration from the content store when working from masked traces. |
+
+### Optional: mark a tool idempotent
+
+```python
+from nucleusiq.tools.decorators import tool
+
+@tool(idempotent=True)
+def list_allowed_urls() -> str:
+    """Static catalog — same args always same result."""
+    return "https://a.example,https://b.example"
+```
+
+See [@tool decorator](../tools/tool-decorator.md#idempotent-tools-same-args-same-result).
 
 ## From v0.7.4 to v0.7.5
 

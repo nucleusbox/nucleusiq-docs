@@ -168,6 +168,10 @@ result = await agent.execute({"id": "q1", "objective": "What is the GDP of Japan
 ### Example 2: Power User — "I need cost control + determinism" — WORKS TODAY
 
 ```python
+from nucleusiq.agents import Agent
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+from nucleusiq_openai import BaseOpenAI, OpenAITool
+
 llm = BaseOpenAI(
     model_name="o3",
     temperature=0.2,
@@ -175,6 +179,7 @@ llm = BaseOpenAI(
     service_tier="flex",
     reasoning_effort="low",
 )
+prompt = ZeroShotPrompt().configure(system="You are a helpful assistant.")
 
 agent = Agent(
     name="CostEfficientBot",
@@ -193,8 +198,14 @@ result = await agent.execute({"id": "q1", "objective": "Calculate quarterly reve
 ### Example 3: Different Settings Per Agent (Same LLM, Different Config) — WORKS TODAY
 
 ```python
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+from nucleusiq_openai import BaseOpenAI, OpenAITool, OpenAILLMParams
+
 llm = BaseOpenAI(model_name="gpt-4o", temperature=0.5)
-from nucleusiq_openai import OpenAILLMParams
+writer_prompt = ZeroShotPrompt().configure(system="You are a creative writer.")
+analyst_prompt = ZeroShotPrompt().configure(system="You are a precise data analyst.")
 
 # Agent A: Creative writing — override temperature higher
 agent_writer = Agent(
@@ -239,10 +250,16 @@ await agent_analyst.execute({"id": "a1", "objective": "Sum column B of this data
 ### Example 4: Per-Task Overrides — "This specific task needs more reasoning" — WORKS TODAY
 
 ```python
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+from nucleusiq_openai import BaseOpenAI, OpenAILLMParams
+
 agent = Agent(
     name="FlexBot",
+    prompt=ZeroShotPrompt().configure(system="You are a helpful assistant."),
     llm=BaseOpenAI(model_name="o3", reasoning_effort="low"),
-    ...
+    config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
 )
 
 # Normal task — uses default low reasoning
@@ -265,10 +282,12 @@ await agent.execute({"id": "q3", "objective": "Summarize this text."})
 ```python
 from nucleusiq.agents import Agent
 from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
 from nucleusiq.streaming.events import StreamEventType
 from nucleusiq_openai import BaseOpenAI, OpenAITool
 
 llm = BaseOpenAI(model_name="gpt-4o")
+prompt = ZeroShotPrompt().configure(system="You are a helpful assistant.")
 
 agent = Agent(
     name="StreamBot",

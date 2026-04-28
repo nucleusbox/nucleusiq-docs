@@ -152,6 +152,7 @@ For tool-heavy agents, add context management to prevent context window overflow
 
 ```python
 from nucleusiq.agents.context import ContextConfig, ContextStrategy
+from nucleusiq.tools.builtin import FileReadTool, FileSearchTool
 
 agent = Agent(
     name="researcher",
@@ -159,7 +160,10 @@ agent = Agent(
         system="You are a research analyst. Gather data, then write a report.",
     ),
     llm=llm,
-    tools=[...],
+    tools=[
+        FileReadTool(workspace_root="./workspace"),
+        FileSearchTool(workspace_root="./workspace"),
+    ],
     config=AgentConfig(
         context=ContextConfig(
             optimal_budget=50_000,

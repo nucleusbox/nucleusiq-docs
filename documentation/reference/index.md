@@ -2,7 +2,7 @@
 
 Release and project reference documents.
 
-- [Changelog](changelog.md) — Version-by-version release history (latest: v0.7.6)
+- [Changelog](changelog.md) — Version-by-version release history (latest: v0.7.7)
 
 ## External links
 

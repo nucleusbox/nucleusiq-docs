@@ -21,10 +21,8 @@ agent = Agent(
     ),                            # REQUIRED — defines what the LLM sees
     llm=BaseOpenAI(model_name="gpt-4.1-mini"),
     config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
-    tools=[...],                  # optional tool set
-    memory=...,                   # optional conversation memory
-    plugins=[...],                # optional policy/guardrails
 )
+# Optional: add tools=, memory=, plugins= as needed.
 ```
 
 | Field | Required | Sent to LLM? | Purpose |

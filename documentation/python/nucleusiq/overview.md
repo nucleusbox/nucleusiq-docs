@@ -13,8 +13,8 @@ NucleusIQ is the practical way to build AI agents that work in real environments
 
     See [Execution modes](execution-modes.md) for details.
 
-!!! success "New in v0.7.6: Context Window Management"
-    Automatic context management for tool-heavy agents — prevents context overflow and keeps token usage under control.
+!!! success "Context window management (v0.7.6+) — V2 stable in v0.7.7"
+    Automatic context management for tool-heavy agents — prevents context overflow and keeps token usage under control. **v0.7.7** stabilizes masking/compaction, rehydration with auto-detected model windows, and clearer behavior when tool budgets are exhausted.
 
     See [Context management](context-management.md) for details.
 

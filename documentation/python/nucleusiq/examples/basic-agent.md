@@ -95,6 +95,7 @@ from nucleusiq.agents import Agent
 from nucleusiq.agents.config import AgentConfig, ExecutionMode
 from nucleusiq.agents.context import ContextConfig, ContextStrategy
 from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+from nucleusiq.tools.builtin import FileReadTool, FileSearchTool
 from nucleusiq_openai import BaseOpenAI
 
 async def main():
@@ -104,7 +105,10 @@ async def main():
             system="You are a research analyst. Gather data using tools, then write a comprehensive report.",
         ),
         llm=BaseOpenAI(model_name="gpt-4.1-mini"),
-        tools=[...],
+        tools=[
+            FileReadTool(workspace_root="."),
+            FileSearchTool(workspace_root="."),
+        ],
         config=AgentConfig(
             execution_mode=ExecutionMode.STANDARD,
             context=ContextConfig(

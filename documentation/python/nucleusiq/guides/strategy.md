@@ -27,13 +27,20 @@ config = AgentConfig(execution_mode=ExecutionMode.STANDARD)
 Combine mode choice with plugins:
 
 ```python
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
 from nucleusiq.plugins.builtin import ModelCallLimitPlugin, ToolRetryPlugin
+from nucleusiq_openai import BaseOpenAI
 
 agent = Agent(
-    ...,
+    name="strategy-guardrails",
+    prompt=ZeroShotPrompt().configure(system="You are a helpful assistant."),
+    llm=BaseOpenAI(model_name="gpt-4.1-mini"),
     plugins=[
         ModelCallLimitPlugin(max_calls=15),
         ToolRetryPlugin(max_retries=2),
     ],
+    config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
 )
 ```

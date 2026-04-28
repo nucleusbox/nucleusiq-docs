@@ -23,6 +23,10 @@ poetry run python scripts/check_docs.py
 poetry run python -m mkdocs build --strict
 ```
 
+## After a NucleusIQ release
+
+Sync the user-facing **version callouts** and **[reference changelog](reference/changelog.md)** with the main repo’s `CHANGELOG.md`, and scan for incomplete `Agent(` snippets (every runnable example needs `prompt=` since v0.7.6).
+
 ## Publishing
 
 Docs are deployed by GitHub Actions from `main` using `.github/workflows/docs.yml`.

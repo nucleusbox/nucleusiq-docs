@@ -2,7 +2,7 @@
 
 Detailed practical examples for common NucleusIQ workflows.
 
-*Updated for v0.7.6: all examples use the mandatory `prompt=` API.*
+*Updated for v0.7.7+: curated examples use the mandatory `prompt=` API. See [migration notes](../learn/migration-notes.md) if upgrading from older releases.*
 
 ## Getting started
 
