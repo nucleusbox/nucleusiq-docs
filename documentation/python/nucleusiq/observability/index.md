@@ -159,6 +159,30 @@ if tel:
 
 See [Context management](../context-management.md) for configuration and telemetry details.
 
+## Run-local state metadata (v0.7.8)
+
+Separate from **`context_telemetry`** (context window engine), **`AgentResult.metadata`** is a **`dict`** that may summarize **run-local** workspace / evidence / corpus state and activation telemetry:
+
+```python
+result = await agent.execute(task)
+meta = result.metadata or {}
+
+for key in ("workspace", "evidence", "document_search", "phase_control", "context_activation", "synthesis_package"):
+    if key in meta:
+        print(f"{key}: {meta[key]}")
+```
+
+| Key | Typical contents |
+|-----|------------------|
+| `workspace` | Stats from `InMemoryWorkspace` (entry counts, limits). |
+| `evidence` | Stats from `InMemoryEvidenceDossier`. |
+| `document_search` | `DocumentSearchStats` — chunks indexed, searches, promotions to evidence. |
+| `phase_control` | Phase durations, evidence-gate outcome, flags (`synthesis_used_package`, `critic_used_package`, …). |
+| `context_activation` | `ContextActivationMetrics` counters from **`ContextStateActivator`**. |
+| `synthesis_package` | Metadata dict from the last **`SynthesisPackage`** built during the run (if any). |
+
+Details: [Run-local context state](../run-local-context-state.md).
+
 ### Display
 
 `AgentResult.display()` renders a human-readable summary including all traced fields:

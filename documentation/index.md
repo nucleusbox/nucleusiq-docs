@@ -74,7 +74,20 @@ Choose your path based on where you are today:
 
 ## What's new in v0.7.x
 
-### v0.7.7 (latest)
+### v0.7.8 (latest)
+
+!!! success "Run-local context state + robustness"
+    - **Workspace / evidence / lexical corpus** — per-run in-memory analyst state with optional framework tools (budget-exempt).
+    - **L4.5 activation** — promotes evidence-shaped tool output and light-ingests text into workspace + corpus (`AgentConfig` caps).
+    - **Phase control & evidence gate** — ordered phases and tag-based completeness checks; telemetry in **`AgentResult.metadata`**.
+    - **Synthesis package** — bounded bundle from workspace + evidence for final answers.
+    - **Serialization fix** — string tool results are not double JSON-encoded in the transcript.
+    - **Autonomous** — Critic errors → **`UNCERTAIN`**; Refiner updates the trace before the next Critic.
+    - **Providers:** same **`nucleusiq-openai` 0.6.3** / **`nucleusiq-gemini` 0.2.5** with **`nucleusiq>=0.7.8`** floor.
+
+    [Changelog](reference/changelog.md){ .md-button } · [Run-local context state](python/nucleusiq/run-local-context-state.md){ .md-button } · [Migration (0.7.7 → 0.7.8)](python/nucleusiq/learn/migration-notes.md#from-v077-to-v078){ .md-button }
+
+### v0.7.7
 
 !!! success "Context Management v2 + execution fixes"
     - **Stable V2 pipeline** — compaction, masking, recall/rehydration tuned for PDF-heavy agents (`squeeze_threshold=0.70` default).
@@ -143,7 +156,7 @@ Choose your path based on where you are today:
 - **AgentResult response contract** — typed, immutable Pydantic model
 - **Gemini tool-calling fixes** — `$ref`/`$defs` inlining
 
-Current packages: `nucleusiq` **0.7.7**, `nucleusiq-openai` **0.6.3**, `nucleusiq-gemini` **0.2.5**
+Current packages: `nucleusiq` **0.7.8**, `nucleusiq-openai` **0.6.3**, `nucleusiq-gemini` **0.2.5**
 
 See the [full changelog](reference/changelog.md).
 

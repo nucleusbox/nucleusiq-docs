@@ -33,6 +33,10 @@ config = AgentConfig(
 | `enable_synthesis` | `True` | Enable synthesis pass after multi-round tool loops (v0.7.6). From **v0.7.7**, when the **tool-call cap** is reached, Standard mode still runs a **tools-free synthesis** step if synthesis is enabled, so validation/refinement can proceed. |
 | `context` | `None` | `ContextConfig` for context window management (v0.7.6; **v0.7.7** stabilizes V2 compaction/masking — see [Context management](../context-management.md)) |
 | `observability` | `None` | `ObservabilityConfig` for unified tracing/logging (v0.7.6) |
+| `evidence_gate_required_tags` | `()` | Tags the **`EvidenceGate`** expects on dossier items before synthesis-related phases; empty tuple disables tag requirements |
+| `evidence_gate_enforce` | `False` | If **`True`**, missing required tags **block** the gate; if **`False`**, outcomes are recorded without blocking |
+| `context_tool_result_corpus_max_chars` | `500_000` | Max characters of each **business** tool result text auto-indexed into the run-local corpus (L5); **`0`** disables indexing |
+| `context_activation_ingest_min_chars` | `200` | Minimum text length for **light ingest** (workspace + corpus) when output is not evidence-shaped; **`0`** allows any non-empty text |
 
 ## Context window management
 
@@ -178,6 +182,7 @@ effective = config.get_effective_max_tool_calls()
 
 ## See also
 
+- [Run-local context state](../run-local-context-state.md) — v0.7.8 workspace/evidence/corpus and `AgentResult.metadata`
 - [Context management](../context-management.md) — Full context window management guide
 - [Execution modes](../execution-modes.md) — Mode behavior and selection
 - [Observability](../observability/index.md) — Tracing, usage, and cost

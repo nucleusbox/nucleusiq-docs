@@ -1,8 +1,10 @@
 # Context Window Management
 
-*Introduced in v0.7.6; stabilized and extended in v0.7.7 (Context Management v2).*
+*Introduced in v0.7.6; stabilized in v0.7.7 (Context Management v2); complemented in **v0.7.8** by run-local workspace/evidence/corpus state (separate from transcript compaction).*
 
 Tool-heavy agents can fill the context window, leaving no room for the LLM's final response. NucleusIQ automatically tracks and compacts context to keep it within budget.
+
+**Doc numbering:** transcript hygiene (**masking + compaction**) is **L0–L3** in [Context stack layers (L0–L7)](context-stack-layers.md); **run-local workspace/evidence/corpus** is **L4–L6** on that same map.
 
 ## Quick Start
 
@@ -103,9 +105,17 @@ If you don't pass a `ContextConfig`, no context management is applied — the ag
 
 **Notebooks:** `context_management_tcs_deep_dive.ipynb` and `context_window_management_showcase.ipynb` in the main repo demonstrate end-to-end behavior.
 
+## v0.7.8 — Run-local context state (add-on)
+
+Compaction and masking still manage **tokens in the chat transcript**. **v0.7.8** adds an optional **per-run** stack—workspace notes, an evidence dossier, a lexical text corpus (L5), automatic promotion/indexing after tool results (L4.5), and phase/evidence-gate telemetry (L6). These subsystems use **`AgentConfig`** fields such as **`evidence_gate_required_tags`** and **`context_tool_result_corpus_max_chars`**, and expose summaries under **`AgentResult.metadata`**.
+
+For architecture, tool names, and limits, read **[Run-local context state](run-local-context-state.md)**.
+
 ## See also
 
+- [Context stack layers (L0–L7)](context-stack-layers.md) — Unified map: L0–L3 transcript compaction, L4–L6 run-local state, L7 output closure
+- [Run-local context state](run-local-context-state.md) — Workspace, evidence, corpus, activation, phase gate (v0.7.8)
 - [Agent Config guide](guides/agent-config.md) — Full AgentConfig reference
 - [Execution modes](execution-modes.md) — How modes work with context management
 - [Observability](observability/index.md) — Telemetry in AgentResult
-- [Migration notes](learn/migration-notes.md) — Upgrading from v0.7.5
+- [Migration notes](learn/migration-notes.md) — Upgrading across v0.7.x (prompt refactor, V2 context, run-local state)

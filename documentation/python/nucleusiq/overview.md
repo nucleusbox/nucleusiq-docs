@@ -16,7 +16,12 @@ NucleusIQ is the practical way to build AI agents that work in real environments
 !!! success "Context window management (v0.7.6+) — V2 stable in v0.7.7"
     Automatic context management for tool-heavy agents — prevents context overflow and keeps token usage under control. **v0.7.7** stabilizes masking/compaction, rehydration with auto-detected model windows, and clearer behavior when tool budgets are exhausted.
 
-    See [Context management](context-management.md) for details.
+    See [Context management](context-management.md). For how masking/compaction tiers (**L0–L3**) connect to run-local state (**L4–L6**) and output closure (**L7**), see [Context stack layers (L0–L7)](context-stack-layers.md).
+
+!!! info "Run-local context state (v0.7.8)"
+    Each **`execute()`** can populate an in-memory **workspace**, **evidence dossier**, and **lexical document corpus**, with automatic activation after tool results and telemetry under **`AgentResult.metadata`**. Separate from transcript compaction — complements context window management.
+
+    See [Run-local context state](run-local-context-state.md).
 
 NucleusIQ agents support memory, streaming, structured output, cost tracking, and 10 built-in plugins. Sensible defaults get you running quickly — add complexity only when the task needs it.
 
@@ -118,7 +123,7 @@ See the [Install](install.md) and [Quickstart](quickstart.md) guides to get star
 
 -   :material-memory: **Context management**
     ---
-    Automatic context management prevents overflow in tool-heavy agents. *New in v0.7.6.*
+    Automatic context management prevents overflow in tool-heavy agents. *Shipped in v0.7.6; V2 stable in v0.7.7; extended by **run-local workspace/evidence/corpus** in v0.7.8 — see [Run-local context state](run-local-context-state.md).*
     [:octicons-arrow-right-24: Context management](context-management.md)
 
 -   :material-chart-line: **Observability**

@@ -112,9 +112,9 @@ messages = MessageBuilder.build(
 
 | Package | Version | Requires |
 |---------|---------|----------|
-| `nucleusiq` | **0.7.7** (current) | — |
-| `nucleusiq-openai` | **0.6.3** | `nucleusiq>=0.7.7` |
-| `nucleusiq-gemini` | **0.2.5** | `nucleusiq>=0.7.7` |
+| `nucleusiq` | **0.7.8** (current) | — |
+| `nucleusiq-openai` | **0.6.3** | `nucleusiq>=0.7.8` |
+| `nucleusiq-gemini` | **0.2.5** | `nucleusiq>=0.7.8` |
 
 Upgrade all three:
 
@@ -123,6 +123,41 @@ pip install --upgrade nucleusiq nucleusiq-openai nucleusiq-gemini
 ```
 
 If you must stay on v0.7.6 for a short period, use `nucleusiq==0.7.6` with `nucleusiq-openai==0.6.2` and `nucleusiq-gemini==0.2.4`.
+
+If you must stay on v0.7.7, pin `nucleusiq==0.7.7` and use provider versions that still declare `nucleusiq>=0.7.7` — upgrading core to **0.7.8** with latest providers is recommended.
+
+## From v0.7.7 to v0.7.8
+
+v0.7.8 is **backward compatible** for typical agent code: **`prompt`** stays mandatory as in v0.7.6+; no `Agent` constructor change is required to upgrade.
+
+### Packages
+
+Both **`nucleusiq-openai`** and **`nucleusiq-gemini`** raised their **`nucleusiq`** dependency floor to **`>=0.7.8`** while staying at package versions **0.6.3** and **0.2.5**. Upgrade together:
+
+```bash
+pip install --upgrade nucleusiq nucleusiq-openai nucleusiq-gemini
+```
+
+### What is new (opt-in by usage)
+
+| Area | Change |
+|------|--------|
+| **Run-local state** | Each **`execute()`** creates fresh **workspace**, **evidence dossier**, **lexical document corpus**, **phase controller**, **evidence gate**, and **`ContextStateActivator`**. Framework tools may be injected when you already have user tools; they **do not** count toward your external tool budget (`is_context_management_tool_name`). |
+| **`Agent` accessors** | **`workspace`**, **`evidence_dossier`**, **`document_corpus`**, **`phase_controller`**, **`evidence_gate`**, **`build_synthesis_package()`** for inspection or custom pipelines. |
+| **`AgentConfig`** | **`evidence_gate_required_tags`**, **`evidence_gate_enforce`**, **`context_tool_result_corpus_max_chars`** (default `500_000`; **`0`** disables corpus indexing), **`context_activation_ingest_min_chars`** (default **`200`**). See [Agent Config](../guides/agent-config.md). |
+| **`AgentResult.metadata`** | May include **`workspace`**, **`evidence`**, **`document_search`**, **`phase_control`**, **`context_activation`**, **`synthesis_package`** when populated. See [Observability](../observability/index.md) and [Run-local context state](../run-local-context-state.md). |
+
+### Behavioral changes (may affect tests or assumptions)
+
+| Area | Change |
+|------|--------|
+| **Tool → transcript serialization** | **`str`** tool outputs are **no longer JSON-double-encoded** when appended to the visible context (standard/direct/base paths use **`tool_result_to_context_string`**). Assertions that expected wrapped strings should be updated. |
+| **Autonomous Critic** | **`CriticRunner`** treats **any** critique-time exception as **`Verdict.UNCERTAIN`** with score **`0.0`** and explicit feedback — safer than an accidental pass. |
+| **Autonomous trace after Refiner** | **`SimpleRunner`** refreshes **`agent._last_messages`** after a successful Refiner so the **next Critic** sees the revised trace. |
+
+### Documentation
+
+- **[Run-local context state](../run-local-context-state.md)** — architecture (L4–L6), tool lists, config knobs, metadata keys.
 
 ## From v0.7.6 to v0.7.7
 

@@ -71,6 +71,8 @@ nav:
     - Providers: python/nucleusiq/providers.md
     - Prompts: python/nucleusiq/prompts.md
     - Context Management: python/nucleusiq/context-management.md
+    - Context stack (L0–L7): python/nucleusiq/context-stack-layers.md
+    - Run-local context state: python/nucleusiq/run-local-context-state.md
     - Runtime Components: python/nucleusiq/core-concepts/runtime-components.md
     - Memory: python/nucleusiq/memory.md
     - Streaming: python/nucleusiq/streaming.md

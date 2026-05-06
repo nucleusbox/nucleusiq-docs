@@ -4,6 +4,7 @@ All notable changes to NucleusIQ are documented in the [CHANGELOG.md](https://gi
 
 ## Recent releases
 
+- **[0.7.8](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#078)** — Run-local context state (workspace, evidence, lexical corpus), L4.5 activation, phase/evidence gate, synthesis package, tool-result serialization fix, autonomous Critic/Refiner wiring
 - **[0.7.7](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#077)** — Context Management v2 stability, idempotent tool opt-in, AgentResult / synthesis fixes, provider sync (OpenAI 0.6.3, Gemini 0.2.5)
 - **[0.7.6](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#076)** — Context window management, prompt system refactor, synthesis pass, ObservabilityConfig
 - **[0.7.5](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#075)** — Gemini native + custom tool mixing (proxy pattern), full observability wiring
@@ -13,6 +14,68 @@ All notable changes to NucleusIQ are documented in the [CHANGELOG.md](https://gi
 - **[0.6.0](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#060--2026-03-13)** — Gemini provider, `@tool` decorator, cost estimation, framework error taxonomy
 - **[0.5.0](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#050--2026-03-11)** — Token origin split, UsageSummary schema, FileWriteTool, FileExtractTool query filtering
 
+## v0.7.8 highlights — 2026-05-06
+
+### Packages
+
+| Package | Version | What's new |
+|---------|---------|-----------|
+| `nucleusiq` | **0.7.8** | Run-local context stack (workspace, evidence dossier, lexical document corpus), automatic L4.5 activation, phase/evidence gate telemetry, synthesis package, shared tool-result serialization, autonomous Critic/Refiner fixes |
+| `nucleusiq-openai` | **0.6.3** | Dependency floor **`nucleusiq>=0.7.8`** (package version unchanged) |
+| `nucleusiq-gemini` | **0.2.5** | Dependency floor **`nucleusiq>=0.7.8`** (package version unchanged) |
+
+### Run-local context state (L4 / analyst notebook)
+
+- **`InMemoryWorkspace`** (`nucleusiq.agents.context.workspace`) — bounded per-run notebook (notes, artifacts, summaries) with `WorkspaceEntry`, `WorkspaceStats`, `WorkspaceLimitError`.
+- **Workspace tools** (`nucleusiq.agents.context.workspace_tools`) — `build_workspace_tools`: `write_workspace_note`, `write_workspace_artifact`, `list_workspace_entries`, `read_workspace_entry`, `summarize_workspace`. Helpers **`is_workspace_tool_name`**, **`is_context_management_tool_name`** (all framework-injected context helpers skip the user’s external tool budget).
+
+### Structured evidence (L4)
+
+- **`InMemoryEvidenceDossier`** + **`EvidenceItem`** (`nucleusiq.agents.context.evidence`) — claims with status, confidence, tags, quotes, provenance.
+- **Evidence tools** (`nucleusiq.agents.context.evidence_tools`) — **`build_evidence_tools`**: `add_evidence`, `add_evidence_gap`, `list_evidence`, `summarize_evidence`, `evidence_coverage`; **`is_evidence_tool_name`**.
+
+### Lexical document corpus (L5)
+
+- **`InMemoryDocumentCorpus`** (`nucleusiq.agents.context.document_search`) — indexes caller-provided **text** into bounded chunks with lexical search (`DocumentRef`, `DocumentChunk`, `ChunkHit`, `DocumentSearchStats`). No PDF parsing, embeddings, or Task E logic in this surface.
+- **Corpus tools** (`nucleusiq.agents.context.document_corpus_tools`) — **`build_document_corpus_tools(corpus, evidence=…)`**: `search_document_corpus`, `get_document_chunk`, `list_indexed_documents`, `promote_document_chunk_to_evidence`; **`is_document_corpus_tool_name`**.
+
+### L4.5 activation
+
+- **`ContextStateActivator`** (`nucleusiq.agents.context.state_activator`) — after each **business** tool result (skips framework context tools): strict promotion into evidence when shaped like facts; **light ingest** into workspace + corpus with guards (tool-name hints, length gates, false-positive filters).
+- **`ContextActivationMetrics`** — counters surfaced as **`AgentResult.metadata["context_activation"]`**.
+
+### L6 phase control & evidence gate
+
+- **`PhaseController`** + **`AgentPhase`** (`nucleusiq.agents.context.phase_control`) — ordered phases, durations, evidence-gate outcomes, flags (`synthesis_used_package`, `critic_used_package`, `refiner_used_gaps`). **`PhaseStats.to_dict()`** → **`AgentResult.metadata["phase_control"]`**.
+- **`EvidenceGate`** + **`EvidenceGateDecision`** — optional tag-based completeness vs the dossier.
+- **`AgentConfig`** — **`evidence_gate_required_tags`**, **`evidence_gate_enforce`**, **`context_tool_result_corpus_max_chars`** (per-result corpus cap; `0` disables), **`context_activation_ingest_min_chars`** (minimum text size for light ingest when not evidence-shaped).
+
+### Synthesis package
+
+- **`SynthesisPackage`** + **`build_synthesis_package`** (`nucleusiq.agents.context.synthesis_package`) — bounded final input from workspace + evidence + recalled snippets. **`Agent.build_synthesis_package`** / **`_last_synthesis_package`**; **`AgentResult.metadata["synthesis_package"]`** when present.
+
+### Agent wiring & metadata
+
+- **`Agent`** lazy accessors: **`workspace`**, **`evidence_dossier`**, **`document_corpus`**, **`phase_controller`**, **`evidence_gate`**, **`build_synthesis_package`**.
+- **`AgentResult.metadata`** may include **`workspace`**, **`evidence`**, **`document_search`**, **`phase_control`**, **`context_activation`**, **`synthesis_package`** (alongside **`context_telemetry`** on the result).
+
+### Serialization & autonomous behavior
+
+- **`tool_result_to_context_string`** (`nucleusiq.agents.modes.tool_payload`) — shared by base/standard/direct modes; **`str`** tool results are **not** double JSON-encoded.
+- **`CriticRunner`** — any critique exception → **`Verdict.UNCERTAIN`**, score **`0.0`**, explicit feedback (safer than treating failures as pass).
+- **`SimpleRunner`** — after Refiner success, **`_last_messages`** refreshed so the next Critic sees the revised trace.
+
+### Validation
+
+Upstream gate (see [CHANGELOG.md](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#078)): **2554 passed**, **2 skipped** with `pytest tests --ignore=tests/memory/integration` (~2026-05-06).
+
+### Documentation
+
+- **[Context stack layers (L0–L7)](../python/nucleusiq/context-stack-layers.md)** — unified map from compaction tiers (**L0–L3**) through run-local state (**L4–L6**) to synthesis/`AgentResult` (**L7**).
+- **[Run-local context state](../python/nucleusiq/run-local-context-state.md)** — deep dive on **L4–L6**, tools, config, **`AgentResult.metadata`**.
+
+See the full [CHANGELOG.md on GitHub](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#078--2026-05-06) for the authoritative list and CI notes.
+
 ## v0.7.7 highlights
 
 ### Packages
@@ -20,8 +83,8 @@ All notable changes to NucleusIQ are documented in the [CHANGELOG.md](https://gi
 | Package | Version | What's new |
 |---------|---------|-----------|
 | `nucleusiq` | **0.7.7** | Stable Context Management v2 (single `Compactor`, bounded markers, recall/rehydration), idempotent tool metadata, clearer `AgentResult` on errors and tool-cap exhaustion |
-| `nucleusiq-openai` | **0.6.3** | Sync with v0.7.7 core message/tool contracts |
-| `nucleusiq-gemini` | **0.2.5** | Sync with v0.7.7 core message/tool contracts |
+| `nucleusiq-openai` | **0.6.3** | Sync with v0.7.7 core message/tool contracts (`nucleusiq>=0.7.7`) |
+| `nucleusiq-gemini` | **0.2.5** | Sync with v0.7.7 core message/tool contracts (`nucleusiq>=0.7.7`) |
 
 ### Context Management v2
 
@@ -35,7 +98,7 @@ All notable changes to NucleusIQ are documented in the [CHANGELOG.md](https://gi
 
 ### Agent execution & results
 
-- **Mode default tool budgets** when `max_tool_calls` is unset: **Direct 25**, **Standard 80**, **Autonomous 300** tool invocations per run (and the same ceiling applies to how many user tools you register, excluding recall tools). Older docs listed **5 / 30 / 100**; current behavior matches `AgentConfig.get_effective_max_tool_calls()` in the framework.
+- **Mode default tool budgets** when `max_tool_calls` is unset: **Direct 25**, **Standard 80**, **Autonomous 300** tool invocations per run (and the same ceiling applies to how many user tools you register, excluding recall tools). Older docs listed **5 / 30 / 100**; behavior matches `AgentConfig.get_effective_max_tool_calls()` in the framework.
 - **`AgentResult`:** legacy mode error-string outcomes surface as `status=error` when agent state is already `ERROR`, including stable `ToolCallLimitError` when the tool budget is exhausted.
 - **Standard mode:** when the configured tool-call cap is reached and synthesis is enabled, the runtime forces a **tools-free synthesis** pass so autonomous flows can still reach validation/refinement instead of stopping on a raw limit string.
 
@@ -98,7 +161,7 @@ Unified config replacing `verbose` + `enable_tracing`: `tracing`, `verbose`, `lo
 
 - 97 new context management unit tests + 4 agent-level integration tests
 - 27 existing test files updated for prompt system refactor
-- For current test counts and gates, see the [upstream CHANGELOG](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md) for the release you are on (v0.7.7 focused gates: ~1,340+ on context/agent slices; full suite ~2,469+ with skips per environment).
+- For current test counts and gates, see the [upstream CHANGELOG](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md) for the release you are on (v0.7.8 upstream gate: ~2,554 passed with skips per environment).
 
 ## v0.7.5 highlights
 

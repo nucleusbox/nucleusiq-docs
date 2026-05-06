@@ -82,7 +82,7 @@ An agent is a managed runtime with memory, tools, policy, streaming, structure, 
 
 ## AgentResult
 
-`execute()` returns an `AgentResult` — a structured response contract that provides the LLM output, execution metadata, and optional tracing data.
+`execute()` returns an `AgentResult` — a structured response contract that provides the LLM output, execution metadata, and optional tracing data. Since **v0.7.8**, **`result.metadata`** may also carry summaries of **run-local** context state (workspace, evidence dossier, lexical corpus stats, phase control, activation counters, synthesis-package metadata); see [Run-local context state](run-local-context-state.md).
 
 ```python
 result = await agent.execute(task)
@@ -110,6 +110,12 @@ print(result.warnings)     # Any warnings during execution
 # Context telemetry (v0.7.6)
 if result.context_telemetry:
     print(f"Peak utilization: {result.context_telemetry.peak_utilization:.1%}")
+
+# Run-local state summaries (v0.7.8) — workspace/evidence/corpus/phase/activation/synthesis package
+if result.metadata:
+    for key in ("workspace", "evidence", "document_search", "phase_control", "context_activation", "synthesis_package"):
+        if key in result.metadata:
+            print(key, result.metadata[key])
 ```
 
 ## End-to-end example
