@@ -87,6 +87,48 @@ asyncio.run(main())
 
 Set `GEMINI_API_KEY` in your environment or `.env` file.
 
+## With Groq
+
+Public beta inference provider — **`nucleusiq-groq` 0.1.0b1** on **`nucleusiq>=0.7.9`**. Uses Groq’s official **`groq`** SDK; pass **`async_mode=True`** on **`BaseGroq`**. Calling **`await agent.initialize()`** before **`execute()`** matches the runnable scripts in the monorepo. See also **[Groq quickstart](examples/groq-quickstart.md)** and **[Groq provider guide](guides/groq-provider.md)**.
+
+```python
+import asyncio
+
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.agents.task import Task
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+from nucleusiq_groq import BaseGroq, GroqLLMParams
+
+
+async def main():
+    llm = BaseGroq(model_name="llama-3.3-70b-versatile", async_mode=True)
+
+    agent = Agent(
+        name="Assistant",
+        prompt=ZeroShotPrompt().configure(
+            system="You are a helpful assistant.",
+        ),
+        llm=llm,
+        config=AgentConfig(
+            execution_mode=ExecutionMode.STANDARD,
+            llm_params=GroqLLMParams(temperature=0.4, max_output_tokens=512),
+        ),
+    )
+
+    await agent.initialize()
+
+    result = await agent.execute(
+        Task(id="q-groq-1", objective="What is the capital of France?"),
+    )
+    print(result.output)
+
+
+asyncio.run(main())
+```
+
+Set **`GROQ_API_KEY`** in your environment or `.env` file. Full scope, **429** / **`Retry-After`** behavior, model-capability checks, and example scripts: [Groq provider](guides/groq-provider.md).
+
 ## Execution modes
 
 NucleusIQ uses the **Gearbox Strategy** — three modes that scale from simple chat to autonomous reasoning:
@@ -182,7 +224,7 @@ See [Context management](context-management.md) for the full guide.
 - [Prompts](prompts.md) — Prompt techniques and the mandatory prompt system
 - [Context management](context-management.md) — Context window management
 - [Tools](tools.md) — Built-in tools, `@tool` decorator, and provider native tools
-- [Providers](providers.md) — OpenAI, Gemini, and provider portability
+- [Providers](providers.md) — OpenAI, Gemini, Groq, and provider portability
 - [Usage tracking](usage-tracking.md) — Token usage and cost estimation
 - [Plugins](plugins/overview.md) — 10 built-in plugins for guardrails and control
-- [Examples](examples/index.md) — Practical patterns
+- [Examples](examples/index.md) — Practical patterns (including **[Groq quickstart](examples/groq-quickstart.md)**)

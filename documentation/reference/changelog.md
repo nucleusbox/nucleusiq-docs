@@ -4,8 +4,9 @@ All notable changes to NucleusIQ are documented in the [CHANGELOG.md](https://gi
 
 ## Recent releases
 
-- **[0.7.8](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#078)** — Run-local context state (workspace, evidence, lexical corpus), L4.5 activation, phase/evidence gate, synthesis package, tool-result serialization fix, autonomous Critic/Refiner wiring
-- **[0.7.7](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#077)** — Context Management v2 stability, idempotent tool opt-in, AgentResult / synthesis fixes, provider sync (OpenAI 0.6.3, Gemini 0.2.5)
+- **[0.7.9](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#079)** — **`retry_policy`** (429 **`Retry-After`** across Groq/OpenAI/Gemini), **`nucleusiq-groq` 0.1.0b1** public beta (`strict_model_capabilities`, streaming-open parity); **`nucleusiq-openai` 0.6.4**, **`nucleusiq-gemini` 0.2.6** (`nucleusiq>=0.7.9`)
+- **[0.7.8](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#078)** — Run-local context state (workspace, evidence, lexical corpus), L4.5 activation, phase/evidence gate, synthesis package, tool-result serialization fix, autonomous Critic/Refiner wiring; **`nucleusiq-groq` 0.1.0a1** (since superseded by **0.1.0b1**)
+- **[0.7.7](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#077)** — Context Management v2 stability, idempotent tool opt-in, AgentResult / synthesis fixes, provider sync (OpenAI **0.6.3**, Gemini **0.2.5**)
 - **[0.7.6](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#076)** — Context window management, prompt system refactor, synthesis pass, ObservabilityConfig
 - **[0.7.5](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#075)** — Gemini native + custom tool mixing (proxy pattern), full observability wiring
 - **[0.7.4](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#074)** — ExecutionTracer, Pyrefly type checking, error package restructure, usage extraction, exhaustive error wiring
@@ -13,6 +14,29 @@ All notable changes to NucleusIQ are documented in the [CHANGELOG.md](https://gi
 - **[0.7.2](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#072)** — Unified exception hierarchy (10 families), AgentResult response contract
 - **[0.6.0](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#060--2026-03-13)** — Gemini provider, `@tool` decorator, cost estimation, framework error taxonomy
 - **[0.5.0](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#050--2026-03-11)** — Token origin split, UsageSummary schema, FileWriteTool, FileExtractTool query filtering
+
+## v0.7.9 highlights — 2026-05-07
+
+### Packages
+
+| Package | Version | What's new |
+|---------|---------|-----------|
+| `nucleusiq` | **0.7.9** | **`nucleusiq.llms.retry_policy`** — shared **429** / **`Retry-After`** parsing, backoff merge, **`DEFAULT_RATE_LIMIT_MAX_SLEEP_SECONDS`** ceiling |
+| `nucleusiq-openai` | **0.6.4** | Align with **`retry_policy`**; **`404`/`409`** mapped before generic **`APIError`** retry loops (`ModelNotFoundError`, **`InvalidRequestError`**) |
+| `nucleusiq-gemini` | **0.2.6** | **429** honors **`Retry-After`** via **`retry_policy`**; **`nucleusiq>=0.7.9`** |
+| `nucleusiq-groq` | **0.1.0b1** | Public **beta**; **`nucleusiq>=0.7.9`**; **`GroqLLMParams(strict_model_capabilities=…)`**; **`nucleusiq_groq.capabilities`**; streaming session **open** shares chat **429** policy |
+
+### Groq provider (beta)
+
+- **`strict_model_capabilities`** — optional gate **`parallel_tool_calls=True`** against **`PARALLEL_TOOL_CALLS_DOCUMENTED_MODELS`**.
+- Stream **`open_streaming_completion`** path wired through **`stream_create`** for parity with non-stream retry semantics.
+
+### Documentation
+
+- **[Groq quickstart](../python/nucleusiq/examples/groq-quickstart.md)** — runnable DIRECT / STANDARD / AUTONOMOUS snippets (**beta** pins).
+- **[Groq provider](../python/nucleusiq/guides/groq-provider.md)** — refreshed for beta + **`retry_policy`** narrative.
+
+See the full [CHANGELOG.md on GitHub](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#079--2026-05-07) for CI gates and exhaustive lists.
 
 ## v0.7.8 highlights — 2026-05-06
 
@@ -23,6 +47,7 @@ All notable changes to NucleusIQ are documented in the [CHANGELOG.md](https://gi
 | `nucleusiq` | **0.7.8** | Run-local context stack (workspace, evidence dossier, lexical document corpus), automatic L4.5 activation, phase/evidence gate telemetry, synthesis package, shared tool-result serialization, autonomous Critic/Refiner fixes |
 | `nucleusiq-openai` | **0.6.3** | Dependency floor **`nucleusiq>=0.7.8`** (package version unchanged) |
 | `nucleusiq-gemini` | **0.2.5** | Dependency floor **`nucleusiq>=0.7.8`** (package version unchanged) |
+| `nucleusiq-groq` | **0.1.0a1** | **New** — Groq Chat Completions via official **`groq`** SDK; local tools, streaming, structured output (model-dependent); **`nucleusiq>=0.7.8`** |
 
 ### Run-local context state (L4 / analyst notebook)
 
@@ -71,6 +96,7 @@ Upstream gate (see [CHANGELOG.md](https://github.com/nucleusbox/NucleusIQ/blob/m
 
 ### Documentation
 
+- **[Groq provider](../python/nucleusiq/guides/groq-provider.md)** — Install, env vars, **`BaseGroq`** / **`GroqLLMParams`**, Phase A limitations, links to monorepo examples.
 - **[Context stack layers (L0–L7)](../python/nucleusiq/context-stack-layers.md)** — unified map from compaction tiers (**L0–L3**) through run-local state (**L4–L6**) to synthesis/`AgentResult` (**L7**).
 - **[Run-local context state](../python/nucleusiq/run-local-context-state.md)** — deep dive on **L4–L6**, tools, config, **`AgentResult.metadata`**.
 
@@ -161,7 +187,7 @@ Unified config replacing `verbose` + `enable_tracing`: `tracing`, `verbose`, `lo
 
 - 97 new context management unit tests + 4 agent-level integration tests
 - 27 existing test files updated for prompt system refactor
-- For current test counts and gates, see the [upstream CHANGELOG](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md) for the release you are on (v0.7.8 upstream gate: ~2,554 passed with skips per environment).
+- For current test counts and gates, see the [upstream CHANGELOG](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md) for the release you are on (example upstream gate cited for **v0.7.8**: ~2,554 passed with skips per environment).
 
 ## v0.7.5 highlights
 

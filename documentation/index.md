@@ -74,18 +74,23 @@ Choose your path based on where you are today:
 
 ## What's new in v0.7.x
 
-### v0.7.8 (latest)
+### v0.7.9 (latest)
 
-!!! success "Run-local context state + robustness"
+!!! success "LLM rate limits + Groq beta"
+    - **`nucleusiq.llms.retry_policy`** — shared **429** handling: **`Retry-After`** parsing, capped backoff, ceiling (**120s** default single sleep cap).
+    - **Providers:** **`nucleusiq-openai` 0.6.4**, **`nucleusiq-gemini` 0.2.6**, **`nucleusiq-groq` 0.1.0b1** (public **beta**) — dependency floor **`nucleusiq>=0.7.9`**.
+    - **Groq** — stream **open** uses the same **429** policy as chat; **`strict_model_capabilities`** on **`GroqLLMParams`**; **`nucleusiq_groq.capabilities`** allowlist for **`parallel_tool_calls`** (warnings vs strict **`InvalidRequestError`**).
+
+    [Changelog](reference/changelog.md){ .md-button } · [Groq provider](python/nucleusiq/guides/groq-provider.md){ .md-button } · [Groq quickstart](python/nucleusiq/examples/groq-quickstart.md){ .md-button } · [Migration (0.7.8 → 0.7.9)](python/nucleusiq/learn/migration-notes.md#from-v078-to-v079){ .md-button }
+
+### v0.7.8
+
+!!! info "Run-local context state + Groq alpha debut"
     - **Workspace / evidence / lexical corpus** — per-run in-memory analyst state with optional framework tools (budget-exempt).
-    - **L4.5 activation** — promotes evidence-shaped tool output and light-ingests text into workspace + corpus (`AgentConfig` caps).
-    - **Phase control & evidence gate** — ordered phases and tag-based completeness checks; telemetry in **`AgentResult.metadata`**.
-    - **Synthesis package** — bounded bundle from workspace + evidence for final answers.
-    - **Serialization fix** — string tool results are not double JSON-encoded in the transcript.
-    - **Autonomous** — Critic errors → **`UNCERTAIN`**; Refiner updates the trace before the next Critic.
-    - **Providers:** same **`nucleusiq-openai` 0.6.3** / **`nucleusiq-gemini` 0.2.5** with **`nucleusiq>=0.7.8`** floor.
+    - **L4.5 activation**, **phase control**, **evidence gate**, **synthesis package**, autonomous fixes — see [Run-local context state](python/nucleusiq/run-local-context-state.md).
+    - **Groq** landed first as **`nucleusiq-groq` 0.1.0a1** (since superseded by **0.1.0b1** + **`nucleusiq>=0.7.9`**).
 
-    [Changelog](reference/changelog.md){ .md-button } · [Run-local context state](python/nucleusiq/run-local-context-state.md){ .md-button } · [Migration (0.7.7 → 0.7.8)](python/nucleusiq/learn/migration-notes.md#from-v077-to-v078){ .md-button }
+    [Changelog](reference/changelog.md){ .md-button } · [Migration (0.7.7 → 0.7.8)](python/nucleusiq/learn/migration-notes.md#from-v077-to-v078){ .md-button }
 
 ### v0.7.7
 
@@ -156,7 +161,7 @@ Choose your path based on where you are today:
 - **AgentResult response contract** — typed, immutable Pydantic model
 - **Gemini tool-calling fixes** — `$ref`/`$defs` inlining
 
-Current packages: `nucleusiq` **0.7.8**, `nucleusiq-openai` **0.6.3**, `nucleusiq-gemini` **0.2.5**
+Current packages: `nucleusiq` **0.7.9**, `nucleusiq-openai` **0.6.4**, `nucleusiq-gemini` **0.2.6**, `nucleusiq-groq` **0.1.0b1** (optional beta)
 
 See the [full changelog](reference/changelog.md).
 

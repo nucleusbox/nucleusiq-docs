@@ -53,8 +53,9 @@ final_text = "".join(chunks)
 
 ## Provider notes
 
-- **OpenAI** — Supports streaming for both Chat Completions and Responses API
-- **Gemini** — Supports streaming with `THINKING` events for 2.5+ models when thinking mode is enabled
+- **OpenAI** — Supports streaming for both Chat Completions and Responses API; **429** responses honor **`Retry-After`** via **`retry_policy`** (**v0.7.9+**, **`nucleusiq-openai` 0.6.4+).
+- **Gemini** — Supports streaming with `THINKING` events for 2.5+ models when thinking mode is enabled; **429** with **`Retry-After`** merges **`retry_policy`** sleeps (**v0.7.9+**, **`nucleusiq-gemini` 0.2.6+).
+- **Groq** — Chat Completions streaming via **`nucleusiq-groq`**; streaming session **open** shares the same **429** / **`Retry-After`** policy as non-stream chat (**v0.7.9+**, **`nucleusiq-groq` 0.1.0b1+).
 
 ## All execution modes
 
@@ -62,6 +63,6 @@ Streaming works across Direct, Standard, and Autonomous modes — including tool
 
 ## See also
 
-- [Streaming example](examples/streaming.md) — Full runnable examples with Gemini thinking
+- [Streaming example](examples/streaming.md) — Full runnable examples (including Gemini thinking)
 - [Agents](agents.md) — Agent lifecycle
 - [Execution modes](execution-modes.md) — Mode behavior

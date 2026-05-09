@@ -8,6 +8,7 @@ NucleusIQ uses a **provider-agnostic** `BaseLLM` interface. Swap providers witho
 |----------|---------|---------|
 | OpenAI | `nucleusiq-openai` | `pip install nucleusiq-openai` |
 | Google Gemini | `nucleusiq-gemini` | `pip install nucleusiq-gemini` |
+| Groq | `nucleusiq-groq` | `pip install nucleusiq-groq` |
 | Mock (testing) | Built-in | `from nucleusiq.core.llms.mock_llm import MockLLM` |
 
 ## Usage
@@ -26,6 +27,14 @@ NucleusIQ uses a **provider-agnostic** `BaseLLM` interface. Swap providers witho
     from nucleusiq_gemini import BaseGemini
 
     llm = BaseGemini(model_name="gemini-2.5-flash")
+    ```
+
+=== "Groq"
+
+    ```python
+    from nucleusiq_groq import BaseGroq
+
+    llm = BaseGroq(model_name="llama-3.3-70b-versatile", async_mode=True)
     ```
 
 === "Mock (testing)"
@@ -61,6 +70,17 @@ NucleusIQ uses a **provider-agnostic** `BaseLLM` interface. Swap providers witho
 | `gemini-1.5-pro` | 2M tokens | No |
 | `gemini-1.5-flash` | 1M tokens | No |
 
+### Groq
+
+Groq rotates **Llama**, **Mixtral**, **Qwen**, **GPT-OSS**, and other checkpoints frequently — see [Groq models](https://console.groq.com/docs/models). Typical starter IDs:
+
+| Model id | Typical use |
+|----------|-------------|
+| `llama-3.3-70b-versatile` | Chat + local tools |
+| `openai/gpt-oss-20b` | Structured output demos (`json_schema`) |
+
+Beta package **`nucleusiq-groq` 0.1.0b1** requires **`nucleusiq>=0.7.9`** and ships against the official **`groq`** Python SDK (`>=1.2,<2`).
+
 ## Parameter control
 
 ### AgentConfig (recommended)
@@ -79,7 +99,7 @@ config = AgentConfig(
 agent = Agent(
     name="configured-agent",
     prompt=ZeroShotPrompt().configure(system="You are a helpful assistant."),
-    llm=llm,  # e.g. BaseOpenAI / BaseGemini from the sections above
+    llm=llm,  # e.g. BaseOpenAI / BaseGemini / BaseGroq from the sections above
     config=config,
 )
 ```
@@ -111,20 +131,60 @@ Use provider-specific parameter classes for advanced settings:
     )
     ```
 
+=== "Groq"
+
+    ```python
+    from nucleusiq_groq import GroqLLMParams
+
+    config = AgentConfig(
+        llm_params=GroqLLMParams(
+            temperature=0.5,
+            parallel_tool_calls=True,
+        ),
+    )
+    ```
+
 ### Per-task overrides
 
 Override parameters for a single execution:
 
-```python
-result = await agent.execute(
-    task,
-    llm_params=OpenAILLMParams(temperature=0.0),
-)
-```
+=== "OpenAI"
+
+    ```python
+    from nucleusiq_openai import OpenAILLMParams
+
+    result = await agent.execute(
+        task,
+        llm_params=OpenAILLMParams(temperature=0.0),
+    )
+    ```
+
+=== "Gemini"
+
+    ```python
+    from nucleusiq_gemini import GeminiLLMParams
+
+    result = await agent.execute(
+        task,
+        llm_params=GeminiLLMParams(temperature=0.0),
+    )
+    ```
+
+=== "Groq"
+
+    ```python
+    from nucleusiq_groq import GroqLLMParams
+
+    result = await agent.execute(
+        task,
+        llm_params=GroqLLMParams(temperature=0.0, max_output_tokens=512),
+    )
+    ```
 
 ## See also
 
 - [Providers](providers.md) — Provider architecture and portability
 - [OpenAI provider guide](guides/openai-provider.md) — OpenAI-specific features
 - [Gemini provider guide](guides/gemini-provider.md) — Gemini-specific features
+- [Groq provider guide](guides/groq-provider.md) — Groq Chat Completions (beta), **`strict_model_capabilities`**, rate limits
 - [Install](install.md) — Setup instructions

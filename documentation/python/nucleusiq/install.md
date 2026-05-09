@@ -27,10 +27,24 @@ NucleusIQ providers live in independent packages. Install the ones you need:
     pip install nucleusiq nucleusiq-gemini
     ```
 
-=== "Both"
+=== "Groq"
+
+    ```bash
+    pip install nucleusiq nucleusiq-groq
+    ```
+
+    Public beta — pin if needed: `pip install "nucleusiq-groq==0.1.0b1"`
+
+=== "Both (OpenAI + Gemini)"
 
     ```bash
     pip install nucleusiq nucleusiq-openai nucleusiq-gemini
+    ```
+
+=== "All three providers"
+
+    ```bash
+    pip install nucleusiq nucleusiq-openai nucleusiq-gemini nucleusiq-groq
     ```
 
 ### Optional dependencies
@@ -45,11 +59,15 @@ The clustering extra is only needed if you use the `AutoChainOfThoughtPrompt` te
 ## Verify installation
 
 ```python
-from importlib.metadata import version
+from importlib.metadata import PackageNotFoundError, version
 
-print(version("nucleusiq"))        # e.g., 0.7.8
-print(version("nucleusiq-openai")) # e.g., 0.6.3
-print(version("nucleusiq-gemini")) # e.g., 0.2.5
+for pkg in ("nucleusiq", "nucleusiq-openai", "nucleusiq-gemini"):
+    print(f"{pkg}: {version(pkg)}")
+
+try:
+    print(f"nucleusiq-groq: {version('nucleusiq-groq')}")
+except PackageNotFoundError:
+    print("nucleusiq-groq: (not installed)")
 ```
 
 ## Environment variables
@@ -66,11 +84,21 @@ print(version("nucleusiq-gemini")) # e.g., 0.2.5
     export GEMINI_API_KEY=your-gemini-api-key
     ```
 
+=== "Groq"
+
+    ```bash
+    export GROQ_API_KEY=gsk_...
+    # Optional defaults used by repo examples:
+    # export GROQ_MODEL=llama-3.3-70b-versatile
+    # export GROQ_MODEL_STRUCTURED=openai/gpt-oss-20b
+    ```
+
 Or create a `.env` file in your project root:
 
 ```
 OPENAI_API_KEY=sk-...
 GEMINI_API_KEY=your-gemini-api-key
+GROQ_API_KEY=gsk_...
 ```
 
 NucleusIQ automatically loads `.env` files from the project root.
@@ -81,9 +109,10 @@ NucleusIQ is a monorepo with independently installable packages:
 
 | Package | Version | Description | Depends on |
 |---------|---------|-------------|-----------|
-| `nucleusiq` | 0.7.4 | Core framework (agents, tools, memory, plugins, error hierarchy, usage tracking) | — |
-| `nucleusiq-openai` | 0.6.1 | OpenAI provider | `nucleusiq>=0.7.4` |
-| `nucleusiq-gemini` | 0.2.2 | Google Gemini provider | `nucleusiq>=0.7.4` |
+| `nucleusiq` | **0.7.9** | Core framework (agents, tools, memory, plugins, error hierarchy, usage tracking, shared **`retry_policy`**) | — |
+| `nucleusiq-openai` | **0.6.4** | OpenAI provider | `nucleusiq>=0.7.9` |
+| `nucleusiq-gemini` | **0.2.6** | Google Gemini provider | `nucleusiq>=0.7.9` |
+| `nucleusiq-groq` | **0.1.0b1** (beta) | Groq Chat Completions (`groq` SDK) | `nucleusiq>=0.7.9`, `groq>=1.2,<2` |
 
 Install the core first, then add providers as needed.
 
@@ -105,6 +134,10 @@ uv venv && uv sync --all-groups
 
 # Gemini provider
 cd ../gemini
+uv venv && uv sync --all-groups
+
+# Groq provider (beta — Chat Completions)
+cd ../../inference/groq
 uv venv && uv sync --all-groups
 ```
 

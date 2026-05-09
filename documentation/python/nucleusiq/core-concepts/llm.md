@@ -17,6 +17,10 @@ nucleusiq-openai     # Provider package
 nucleusiq-gemini     # Provider package
 ├── BaseGemini       # Implements BaseLLM
 └── GeminiLLMParams  # Extends LLMParams
+
+nucleusiq-groq       # Provider package (public beta)
+├── BaseGroq         # Implements BaseLLM (Groq Chat Completions)
+└── GroqLLMParams    # Extends LLMParams
 ```
 
 ## Usage
@@ -28,11 +32,12 @@ nucleusiq-gemini     # Provider package
     llm = BaseOpenAI(model_name="gpt-4o-mini")
     ```
 
-=== "Gemini"
+=== "Groq"
 
     ```python
-    from nucleusiq_gemini import BaseGemini
-    llm = BaseGemini(model_name="gemini-2.5-flash")
+    from nucleusiq_groq import BaseGroq
+
+    llm = BaseGroq(model_name="llama-3.3-70b-versatile", async_mode=True)
     ```
 
 ## Parameter control
@@ -42,20 +47,47 @@ Three levels of control — use what you need:
 | Level | Who | How |
 |-------|-----|-----|
 | **Agent defaults** | Most users | `AgentConfig(llm_max_output_tokens=1024)` |
-| **Provider params** | Power users | `AgentConfig(llm_params=GeminiLLMParams(thinking_config=...))` |
+| **Provider params** | Power users | `AgentConfig(llm_params=OpenAILLMParams(reasoning_effort="high"))` |
 | **Per-task override** | Advanced | `agent.execute(task, llm_params=OpenAILLMParams(temperature=0))` |
 
-```python
-from nucleusiq.agents.config import AgentConfig
-from nucleusiq_gemini import GeminiLLMParams, GeminiThinkingConfig
+=== "OpenAI"
 
-config = AgentConfig(
-    llm_params=GeminiLLMParams(
-        temperature=0.2,
-        thinking_config=GeminiThinkingConfig(thinking_budget=2048),
-    ),
-)
-```
+    ```python
+    from nucleusiq.agents.config import AgentConfig
+    from nucleusiq_openai import OpenAILLMParams
+
+    config = AgentConfig(
+        llm_params=OpenAILLMParams(temperature=0.2, reasoning_effort="medium"),
+    )
+    ```
+
+=== "Gemini"
+
+    ```python
+    from nucleusiq.agents.config import AgentConfig
+    from nucleusiq_gemini import GeminiLLMParams, GeminiThinkingConfig
+
+    config = AgentConfig(
+        llm_params=GeminiLLMParams(
+            temperature=0.2,
+            thinking_config=GeminiThinkingConfig(thinking_budget=2048),
+        ),
+    )
+    ```
+
+=== "Groq"
+
+    ```python
+    from nucleusiq.agents.config import AgentConfig
+    from nucleusiq_groq import GroqLLMParams
+
+    config = AgentConfig(
+        llm_params=GroqLLMParams(
+            temperature=0.2,
+            parallel_tool_calls=True,
+        ),
+    )
+    ```
 
 ## Universal parameters
 
@@ -67,7 +99,7 @@ These parameters work across all providers:
 | `max_output_tokens` | Maximum tokens in the response |
 | `top_p` | Nucleus sampling threshold |
 
-Provider-specific parameters (e.g., `reasoning_effort` for OpenAI, `thinking_config` for Gemini) are defined in the provider's `LLMParams` subclass.
+Provider-specific parameters (for example `reasoning_effort` for OpenAI, `thinking_config` for Gemini, `parallel_tool_calls` for Groq) are defined in the provider's `LLMParams` subclass.
 
 ## Error contract
 
@@ -86,5 +118,6 @@ except RateLimitError:
 ## See also
 
 - [Providers](../providers.md) — Full provider architecture
+- [Groq provider guide](../guides/groq-provider.md) — Groq Chat Completions (beta), **`retry_policy`** alignment (**v0.7.9+**)
 - [Models](../models.md) — Available models per provider
 - [Error handling](error-handling.md) — Framework error taxonomy

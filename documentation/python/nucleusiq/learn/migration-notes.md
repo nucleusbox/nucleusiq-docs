@@ -1,5 +1,42 @@
 # Migration notes
 
+## Recommended pins
+
+| Package | Version | Requires |
+|---------|---------|----------|
+| `nucleusiq` | **0.7.9** | — |
+| `nucleusiq-openai` | **0.6.4** | `nucleusiq>=0.7.9` |
+| `nucleusiq-gemini` | **0.2.6** | `nucleusiq>=0.7.9` |
+| `nucleusiq-groq` | **0.1.0b1** (beta) | `nucleusiq>=0.7.9`, `groq>=1.2,<2` |
+
+```bash
+pip install --upgrade nucleusiq nucleusiq-openai nucleusiq-gemini
+pip install --upgrade "nucleusiq-groq>=0.1.0b1"
+```
+
+## From v0.7.8 to v0.7.9
+
+v0.7.9 is **backward compatible** for everyday **`Agent`** usage (**`prompt`** unchanged).
+
+### Packages
+
+OpenAI **0.6.4**, Gemini **0.2.6**, and Groq **0.1.0b1** declare **`nucleusiq>=0.7.9`**. Upgrade **core + all installed providers** together:
+
+```bash
+pip install --upgrade nucleusiq nucleusiq-openai nucleusiq-gemini
+pip install --upgrade "nucleusiq-groq>=0.1.0b1"
+```
+
+### Notable changes
+
+| Area | What changed |
+|------|----------------|
+| **HTTP 429** | **`nucleusiq.llms.retry_policy`** centralizes **`Retry-After`** parsing + backoff; providers aligned (**Groq** streaming **open**, OpenAI, Gemini). |
+| **Groq** | Public **beta** **`0.1.0b1`** (`Development Status :: 4 - Beta`); **`GroqLLMParams(strict_model_capabilities=…)`**; **`nucleusiq_groq.capabilities`** for **`parallel_tool_calls`** warnings vs strict **`InvalidRequestError`**. |
+| **OpenAI** | Fewer spurious retries: **`NotFoundError`/`ConflictError`** map cleanly **before** generic **`APIError`**. |
+
+See upstream **[CHANGELOG.md — 0.7.9](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#079)** and the docs **[Groq provider](../guides/groq-provider.md)**.
+
 ## From v0.7.5 to v0.7.6
 
 v0.7.6 includes **breaking changes** to the prompt system and adds context window management.
@@ -110,21 +147,25 @@ messages = MessageBuilder.build(
 
 ### Package versions
 
-| Package | Version | Requires |
-|---------|---------|----------|
-| `nucleusiq` | **0.7.8** (current) | — |
-| `nucleusiq-openai` | **0.6.3** | `nucleusiq>=0.7.8` |
-| `nucleusiq-gemini` | **0.2.5** | `nucleusiq>=0.7.8` |
+*(Historical appendix — current pins live under **[Recommended pins](#recommended-pins)**.)*
 
-Upgrade all three:
+| Package | Example pin when upgrading from §below | Requires |
+|---------|---------|----------|
+| `nucleusiq` | **0.7.9** | — |
+| `nucleusiq-openai` | **0.6.4** | `nucleusiq>=0.7.9` |
+| `nucleusiq-gemini` | **0.2.6** | `nucleusiq>=0.7.9` |
+| `nucleusiq-groq` | **0.1.0b1** (beta) | `nucleusiq>=0.7.9`, `groq>=1.2,<2` |
+
+Upgrade core + installed providers:
 
 ```bash
 pip install --upgrade nucleusiq nucleusiq-openai nucleusiq-gemini
+pip install --upgrade "nucleusiq-groq>=0.1.0b1"
 ```
 
 If you must stay on v0.7.6 for a short period, use `nucleusiq==0.7.6` with `nucleusiq-openai==0.6.2` and `nucleusiq-gemini==0.2.4`.
 
-If you must stay on v0.7.7, pin `nucleusiq==0.7.7` and use provider versions that still declare `nucleusiq>=0.7.7` — upgrading core to **0.7.8** with latest providers is recommended.
+If you must stay on v0.7.7, pin `nucleusiq==0.7.7` and use provider versions that still declare `nucleusiq>=0.7.7` — upgrading core to **0.7.9** with latest providers is recommended.
 
 ## From v0.7.7 to v0.7.8
 
@@ -132,10 +173,12 @@ v0.7.8 is **backward compatible** for typical agent code: **`prompt`** stays man
 
 ### Packages
 
-Both **`nucleusiq-openai`** and **`nucleusiq-gemini`** raised their **`nucleusiq`** dependency floor to **`>=0.7.8`** while staying at package versions **0.6.3** and **0.2.5**. Upgrade together:
+Both **`nucleusiq-openai`** and **`nucleusiq-gemini`** raised their **`nucleusiq`** dependency floor to **`>=0.7.8`** while staying at package versions **0.6.3** and **0.2.5**. **`nucleusiq-groq` 0.1.0a1** (alpha) also targets **`nucleusiq>=0.7.8`**. Upgrade together:
 
 ```bash
 pip install --upgrade nucleusiq nucleusiq-openai nucleusiq-gemini
+# Optional:
+pip install --upgrade nucleusiq-groq
 ```
 
 ### What is new (opt-in by usage)

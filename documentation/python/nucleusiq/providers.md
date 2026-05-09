@@ -14,6 +14,7 @@ NucleusIQ uses provider packages so your agent code stays stable while model bac
 |---------|----------|--------|---------|
 | `nucleusiq-openai` | LLM provider | **Active** — Chat Completions + Responses API | `pip install nucleusiq-openai` |
 | `nucleusiq-gemini` | LLM provider | **Active** — Google GenAI SDK (GA) | `pip install nucleusiq-gemini` |
+| `nucleusiq-groq` | Inference provider | **Beta** — Groq Chat Completions (`groq` SDK); **`nucleusiq>=0.7.9`** | `pip install nucleusiq-groq` |
 
 ## Planned providers
 
@@ -21,7 +22,6 @@ NucleusIQ uses provider packages so your agent code stays stable while model bac
 |---------|----------|--------|
 | `nucleusiq-anthropic` | LLM provider | v0.7.0 |
 | `nucleusiq-ollama` | Inference provider | v0.7.0 |
-| `nucleusiq-groq` | Inference provider | Backlog |
 | `nucleusiq-chroma` | DB provider | Backlog |
 | `nucleusiq-pinecone` | DB provider | Backlog |
 
@@ -32,18 +32,24 @@ The same agent code works with any provider:
 ```python
 from nucleusiq.agents import Agent
 from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
 
-# Choose your provider — one line change
+# Choose your provider — swap the LLM line
 from nucleusiq_openai import BaseOpenAI
+
 llm = BaseOpenAI(model_name="gpt-4o")
 
-# Or switch to Gemini
-from nucleusiq_gemini import BaseGemini
-llm = BaseGemini(model_name="gemini-2.5-flash")
+# Or Gemini
+# from nucleusiq_gemini import BaseGemini
+# llm = BaseGemini(model_name="gemini-2.5-flash")
 
-# Same agent, same tools, same plugins
+# Or Groq (use async_mode=True with the official SDK path)
+# from nucleusiq_groq import BaseGroq
+# llm = BaseGroq(model_name="llama-3.3-70b-versatile", async_mode=True)
+
 agent = Agent(
     name="assistant",
+    prompt=ZeroShotPrompt().configure(system="You are a helpful assistant."),
     llm=llm,
     config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
     tools=my_tools,
@@ -86,6 +92,20 @@ Each provider has its own `LLMParams` subclass for provider-specific settings:
     )
     ```
 
+=== "Groq"
+
+    ```python
+    from nucleusiq_groq import GroqLLMParams
+
+    config = AgentConfig(
+        llm_params=GroqLLMParams(
+            temperature=0.7,
+            max_output_tokens=1024,
+            parallel_tool_calls=True,
+        ),
+    )
+    ```
+
 Common parameters (`temperature`, `max_output_tokens`, `top_p`) are defined in the base `LLMParams` and work across all providers.
 
 ## Provider-native tools
@@ -96,6 +116,7 @@ Each provider can expose server-side tools:
 |----------|-------------|
 | OpenAI | `code_interpreter`, `file_search`, `web_search`, `image_generation`, `mcp`, `computer_use` |
 | Gemini | `google_search`, `code_execution`, `url_context`, `google_maps` |
+| Groq | **Phase A:** framework **`@tool`** / local function tools only — Groq built-in/hosted tools are **not** wired yet (see [Groq provider](guides/groq-provider.md)) |
 
 Native tools are accessed via provider-specific factories (`OpenAITool`, `GeminiTool`) and can be mixed with framework-level tools in the same agent.
 
@@ -106,11 +127,12 @@ All providers map SDK errors to NucleusIQ's [framework-level error taxonomy](cor
 ## Compatibility
 
 - The core package is versioned independently from provider packages.
-- Provider packages declare their minimum `nucleusiq` version (e.g., `nucleusiq>=0.6.0`).
+- Provider packages declare their minimum **`nucleusiq`** version (for example **`nucleusiq>=0.7.9`** for current OpenAI, Gemini, and Groq releases).
 - Always keep provider versions compatible with your installed `nucleusiq` version.
 
 ## See also
 
+- [Groq provider guide](guides/groq-provider.md) — Groq Chat Completions, beta scope, rate limits, examples
 - [Gemini provider guide](guides/gemini-provider.md) — Full Gemini integration details
 - [OpenAI provider guide](guides/openai-provider.md) — Full OpenAI integration details
 - [Models](models.md) — Provider-agnostic model usage
