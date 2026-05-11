@@ -35,13 +35,27 @@ NucleusIQ providers live in independent packages. Install the ones you need:
 
     Public beta — pin if needed: `pip install "nucleusiq-groq==0.1.0b1"`
 
+=== "Ollama"
+
+    ```bash
+    pip install nucleusiq nucleusiq-ollama
+    ```
+
+    **Alpha** — pin if needed: `pip install "nucleusiq>=0.7.10" "nucleusiq-ollama==0.1.0a1"`
+
 === "Both (OpenAI + Gemini)"
 
     ```bash
     pip install nucleusiq nucleusiq-openai nucleusiq-gemini
     ```
 
-=== "All three providers"
+=== "All four providers"
+
+    ```bash
+    pip install nucleusiq nucleusiq-openai nucleusiq-gemini nucleusiq-groq nucleusiq-ollama
+    ```
+
+=== "OpenAI + Gemini + Groq only"
 
     ```bash
     pip install nucleusiq nucleusiq-openai nucleusiq-gemini nucleusiq-groq
@@ -52,6 +66,12 @@ NucleusIQ providers live in independent packages. Install the ones you need:
 ```bash
 # Auto Chain-of-Thought clustering (scikit-learn ~50MB)
 pip install "nucleusiq[clustering]"
+```
+
+**v0.7.10+ — HTTP stack for notebooks / legacy apps** (not imported by core):
+
+```bash
+pip install "nucleusiq[http]"
 ```
 
 The clustering extra is only needed if you use the `AutoChainOfThoughtPrompt` technique. The core framework works without it.
@@ -68,6 +88,11 @@ try:
     print(f"nucleusiq-groq: {version('nucleusiq-groq')}")
 except PackageNotFoundError:
     print("nucleusiq-groq: (not installed)")
+
+try:
+    print(f"nucleusiq-ollama: {version('nucleusiq-ollama')}")
+except PackageNotFoundError:
+    print("nucleusiq-ollama: (not installed)")
 ```
 
 ## Environment variables
@@ -93,12 +118,23 @@ except PackageNotFoundError:
     # export GROQ_MODEL_STRUCTURED=openai/gpt-oss-20b
     ```
 
+=== "Ollama"
+
+    ```bash
+    # Optional — default is local SDK default (often http://127.0.0.1:11434)
+    # export OLLAMA_HOST=http://127.0.0.1:11434
+    # export OLLAMA_API_KEY=...   # hosted / Bearer endpoints only
+    # export OLLAMA_MODEL=llama3.2
+    ```
+
 Or create a `.env` file in your project root:
 
 ```
 OPENAI_API_KEY=sk-...
 GEMINI_API_KEY=your-gemini-api-key
 GROQ_API_KEY=gsk_...
+# OLLAMA_HOST=
+# OLLAMA_API_KEY=
 ```
 
 NucleusIQ automatically loads `.env` files from the project root.
@@ -109,10 +145,11 @@ NucleusIQ is a monorepo with independently installable packages:
 
 | Package | Version | Description | Depends on |
 |---------|---------|-------------|-----------|
-| `nucleusiq` | **0.7.9** | Core framework (agents, tools, memory, plugins, error hierarchy, usage tracking, shared **`retry_policy`**) | — |
+| `nucleusiq` | **0.7.10** | Core framework; optional **`nucleusiq[http]`**; structured-output resolver recognizes **Ollama** / Groq LLMs (**v0.7.10**) | — |
 | `nucleusiq-openai` | **0.6.4** | OpenAI provider | `nucleusiq>=0.7.9` |
 | `nucleusiq-gemini` | **0.2.6** | Google Gemini provider | `nucleusiq>=0.7.9` |
 | `nucleusiq-groq` | **0.1.0b1** (beta) | Groq Chat Completions (`groq` SDK) | `nucleusiq>=0.7.9`, `groq>=1.2,<2` |
+| `nucleusiq-ollama` | **0.1.0a1** (alpha) | Ollama `/api/chat` (`ollama` SDK) | `nucleusiq>=0.7.10`, `ollama>=0.5,<1` |
 
 Install the core first, then add providers as needed.
 
@@ -138,6 +175,10 @@ uv venv && uv sync --all-groups
 
 # Groq provider (beta — Chat Completions)
 cd ../../inference/groq
+uv venv && uv sync --all-groups
+
+# Ollama provider (alpha)
+cd ../ollama
 uv venv && uv sync --all-groups
 ```
 

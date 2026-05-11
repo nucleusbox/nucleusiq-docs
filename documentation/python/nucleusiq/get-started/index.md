@@ -21,3 +21,10 @@ Then continue with:
 
 - [Execution modes](../execution-modes.md)
 - [Examples](../examples/index.md)
+
+## Inference backends
+
+Same **`Agent`** code works across packages — pick an install tab in [Installation](../install.md), then:
+
+- [Groq provider](../guides/groq-provider.md) · [Groq quickstart](../examples/groq-quickstart.md) — cloud (**beta** `nucleusiq-groq`)
+- [Ollama provider](../guides/ollama-provider.md) · [Ollama quickstart](../examples/ollama-quickstart.md) — local / self-hosted (**alpha** `nucleusiq-ollama`, **`nucleusiq>=0.7.10`**)

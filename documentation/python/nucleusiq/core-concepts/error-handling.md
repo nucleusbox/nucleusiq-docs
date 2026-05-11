@@ -1,6 +1,6 @@
 # Error handling
 
-NucleusIQ provides a framework-level error taxonomy so you can write **provider-agnostic, domain-specific** error handling code. Whether you use OpenAI, Gemini, or any future provider — and whether an error originates in an LLM call, a tool, an agent, or the prompt layer — the same exception families apply.
+NucleusIQ provides a framework-level error taxonomy so you can write **provider-agnostic, domain-specific** error handling code. Whether you use OpenAI, Gemini, Groq, Ollama, or another **`BaseLLM`** implementation — and whether an error originates in an LLM call, a tool, an agent, or the prompt layer — the same exception families apply.
 
 As of **v0.7.2**, the framework ships 10 exception families covering every major subsystem.
 
@@ -370,7 +370,7 @@ except NucleusIQError as e:
 
 ## Built-in retry
 
-Both OpenAI and Gemini providers include automatic retry with exponential backoff for transient errors:
+Inference provider packages (**OpenAI**, **Gemini**, **Groq**, **Ollama**) apply automatic retry with exponential backoff for common transient failures where supported by each SDK adapter:
 
 | Error type | Behavior |
 |-----------|----------|
@@ -435,6 +435,8 @@ This structured context makes it straightforward to build dashboards, set up Pag
 
 ## See also
 
+- [Groq provider](../guides/groq-provider.md) — Groq-specific errors and retries
+- [Ollama provider](../guides/ollama-provider.md) — Ollama alpha adapter notes
 - [Gemini provider](../guides/gemini-provider.md) — Gemini-specific error mapping
 - [OpenAI provider](../guides/openai-provider.md) — OpenAI-specific error mapping
 - [Providers](../providers.md) — Provider architecture

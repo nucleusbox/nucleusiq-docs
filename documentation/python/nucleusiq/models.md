@@ -9,6 +9,7 @@ NucleusIQ uses a **provider-agnostic** `BaseLLM` interface. Swap providers witho
 | OpenAI | `nucleusiq-openai` | `pip install nucleusiq-openai` |
 | Google Gemini | `nucleusiq-gemini` | `pip install nucleusiq-gemini` |
 | Groq | `nucleusiq-groq` | `pip install nucleusiq-groq` |
+| Ollama | `nucleusiq-ollama` | `pip install nucleusiq-ollama` |
 | Mock (testing) | Built-in | `from nucleusiq.core.llms.mock_llm import MockLLM` |
 
 ## Usage
@@ -35,6 +36,14 @@ NucleusIQ uses a **provider-agnostic** `BaseLLM` interface. Swap providers witho
     from nucleusiq_groq import BaseGroq
 
     llm = BaseGroq(model_name="llama-3.3-70b-versatile", async_mode=True)
+    ```
+
+=== "Ollama"
+
+    ```python
+    from nucleusiq_ollama import BaseOllama
+
+    llm = BaseOllama(model_name="llama3.2", async_mode=True)
     ```
 
 === "Mock (testing)"
@@ -81,6 +90,17 @@ Groq rotates **Llama**, **Mixtral**, **Qwen**, **GPT-OSS**, and other checkpoint
 
 Beta package **`nucleusiq-groq` 0.1.0b1** requires **`nucleusiq>=0.7.9`** and ships against the official **`groq`** Python SDK (`>=1.2,<2`).
 
+### Ollama
+
+Model ids are **whatever your Ollama server exposes** (`ollama list`). Typical local tags:
+
+| Model id | Typical use |
+|----------|-------------|
+| `llama3.2` | General chat + tools (examples default) |
+| `mistral`, `qwen2.5`, … | Swap names per your catalog |
+
+Alpha package **`nucleusiq-ollama` 0.1.0a1** requires **`nucleusiq>=0.7.10`** and uses the official **`ollama`** SDK (`>=0.5,<1`). See [Ollama provider guide](guides/ollama-provider.md).
+
 ## Parameter control
 
 ### AgentConfig (recommended)
@@ -99,7 +119,7 @@ config = AgentConfig(
 agent = Agent(
     name="configured-agent",
     prompt=ZeroShotPrompt().configure(system="You are a helpful assistant."),
-    llm=llm,  # e.g. BaseOpenAI / BaseGemini / BaseGroq from the sections above
+    llm=llm,  # e.g. BaseOpenAI / BaseGemini / BaseGroq / BaseOllama from the sections above
     config=config,
 )
 ```
@@ -144,6 +164,20 @@ Use provider-specific parameter classes for advanced settings:
     )
     ```
 
+=== "Ollama"
+
+    ```python
+    from nucleusiq_ollama import OllamaLLMParams
+
+    config = AgentConfig(
+        llm_params=OllamaLLMParams(
+            temperature=0.5,
+            think="high",
+            keep_alive="10m",
+        ),
+    )
+    ```
+
 ### Per-task overrides
 
 Override parameters for a single execution:
@@ -181,10 +215,22 @@ Override parameters for a single execution:
     )
     ```
 
+=== "Ollama"
+
+    ```python
+    from nucleusiq_ollama import OllamaLLMParams
+
+    result = await agent.execute(
+        task,
+        llm_params=OllamaLLMParams(temperature=0.0, max_output_tokens=512),
+    )
+    ```
+
 ## See also
 
 - [Providers](providers.md) — Provider architecture and portability
 - [OpenAI provider guide](guides/openai-provider.md) — OpenAI-specific features
 - [Gemini provider guide](guides/gemini-provider.md) — Gemini-specific features
 - [Groq provider guide](guides/groq-provider.md) — Groq Chat Completions (beta), **`strict_model_capabilities`**, rate limits
+- [Ollama provider guide](guides/ollama-provider.md) — Ollama alpha, **`think`**, structured output cautions
 - [Install](install.md) — Setup instructions

@@ -1,6 +1,6 @@
 # Tool integration patterns
 
-Every pattern below uses the **mandatory** `prompt=` argument (see [migration notes](../learn/migration-notes.md)). Swap `BaseOpenAI` / `BaseGemini` and model names to match your provider.
+Every pattern below uses the **mandatory** `prompt=` argument (see [migration notes](../learn/migration-notes.md)). Swap **`BaseOpenAI`**, **`BaseGemini`**, **`BaseGroq`** (`async_mode=True`), **`BaseOllama`** (`async_mode=True`), and model names to match your provider — see [Providers](../providers.md), [Groq provider](../guides/groq-provider.md), and [Ollama provider](../guides/ollama-provider.md).
 
 ## Pattern 1: @tool decorator + file tools
 
@@ -175,8 +175,53 @@ agent = Agent(
 )
 ```
 
+## Pattern 7: `@tool` + local Ollama (alpha)
+
+For **local inference**, **`@tool`** workflows match other providers; call **`await agent.initialize()`** before **`execute()`** when using **`BaseOllama`**.
+
+```python
+import asyncio
+
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.agents.task import Task
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+from nucleusiq.tools.decorators import tool
+from nucleusiq_ollama import BaseOllama, OllamaLLMParams
+
+
+@tool
+def greet(name: str) -> str:
+    """Return a short greeting."""
+    return f"Hello, {name}!"
+
+
+async def main():
+    agent = Agent(
+        name="ollama-tools-demo",
+        prompt=ZeroShotPrompt().configure(system="Use tools when helpful."),
+        llm=BaseOllama(model_name="llama3.2", async_mode=True),
+        tools=[greet],
+        config=AgentConfig(
+            execution_mode=ExecutionMode.STANDARD,
+            llm_params=OllamaLLMParams(temperature=0.3, max_output_tokens=256),
+        ),
+    )
+    await agent.initialize()
+    r = await agent.execute(Task(id="t1", objective='Use the tool to greet Ada.'))
+    print(r.output)
+
+
+asyncio.run(main())
+```
+
+!!! warning "Alpha package"
+
+    **`nucleusiq-ollama`** is **alpha** — pin **`nucleusiq>=0.7.10`**. Native OpenAI/Gemini-only tools (e.g. **`OpenAITool`**, **`GeminiTool`**) do not apply here; use **`@tool`** or see the [Ollama provider](../guides/ollama-provider.md) matrix.
+
 ## See also
 
 - [Tools overview](../tools.md) — All tool types
 - [`@tool` decorator](tool-decorator.md) — Create tools from functions
+- [Ollama provider](../guides/ollama-provider.md) — Alpha limits, **`think`**, structured output
 - [MCP integration guide](../guides/mcp-integration.md) — Full MCP setup

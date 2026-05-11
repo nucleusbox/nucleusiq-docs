@@ -74,7 +74,15 @@ Choose your path based on where you are today:
 
 ## What's new in v0.7.x
 
-### v0.7.9 (latest)
+### v0.7.10 (latest)
+
+!!! success "Core security extras + Ollama alpha"
+    - **`nucleusiq` 0.7.10** — optional **`nucleusiq[http]`**; **`urllib3`** resolution hardening in locks; structured-output resolver recognizes **Ollama** / Groq LLMs for **`OutputSchema`** payloads.
+    - **`nucleusiq-ollama` 0.1.0a1** (**alpha**) — local / remote **[Ollama](https://ollama.com/)** via official **`ollama`** SDK: **`BaseOllama`**, tools, streaming, structured **`format`**, **`think`** / **`keep_alive`**. Requires **`nucleusiq>=0.7.10`**.
+
+    [Changelog](reference/changelog.md){ .md-button } · [Ollama provider](python/nucleusiq/guides/ollama-provider.md){ .md-button } · [Ollama quickstart](python/nucleusiq/examples/ollama-quickstart.md){ .md-button } · [Migration (0.7.9 → 0.7.10)](python/nucleusiq/learn/migration-notes.md#from-v079-to-v0710){ .md-button }
+
+### v0.7.9
 
 !!! success "LLM rate limits + Groq beta"
     - **`nucleusiq.llms.retry_policy`** — shared **429** handling: **`Retry-After`** parsing, capped backoff, ceiling (**120s** default single sleep cap).
@@ -161,7 +169,7 @@ Choose your path based on where you are today:
 - **AgentResult response contract** — typed, immutable Pydantic model
 - **Gemini tool-calling fixes** — `$ref`/`$defs` inlining
 
-Current packages: `nucleusiq` **0.7.9**, `nucleusiq-openai` **0.6.4**, `nucleusiq-gemini` **0.2.6**, `nucleusiq-groq` **0.1.0b1** (optional beta)
+Current packages: `nucleusiq` **0.7.10**, `nucleusiq-openai` **0.6.4**, `nucleusiq-gemini` **0.2.6**, `nucleusiq-groq` **0.1.0b1** (optional beta), `nucleusiq-ollama` **0.1.0a1** (optional alpha)
 
 See the [full changelog](reference/changelog.md).
 

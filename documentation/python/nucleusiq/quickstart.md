@@ -5,7 +5,7 @@ This quickstart takes you from setup to a fully functional agent in a few minute
 ## Requirements
 
 - Python 3.10+
-- An API key for your chosen provider
+- An API key or credentials for cloud providers — **not required** for **local Ollama** (daemon only)
 - [Install](install.md) NucleusIQ and a provider package
 
 ## Minimal example (no API key)
@@ -129,6 +129,51 @@ asyncio.run(main())
 
 Set **`GROQ_API_KEY`** in your environment or `.env` file. Full scope, **429** / **`Retry-After`** behavior, model-capability checks, and example scripts: [Groq provider](guides/groq-provider.md).
 
+## With Ollama
+
+!!! warning "Alpha provider"
+
+    **`nucleusiq-ollama` 0.1.0a1** — pre-release. Requires **`nucleusiq>=0.7.10`**. Run an **Ollama** daemon locally or point **`OLLAMA_HOST`** at a reachable API: `ollama pull <model>` first.
+
+Uses **`BaseOllama`** + **`async_mode=True`** and **`await agent.initialize()`** like the monorepo scripts. More patterns: **[Ollama quickstart](examples/ollama-quickstart.md)** and **[Ollama provider](guides/ollama-provider.md)**.
+
+```python
+import asyncio
+import os
+
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.agents.task import Task
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+from nucleusiq_ollama import BaseOllama, OllamaLLMParams
+
+
+async def main():
+    llm = BaseOllama(model_name=os.getenv("OLLAMA_MODEL", "llama3.2"), async_mode=True)
+
+    agent = Agent(
+        name="Assistant",
+        prompt=ZeroShotPrompt().configure(
+            system="You are a helpful assistant.",
+        ),
+        llm=llm,
+        config=AgentConfig(
+            execution_mode=ExecutionMode.STANDARD,
+            llm_params=OllamaLLMParams(temperature=0.4, max_output_tokens=512),
+        ),
+    )
+
+    await agent.initialize()
+
+    result = await agent.execute(
+        Task(id="q-ollama-1", objective="What is the capital of France?"),
+    )
+    print(result.output)
+
+
+asyncio.run(main())
+```
+
 ## Execution modes
 
 NucleusIQ uses the **Gearbox Strategy** — three modes that scale from simple chat to autonomous reasoning:
@@ -224,7 +269,7 @@ See [Context management](context-management.md) for the full guide.
 - [Prompts](prompts.md) — Prompt techniques and the mandatory prompt system
 - [Context management](context-management.md) — Context window management
 - [Tools](tools.md) — Built-in tools, `@tool` decorator, and provider native tools
-- [Providers](providers.md) — OpenAI, Gemini, Groq, and provider portability
+- [Providers](providers.md) — OpenAI, Gemini, Groq, Ollama, and provider portability
 - [Usage tracking](usage-tracking.md) — Token usage and cost estimation
 - [Plugins](plugins/overview.md) — 10 built-in plugins for guardrails and control
-- [Examples](examples/index.md) — Practical patterns (including **[Groq quickstart](examples/groq-quickstart.md)**)
+- [Examples](examples/index.md) — Practical patterns (**[Groq quickstart](examples/groq-quickstart.md)**, **[Ollama quickstart](examples/ollama-quickstart.md)**)

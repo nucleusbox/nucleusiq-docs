@@ -42,6 +42,42 @@ An agent is a managed runtime with memory, tools, policy, streaming, structure, 
     )
     ```
 
+=== "With Groq"
+
+    ```python
+    from nucleusiq.agents import Agent
+    from nucleusiq.agents.config import AgentConfig, ExecutionMode
+    from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+    from nucleusiq_groq import BaseGroq
+
+    agent = Agent(
+        name="analyst",
+        prompt=ZeroShotPrompt().configure(
+            system="You are a data analyst. Answer questions accurately.",
+        ),
+        llm=BaseGroq(model_name="llama-3.3-70b-versatile", async_mode=True),
+        config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
+    )
+    ```
+
+=== "With Ollama"
+
+    ```python
+    from nucleusiq.agents import Agent
+    from nucleusiq.agents.config import AgentConfig, ExecutionMode
+    from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+    from nucleusiq_ollama import BaseOllama
+
+    agent = Agent(
+        name="analyst",
+        prompt=ZeroShotPrompt().configure(
+            system="You are a data analyst. Answer questions accurately.",
+        ),
+        llm=BaseOllama(model_name="llama3.2", async_mode=True),
+        config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
+    )
+    ```
+
 === "With MockLLM (testing)"
 
     ```python
@@ -62,7 +98,7 @@ An agent is a managed runtime with memory, tools, policy, streaming, structure, 
 |-------|----------|-------------|
 | `name` | Yes | Human-readable identifier |
 | `prompt` | **Yes** | `BasePrompt` instance — the single source of truth for what the LLM sees. Use `ZeroShotPrompt().configure(system="...")` or any prompt technique. |
-| `llm` | Yes | Model backend (`BaseOpenAI`, `BaseGemini`, `MockLLM`) |
+| `llm` | Yes | Model backend (`BaseOpenAI`, `BaseGemini`, `BaseGroq`, `BaseOllama`, `MockLLM`, …) |
 | `config` | No | `AgentConfig` — execution mode, timeouts, context management |
 | `tools` | No | List of tools the agent can call |
 | `memory` | No | Conversation memory strategy |
@@ -203,7 +239,7 @@ except NucleusIQError as e:
 - [Prompts](prompts.md) — Prompt techniques and configuration
 - [Tools](tools.md) — `@tool` decorator, built-in tools, and provider native tools
 - [Memory](memory.md) — Conversation history strategies
-- [Providers](providers.md) — OpenAI, Gemini, and provider portability
+- [Providers](providers.md) — Provider matrix (OpenAI, Gemini, Groq, Ollama, …)
 - [Usage tracking](usage-tracking.md) — Token usage by purpose and origin
 - [Cost estimation](observability/cost-estimation.md) — Dollar cost tracking
 - [Error handling](core-concepts/error-handling.md) — Framework error taxonomy

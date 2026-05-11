@@ -21,6 +21,10 @@ nucleusiq-gemini     # Provider package
 nucleusiq-groq       # Provider package (public beta)
 ├── BaseGroq         # Implements BaseLLM (Groq Chat Completions)
 └── GroqLLMParams    # Extends LLMParams
+
+nucleusiq-ollama     # Provider package (alpha)
+├── BaseOllama       # Implements BaseLLM (Ollama /api/chat)
+└── OllamaLLMParams  # Extends LLMParams
 ```
 
 ## Usage
@@ -32,12 +36,27 @@ nucleusiq-groq       # Provider package (public beta)
     llm = BaseOpenAI(model_name="gpt-4o-mini")
     ```
 
+=== "Gemini"
+
+    ```python
+    from nucleusiq_gemini import BaseGemini
+    llm = BaseGemini(model_name="gemini-2.5-flash")
+    ```
+
 === "Groq"
 
     ```python
     from nucleusiq_groq import BaseGroq
 
     llm = BaseGroq(model_name="llama-3.3-70b-versatile", async_mode=True)
+    ```
+
+=== "Ollama"
+
+    ```python
+    from nucleusiq_ollama import BaseOllama
+
+    llm = BaseOllama(model_name="llama3.2", async_mode=True)
     ```
 
 ## Parameter control
@@ -89,6 +108,21 @@ Three levels of control — use what you need:
     )
     ```
 
+=== "Ollama"
+
+    ```python
+    from nucleusiq.agents.config import AgentConfig
+    from nucleusiq_ollama import OllamaLLMParams
+
+    config = AgentConfig(
+        llm_params=OllamaLLMParams(
+            temperature=0.2,
+            think="low",
+            keep_alive="5m",
+        ),
+    )
+    ```
+
 ## Universal parameters
 
 These parameters work across all providers:
@@ -99,7 +133,7 @@ These parameters work across all providers:
 | `max_output_tokens` | Maximum tokens in the response |
 | `top_p` | Nucleus sampling threshold |
 
-Provider-specific parameters (for example `reasoning_effort` for OpenAI, `thinking_config` for Gemini, `parallel_tool_calls` for Groq) are defined in the provider's `LLMParams` subclass.
+Provider-specific parameters (for example **`reasoning_effort`** for OpenAI, **`thinking_config`** for Gemini, **`parallel_tool_calls`** for Groq, **`think`** / **`keep_alive`** for Ollama) are defined in the provider's **`LLMParams`** subclass.
 
 ## Error contract
 
@@ -118,6 +152,7 @@ except RateLimitError:
 ## See also
 
 - [Providers](../providers.md) — Full provider architecture
+- [Ollama provider guide](../guides/ollama-provider.md) — Ollama alpha (**`nucleusiq>=0.7.10`**)
 - [Groq provider guide](../guides/groq-provider.md) — Groq Chat Completions (beta), **`retry_policy`** alignment (**v0.7.9+**)
 - [Models](../models.md) — Available models per provider
 - [Error handling](error-handling.md) — Framework error taxonomy

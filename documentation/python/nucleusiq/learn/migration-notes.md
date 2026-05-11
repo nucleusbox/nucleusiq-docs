@@ -4,15 +4,40 @@
 
 | Package | Version | Requires |
 |---------|---------|----------|
-| `nucleusiq` | **0.7.9** | — |
+| `nucleusiq` | **0.7.10** | — |
 | `nucleusiq-openai` | **0.6.4** | `nucleusiq>=0.7.9` |
 | `nucleusiq-gemini` | **0.2.6** | `nucleusiq>=0.7.9` |
 | `nucleusiq-groq` | **0.1.0b1** (beta) | `nucleusiq>=0.7.9`, `groq>=1.2,<2` |
+| `nucleusiq-ollama` | **0.1.0a1** (alpha) | `nucleusiq>=0.7.10`, `ollama>=0.5,<1` |
 
 ```bash
 pip install --upgrade nucleusiq nucleusiq-openai nucleusiq-gemini
 pip install --upgrade "nucleusiq-groq>=0.1.0b1"
+pip install --upgrade "nucleusiq>=0.7.10" "nucleusiq-ollama>=0.1.0a1"
 ```
+
+## From v0.7.9 to v0.7.10
+
+v0.7.10 is **backward compatible** for typical **`Agent`** code. Upgrade core when you adopt **`nucleusiq-ollama`** or want resolver / dependency hygiene fixes.
+
+### Packages
+
+- **`nucleusiq` 0.7.10** — optional **`nucleusiq[http]`**; structured-output **`get_provider_from_llm`** recognizes **Ollama** / Groq for native schema payloads; dependency graph **`urllib3`** hardening (see upstream **Security** notes).
+- **`nucleusiq-ollama` 0.1.0a1** — **new alpha** provider (**`nucleusiq>=0.7.10`**).
+
+```bash
+pip install --upgrade nucleusiq
+pip install --upgrade "nucleusiq-ollama>=0.1.0a1"
+```
+
+### Highlights
+
+| Area | Change |
+|------|--------|
+| **Ollama** | **`BaseOllama`**, **`OllamaLLMParams`** (`think`, `keep_alive`), tools, streaming, structured **`format`** — alpha quality; see **[Ollama provider](../guides/ollama-provider.md)**. |
+| **Core** | **`nucleusiq[http]`** extra for **`requests`** / patched **`urllib3`** when you need that stack outside core imports. |
+
+Upstream: **[CHANGELOG.md — 0.7.10](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#0710)**.
 
 ## From v0.7.8 to v0.7.9
 
@@ -151,21 +176,23 @@ messages = MessageBuilder.build(
 
 | Package | Example pin when upgrading from §below | Requires |
 |---------|---------|----------|
-| `nucleusiq` | **0.7.9** | — |
+| `nucleusiq` | **0.7.10** | — |
 | `nucleusiq-openai` | **0.6.4** | `nucleusiq>=0.7.9` |
 | `nucleusiq-gemini` | **0.2.6** | `nucleusiq>=0.7.9` |
 | `nucleusiq-groq` | **0.1.0b1** (beta) | `nucleusiq>=0.7.9`, `groq>=1.2,<2` |
+| `nucleusiq-ollama` | **0.1.0a1** (alpha) | `nucleusiq>=0.7.10`, `ollama>=0.5,<1` |
 
 Upgrade core + installed providers:
 
 ```bash
 pip install --upgrade nucleusiq nucleusiq-openai nucleusiq-gemini
 pip install --upgrade "nucleusiq-groq>=0.1.0b1"
+pip install --upgrade "nucleusiq-ollama>=0.1.0a1"
 ```
 
 If you must stay on v0.7.6 for a short period, use `nucleusiq==0.7.6` with `nucleusiq-openai==0.6.2` and `nucleusiq-gemini==0.2.4`.
 
-If you must stay on v0.7.7, pin `nucleusiq==0.7.7` and use provider versions that still declare `nucleusiq>=0.7.7` — upgrading core to **0.7.9** with latest providers is recommended.
+If you must stay on v0.7.7, pin `nucleusiq==0.7.7` and use provider versions that still declare `nucleusiq>=0.7.7` — upgrading core to **0.7.10** with latest providers is recommended.
 
 ## From v0.7.7 to v0.7.8
 

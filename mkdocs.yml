@@ -91,6 +91,7 @@ nav:
     - OpenAI provider: python/nucleusiq/guides/openai-provider.md
     - Gemini provider: python/nucleusiq/guides/gemini-provider.md
     - Groq provider: python/nucleusiq/guides/groq-provider.md
+    - Ollama provider: python/nucleusiq/guides/ollama-provider.md
   - Tools:
     - python/nucleusiq/tools/index.md
     - Overview: python/nucleusiq/tools.md
@@ -117,6 +118,7 @@ nav:
     - Cost estimation: python/nucleusiq/examples/cost-estimation.md
     - Gemini quickstart: python/nucleusiq/examples/gemini-quickstart.md
     - Groq quickstart: python/nucleusiq/examples/groq-quickstart.md
+    - Ollama quickstart: python/nucleusiq/examples/ollama-quickstart.md
   - Reference:
     - reference/index.md
     - Changelog: reference/changelog.md

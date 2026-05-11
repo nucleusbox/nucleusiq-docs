@@ -4,6 +4,7 @@ All notable changes to NucleusIQ are documented in the [CHANGELOG.md](https://gi
 
 ## Recent releases
 
+- **[0.7.10](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#0710)** — **`nucleusiq[http]`** optional extra + **`urllib3`** lock hygiene; structured-output resolver (**Ollama** / Groq); **`nucleusiq-ollama` 0.1.0a1** (**alpha**, **`nucleusiq>=0.7.10`**)
 - **[0.7.9](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#079)** — **`retry_policy`** (429 **`Retry-After`** across Groq/OpenAI/Gemini), **`nucleusiq-groq` 0.1.0b1** public beta (`strict_model_capabilities`, streaming-open parity); **`nucleusiq-openai` 0.6.4**, **`nucleusiq-gemini` 0.2.6** (`nucleusiq>=0.7.9`)
 - **[0.7.8](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#078)** — Run-local context state (workspace, evidence, lexical corpus), L4.5 activation, phase/evidence gate, synthesis package, tool-result serialization fix, autonomous Critic/Refiner wiring; **`nucleusiq-groq` 0.1.0a1** (since superseded by **0.1.0b1**)
 - **[0.7.7](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#077)** — Context Management v2 stability, idempotent tool opt-in, AgentResult / synthesis fixes, provider sync (OpenAI **0.6.3**, Gemini **0.2.5**)
@@ -14,6 +15,27 @@ All notable changes to NucleusIQ are documented in the [CHANGELOG.md](https://gi
 - **[0.7.2](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#072)** — Unified exception hierarchy (10 families), AgentResult response contract
 - **[0.6.0](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#060--2026-03-13)** — Gemini provider, `@tool` decorator, cost estimation, framework error taxonomy
 - **[0.5.0](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#050--2026-03-11)** — Token origin split, UsageSummary schema, FileWriteTool, FileExtractTool query filtering
+
+## v0.7.10 highlights — 2026-05-09
+
+### Packages
+
+| Package | Version | What's new |
+|---------|---------|-----------|
+| `nucleusiq` | **0.7.10** | Security-focused dependency graph (**`urllib3`**); optional **`nucleusiq[http]`**; **`structured_output.resolver`** recognizes **`ollama`** / **`groq`** LLMs for **`OutputSchema`** |
+| `nucleusiq-ollama` | **0.1.0a1** | **New alpha** — **`BaseOllama`**, **`OllamaLLMParams`** (**`think`**, **`keep_alive`**), tools, streaming, structured **`format`**; **`nucleusiq>=0.7.10`**, **`ollama>=0.5,<1`** |
+
+### Ollama provider (alpha)
+
+- Official **`ollama`** Python SDK (**no LangChain**); **`OLLAMA_HOST`** / **`OLLAMA_API_KEY`** / **`OLLAMA_MODEL`** env passthrough patterns match monorepo examples.
+- Runnable matrix: **`src/providers/inference/ollama/examples/agents/`** (`00`–`03`).
+
+### Documentation
+
+- **[Ollama provider](../python/nucleusiq/guides/ollama-provider.md)** — Alpha scope, env, capabilities, limitations.
+- **[Ollama quickstart](../python/nucleusiq/examples/ollama-quickstart.md)** — DIRECT / STANDARD snippets.
+
+See the full [CHANGELOG.md on GitHub](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#0710--2026-05-09) for security notes and exhaustive lists.
 
 ## v0.7.9 highlights — 2026-05-07
 

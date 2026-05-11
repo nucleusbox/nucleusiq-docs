@@ -1,6 +1,6 @@
 # Structured output
 
-Parse agent responses into typed schemas using Pydantic, dataclass, or TypedDict. Works with **OpenAI**, **Gemini**, and **Groq** (`nucleusiq-groq` **0.1.0b1**, **`nucleusiq>=0.7.9`**) when the Groq model supports **`json_schema`** ([Groq structured outputs](https://console.groq.com/docs/structured-outputs); guide: [Groq provider](guides/groq-provider.md)).
+Parse agent responses into typed schemas using Pydantic, dataclass, or TypedDict. Works with **OpenAI**, **Gemini**, **Groq** (`nucleusiq-groq` **0.1.0b1**, **`nucleusiq>=0.7.9`**) when the Groq model supports **`json_schema`**, and **Ollama** via **`nucleusiq-ollama` 0.1.0a1** (**alpha**, **`nucleusiq>=0.7.10`**) when your Ollama model / server supports structured **`format`** — resolver wiring landed in **v0.7.10**. Guides: [Groq provider](guides/groq-provider.md), [Ollama provider](guides/ollama-provider.md).
 
 ## Pydantic model (recommended)
 

@@ -2,7 +2,7 @@
 
 Detailed practical examples for common NucleusIQ workflows.
 
-*Updated for v0.7.9+: curated examples use the mandatory `prompt=` API and current provider pins. See [migration notes](../learn/migration-notes.md) if upgrading from older releases.*
+*Updated for v0.7.10+: curated examples use the mandatory `prompt=` API and current provider pins. See [migration notes](../learn/migration-notes.md) if upgrading from older releases.*
 
 ## Getting started
 
@@ -23,7 +23,13 @@ Detailed practical examples for common NucleusIQ workflows.
 
 - [Gemini quickstart](gemini-quickstart.md) — Google Gemini with all three execution modes
 - [Groq quickstart](groq-quickstart.md) — Groq DIRECT / STANDARD / AUTONOMOUS (**`nucleusiq-groq` 0.1.0b1**, **`nucleusiq>=0.7.9`**)
+- [Ollama quickstart](ollama-quickstart.md) — Local Ollama DIRECT / STANDARD (**`nucleusiq-ollama` 0.1.0a1**, **`nucleusiq>=0.7.10`** — **alpha**)
 - [Groq provider guide](../guides/groq-provider.md) — Beta scope, **429** / **`Retry-After`**, **`strict_model_capabilities`**, repo scripts
+- [Ollama provider guide](../guides/ollama-provider.md) — Alpha scope, **`think`**, structured-output + tools caveat, repo matrix
+
+!!! tip "Which page for Ollama?"
+
+    Start with **[Ollama quickstart](ollama-quickstart.md)**; use **[Ollama provider](../guides/ollama-provider.md)** for the full capability matrix and env reference.
 
 !!! tip "Which Groq page?"
 
@@ -37,4 +43,5 @@ Full runnable scripts are available in the GitHub repository:
 - [OpenAI examples](https://github.com/nucleusbox/NucleusIQ/tree/main/src/providers/llms/openai/examples)
 - [Gemini examples](https://github.com/nucleusbox/NucleusIQ/tree/main/src/providers/llms/gemini/examples)
 - [Groq examples](https://github.com/nucleusbox/NucleusIQ/tree/main/src/providers/inference/groq/examples) — Direct through Autonomous + structured output
+- [Ollama examples](https://github.com/nucleusbox/NucleusIQ/tree/main/src/providers/inference/ollama/examples) — Smoke, Direct, streaming live, capabilities matrix (**alpha**)
 - [Notebooks](https://github.com/nucleusbox/NucleusIQ/tree/main/notebooks) — Jupyter notebooks for context management showcase and more

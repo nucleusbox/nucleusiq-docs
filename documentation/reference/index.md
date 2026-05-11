@@ -2,7 +2,7 @@
 
 Release and project reference documents.
 
-- [Changelog](changelog.md) — Version-by-version release history (latest: **v0.7.9**)
+- [Changelog](changelog.md) — Version-by-version release history (latest: **v0.7.10**)
 
 ## External links
 
@@ -11,4 +11,5 @@ Release and project reference documents.
 - [PyPI — nucleusiq-openai](https://pypi.org/project/nucleusiq-openai/)
 - [PyPI — nucleusiq-gemini](https://pypi.org/project/nucleusiq-gemini/)
 - [PyPI — nucleusiq-groq](https://pypi.org/project/nucleusiq-groq/)
+- [PyPI — nucleusiq-ollama](https://pypi.org/project/nucleusiq-ollama/)
 - [CONTRIBUTING.md](https://github.com/nucleusbox/NucleusIQ/blob/main/CONTRIBUTING.md)

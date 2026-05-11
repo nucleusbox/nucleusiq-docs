@@ -15,13 +15,13 @@ NucleusIQ uses provider packages so your agent code stays stable while model bac
 | `nucleusiq-openai` | LLM provider | **Active** — Chat Completions + Responses API | `pip install nucleusiq-openai` |
 | `nucleusiq-gemini` | LLM provider | **Active** — Google GenAI SDK (GA) | `pip install nucleusiq-gemini` |
 | `nucleusiq-groq` | Inference provider | **Beta** — Groq Chat Completions (`groq` SDK); **`nucleusiq>=0.7.9`** | `pip install nucleusiq-groq` |
+| `nucleusiq-ollama` | Inference provider | **Alpha** — Ollama **`/api/chat`** (`ollama` SDK); **`nucleusiq>=0.7.10`** | `pip install nucleusiq-ollama` |
 
 ## Planned providers
 
 | Package | Category | Target |
 |---------|----------|--------|
 | `nucleusiq-anthropic` | LLM provider | v0.7.0 |
-| `nucleusiq-ollama` | Inference provider | v0.7.0 |
 | `nucleusiq-chroma` | DB provider | Backlog |
 | `nucleusiq-pinecone` | DB provider | Backlog |
 
@@ -46,6 +46,10 @@ llm = BaseOpenAI(model_name="gpt-4o")
 # Or Groq (use async_mode=True with the official SDK path)
 # from nucleusiq_groq import BaseGroq
 # llm = BaseGroq(model_name="llama-3.3-70b-versatile", async_mode=True)
+
+# Or Ollama — local / hosted daemon (alpha package; async_mode=True)
+# from nucleusiq_ollama import BaseOllama
+# llm = BaseOllama(model_name="llama3.2", async_mode=True)
 
 agent = Agent(
     name="assistant",
@@ -106,6 +110,21 @@ Each provider has its own `LLMParams` subclass for provider-specific settings:
     )
     ```
 
+=== "Ollama"
+
+    ```python
+    from nucleusiq_ollama import OllamaLLMParams
+
+    config = AgentConfig(
+        llm_params=OllamaLLMParams(
+            temperature=0.7,
+            max_output_tokens=1024,
+            think="medium",
+            keep_alive="5m",
+        ),
+    )
+    ```
+
 Common parameters (`temperature`, `max_output_tokens`, `top_p`) are defined in the base `LLMParams` and work across all providers.
 
 ## Provider-native tools
@@ -117,6 +136,7 @@ Each provider can expose server-side tools:
 | OpenAI | `code_interpreter`, `file_search`, `web_search`, `image_generation`, `mcp`, `computer_use` |
 | Gemini | `google_search`, `code_execution`, `url_context`, `google_maps` |
 | Groq | **Phase A:** framework **`@tool`** / local function tools only — Groq built-in/hosted tools are **not** wired yet (see [Groq provider](guides/groq-provider.md)) |
+| Ollama | **Alpha:** framework **`@tool`** / function tools via Ollama **`/api/chat`** — no separate “native tool” factory yet ([Ollama provider](guides/ollama-provider.md)) |
 
 Native tools are accessed via provider-specific factories (`OpenAITool`, `GeminiTool`) and can be mixed with framework-level tools in the same agent.
 
@@ -127,11 +147,12 @@ All providers map SDK errors to NucleusIQ's [framework-level error taxonomy](cor
 ## Compatibility
 
 - The core package is versioned independently from provider packages.
-- Provider packages declare their minimum **`nucleusiq`** version (for example **`nucleusiq>=0.7.9`** for current OpenAI, Gemini, and Groq releases).
+- Provider packages declare their minimum **`nucleusiq`** version (for example **`nucleusiq>=0.7.9`** for OpenAI / Gemini / Groq wheels published with that floor; **`nucleusiq-ollama`** requires **`>=0.7.10`**).
 - Always keep provider versions compatible with your installed `nucleusiq` version.
 
 ## See also
 
+- [Ollama provider guide](guides/ollama-provider.md) — Ollama alpha scope, env, **`think`**, examples
 - [Groq provider guide](guides/groq-provider.md) — Groq Chat Completions, beta scope, rate limits, examples
 - [Gemini provider guide](guides/gemini-provider.md) — Full Gemini integration details
 - [OpenAI provider guide](guides/openai-provider.md) — Full OpenAI integration details
