@@ -2,7 +2,7 @@
 
 > NucleusIQ is an open-source, agent-first Python framework with execution modes, built-in tools, and provider-agnostic LLM support — so you can build agents that adapt to your workflow without lock-in.
 
-NucleusIQ is the practical way to build AI agents that work in real environments. Connect to OpenAI, Google Gemini, Groq, **Ollama** (local inference), or MockLLM for testing — with the same agent code. NucleusIQ provides three execution modes, built-in file tools, the `@tool` decorator, memory strategies, plugins, streaming, structured output, usage tracking, cost estimation, and **context window management**.
+NucleusIQ is the practical way to build AI agents that work in real environments. Connect to OpenAI, Google Gemini, **Anthropic Claude**, Groq, **Ollama** (local inference), or MockLLM for testing — with the same agent code. NucleusIQ provides three execution modes, built-in file tools, the `@tool` decorator, memory strategies, plugins, streaming, structured output, usage tracking, cost estimation, and **context window management**.
 
 !!! tip "Direct vs Standard vs Autonomous"
     NucleusIQ uses the **Gearbox Strategy** — three execution modes that scale from simple chat to autonomous reasoning:
@@ -76,6 +76,33 @@ NucleusIQ agents support memory, streaming, structured output, cost tracking, an
     result = asyncio.run(
         agent.execute(Task(id="t2", objective="What is the capital of France?"))
     )
+    print(result.output)
+    ```
+
+=== "With Anthropic"
+
+    ```python
+    import asyncio
+    from nucleusiq.agents import Agent
+    from nucleusiq.agents.config import AgentConfig, ExecutionMode
+    from nucleusiq.agents.task import Task
+    from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+    from nucleusiq_anthropic import BaseAnthropic
+
+    agent = Agent(
+        name="analyst",
+        prompt=ZeroShotPrompt().configure(
+            system="You are a helpful data analyst.",
+        ),
+        llm=BaseAnthropic(model_name="claude-3-5-sonnet-20241022", async_mode=True),
+        config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
+    )
+
+    async def _run():
+        await agent.initialize()
+        return await agent.execute(Task(id="t-claude", objective="What is the capital of France?"))
+
+    result = asyncio.run(_run())
     print(result.output)
     ```
 
@@ -162,7 +189,7 @@ See the [Install](install.md) and [Quickstart](quickstart.md) guides to get star
 
 -   :material-swap-horizontal: **Provider-portable**
     ---
-    Swap OpenAI, Gemini, Groq, Ollama, or Mock LLMs with one line. Same agent, same tools, same plugins.
+    Swap OpenAI, Gemini, Anthropic, Groq, Ollama, or Mock LLMs with one line. Same agent, same tools, same plugins.
     [:octicons-arrow-right-24: Providers](providers.md)
 
 -   :material-cog: **Execution modes**

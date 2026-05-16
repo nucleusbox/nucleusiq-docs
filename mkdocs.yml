@@ -90,6 +90,7 @@ nav:
     - File handling: python/nucleusiq/guides/file-handling.md
     - OpenAI provider: python/nucleusiq/guides/openai-provider.md
     - Gemini provider: python/nucleusiq/guides/gemini-provider.md
+    - Anthropic provider: python/nucleusiq/guides/anthropic-provider.md
     - Groq provider: python/nucleusiq/guides/groq-provider.md
     - Ollama provider: python/nucleusiq/guides/ollama-provider.md
   - Tools:
@@ -117,6 +118,7 @@ nav:
     - Usage tracking: python/nucleusiq/examples/usage-tracking.md
     - Cost estimation: python/nucleusiq/examples/cost-estimation.md
     - Gemini quickstart: python/nucleusiq/examples/gemini-quickstart.md
+    - Anthropic quickstart: python/nucleusiq/examples/anthropic-quickstart.md
     - Groq quickstart: python/nucleusiq/examples/groq-quickstart.md
     - Ollama quickstart: python/nucleusiq/examples/ollama-quickstart.md
   - Reference:

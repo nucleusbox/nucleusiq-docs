@@ -4,8 +4,8 @@ A step-by-step learning sequence for new NucleusIQ users.
 
 ## 1. Install and run
 
-- [Install NucleusIQ](../install.md) — Core + provider package (**OpenAI**, **Gemini**, **Groq**, **Ollama**, etc.)
-- [Quickstart](../quickstart.md) — Run your first agent in minutes (includes **Groq** + **Ollama** sections)
+- [Install NucleusIQ](../install.md) — Core + provider package (**OpenAI**, **Gemini**, **Anthropic**, **Groq**, **Ollama**, etc.)
+- [Quickstart](../quickstart.md) — Run your first agent in minutes (includes **Anthropic**, **Groq**, **Ollama** sections)
 
 ## 2. Add tools
 
@@ -32,6 +32,7 @@ A step-by-step learning sequence for new NucleusIQ users.
 
 - [Provider portability](../providers.md) — Same agent code, different LLM
 - [Gemini quickstart example](../examples/gemini-quickstart.md) — All three modes with Gemini
+- [Anthropic quickstart](../examples/anthropic-quickstart.md) — Claude Messages API (**alpha**)
 - [Groq quickstart](../examples/groq-quickstart.md) — Cloud inference (**beta**)
 - [Ollama quickstart](../examples/ollama-quickstart.md) — Local **`/api/chat`** (**alpha**)
 

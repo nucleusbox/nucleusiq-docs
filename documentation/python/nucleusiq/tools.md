@@ -6,7 +6,7 @@ NucleusIQ provides three ways to create tools:
 
 1. **`@tool` decorator** — create tools from plain functions (recommended for most cases)
 2. **`BaseTool` subclass** — full control with custom initialization and execution
-3. **Provider native tools** — server-side tools from OpenAI and Gemini (Groq and **Ollama** route tool calls through **`@tool`** / function tools today — see [Tool integration patterns](tools/integration.md))
+3. **Provider native tools** — server-side tools from OpenAI and Gemini (**Anthropic**, Groq, and **Ollama** route tool calls through **`@tool`** / function tools in Phase A — see [Tool integration patterns](tools/integration.md))
 
 ## @tool decorator (v0.6.0+)
 
@@ -198,6 +198,7 @@ agent = Agent(
 - [`@tool` decorator guide](tools/tool-decorator.md) — Full decorator documentation
 - [Built-in tools](tools/built-in.md) — File tool details
 - [File handling guide](guides/file-handling.md) — Attachment vs Tool vs Both
-- [Tool integration patterns](tools/integration.md) — Advanced patterns (includes **Ollama** alpha)
+- [Anthropic provider](guides/anthropic-provider.md) — Claude Messages API (**alpha**)
+- [Tool integration patterns](tools/integration.md) — Advanced patterns (includes **Anthropic** alpha)
 - [Ollama provider](guides/ollama-provider.md) — Capability matrix for local inference (**alpha**)
 - [Attachments](attachments.md) — File-as-context for prompts

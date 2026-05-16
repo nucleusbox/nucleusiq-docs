@@ -74,7 +74,15 @@ Choose your path based on where you are today:
 
 ## What's new in v0.7.x
 
-### v0.7.10 (latest)
+### Anthropic Claude (alpha preview)
+
+!!! info "New provider package — `nucleusiq-anthropic` 0.1.0a1"
+
+    **Claude** via the **Messages API** and official **`anthropic`** Python SDK — **`BaseAnthropic`**, **`@tool`** loops, streaming, native **JSON Schema** outputs when supported, and **`retry_policy`**-aware errors. Requires **`nucleusiq>=0.7.10`**. Ships from **[Unreleased](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#unreleased)** until the next tagged release.
+
+    [Anthropic provider](python/nucleusiq/guides/anthropic-provider.md){ .md-button } · [Anthropic quickstart](python/nucleusiq/examples/anthropic-quickstart.md){ .md-button } · [Changelog — preview](reference/changelog.md){ .md-button }
+
+### v0.7.10 (latest tagged core)
 
 !!! success "Core security extras + Ollama alpha"
     - **`nucleusiq` 0.7.10** — optional **`nucleusiq[http]`**; **`urllib3`** resolution hardening in locks; structured-output resolver recognizes **Ollama** / Groq LLMs for **`OutputSchema`** payloads.
@@ -169,7 +177,7 @@ Choose your path based on where you are today:
 - **AgentResult response contract** — typed, immutable Pydantic model
 - **Gemini tool-calling fixes** — `$ref`/`$defs` inlining
 
-Current packages: `nucleusiq` **0.7.10**, `nucleusiq-openai` **0.6.4**, `nucleusiq-gemini` **0.2.6**, `nucleusiq-groq` **0.1.0b1** (optional beta), `nucleusiq-ollama` **0.1.0a1** (optional alpha)
+Current packages: `nucleusiq` **0.7.10**, `nucleusiq-openai` **0.6.4**, `nucleusiq-gemini` **0.2.6**, `nucleusiq-anthropic` **0.1.0a1** (optional **alpha** preview), `nucleusiq-groq` **0.1.0b1** (optional beta), `nucleusiq-ollama` **0.1.0a1** (optional alpha)
 
 See the [full changelog](reference/changelog.md).
 

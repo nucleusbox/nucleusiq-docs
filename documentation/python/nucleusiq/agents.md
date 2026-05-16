@@ -42,6 +42,24 @@ An agent is a managed runtime with memory, tools, policy, streaming, structure, 
     )
     ```
 
+=== "With Anthropic (Claude)"
+
+    ```python
+    from nucleusiq.agents import Agent
+    from nucleusiq.agents.config import AgentConfig, ExecutionMode
+    from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+    from nucleusiq_anthropic import BaseAnthropic
+
+    agent = Agent(
+        name="analyst",
+        prompt=ZeroShotPrompt().configure(
+            system="You are a data analyst. Answer questions accurately.",
+        ),
+        llm=BaseAnthropic(model_name="claude-3-5-sonnet-20241022", async_mode=True),
+        config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
+    )
+    ```
+
 === "With Groq"
 
     ```python
@@ -92,13 +110,17 @@ An agent is a managed runtime with memory, tools, policy, streaming, structure, 
     )
     ```
 
+!!! tip "Async inference backends (`BaseAnthropic`, `BaseGroq`, `BaseOllama`)"
+
+    Call **`await agent.initialize()`** before **`await agent.execute(...)`** so startup matches the runnable scripts and provider guides.
+
 ## Agent fields
 
 | Field | Required | Description |
 |-------|----------|-------------|
 | `name` | Yes | Human-readable identifier |
 | `prompt` | **Yes** | `BasePrompt` instance — the single source of truth for what the LLM sees. Use `ZeroShotPrompt().configure(system="...")` or any prompt technique. |
-| `llm` | Yes | Model backend (`BaseOpenAI`, `BaseGemini`, `BaseGroq`, `BaseOllama`, `MockLLM`, …) |
+| `llm` | Yes | Model backend (`BaseOpenAI`, `BaseGemini`, `BaseAnthropic`, `BaseGroq`, `BaseOllama`, `MockLLM`, …) |
 | `config` | No | `AgentConfig` — execution mode, timeouts, context management |
 | `tools` | No | List of tools the agent can call |
 | `memory` | No | Conversation memory strategy |
@@ -239,7 +261,7 @@ except NucleusIQError as e:
 - [Prompts](prompts.md) — Prompt techniques and configuration
 - [Tools](tools.md) — `@tool` decorator, built-in tools, and provider native tools
 - [Memory](memory.md) — Conversation history strategies
-- [Providers](providers.md) — Provider matrix (OpenAI, Gemini, Groq, Ollama, …)
+- [Providers](providers.md) — Provider matrix (OpenAI, Gemini, Anthropic, Groq, Ollama, …)
 - [Usage tracking](usage-tracking.md) — Token usage by purpose and origin
 - [Cost estimation](observability/cost-estimation.md) — Dollar cost tracking
 - [Error handling](core-concepts/error-handling.md) — Framework error taxonomy

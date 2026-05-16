@@ -26,5 +26,6 @@ Then continue with:
 
 Same **`Agent`** code works across packages — pick an install tab in [Installation](../install.md), then:
 
+- [Anthropic provider](../guides/anthropic-provider.md) · [Anthropic quickstart](../examples/anthropic-quickstart.md) — Claude Messages API (**alpha** `nucleusiq-anthropic`, **`nucleusiq>=0.7.10`**)
 - [Groq provider](../guides/groq-provider.md) · [Groq quickstart](../examples/groq-quickstart.md) — cloud (**beta** `nucleusiq-groq`)
 - [Ollama provider](../guides/ollama-provider.md) · [Ollama quickstart](../examples/ollama-quickstart.md) — local / self-hosted (**alpha** `nucleusiq-ollama`, **`nucleusiq>=0.7.10`**)

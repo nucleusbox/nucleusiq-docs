@@ -129,6 +129,55 @@ asyncio.run(main())
 
 Set **`GROQ_API_KEY`** in your environment or `.env` file. Full scope, **429** / **`Retry-After`** behavior, model-capability checks, and example scripts: [Groq provider](guides/groq-provider.md).
 
+## With Anthropic (Claude)
+
+!!! warning "Alpha provider"
+
+    **`nucleusiq-anthropic` 0.1.0a1** — pre-release. Requires **`nucleusiq>=0.7.10`**, **`anthropic>=0.40,<1`**. Set **`ANTHROPIC_API_KEY`**; optional **`ANTHROPIC_MODEL`** if the default id is not enabled for your org.
+
+Uses **`BaseAnthropic`** + **`async_mode=True`**, framework **`LLMParams`** on **`AgentConfig`** for sampling, and **`await agent.initialize()`** before **`execute()`**, matching the monorepo scripts. More patterns: **[Anthropic quickstart](examples/anthropic-quickstart.md)** and **[Anthropic provider](guides/anthropic-provider.md)**.
+
+```python
+import asyncio
+import os
+
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.agents.task import Task
+from nucleusiq.llms.llm_params import LLMParams
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+from nucleusiq_anthropic import BaseAnthropic
+
+
+async def main():
+    llm = BaseAnthropic(
+        model_name=os.getenv("ANTHROPIC_MODEL", "claude-3-5-sonnet-20241022"),
+        async_mode=True,
+    )
+
+    agent = Agent(
+        name="Assistant",
+        prompt=ZeroShotPrompt().configure(
+            system="You are a helpful assistant.",
+        ),
+        llm=llm,
+        config=AgentConfig(
+            execution_mode=ExecutionMode.STANDARD,
+            llm_params=LLMParams(temperature=0.4, max_output_tokens=512),
+        ),
+    )
+
+    await agent.initialize()
+
+    result = await agent.execute(
+        Task(id="q-claude-1", objective="What is the capital of France?"),
+    )
+    print(result.output)
+
+
+asyncio.run(main())
+```
+
 ## With Ollama
 
 !!! warning "Alpha provider"
@@ -269,7 +318,7 @@ See [Context management](context-management.md) for the full guide.
 - [Prompts](prompts.md) — Prompt techniques and the mandatory prompt system
 - [Context management](context-management.md) — Context window management
 - [Tools](tools.md) — Built-in tools, `@tool` decorator, and provider native tools
-- [Providers](providers.md) — OpenAI, Gemini, Groq, Ollama, and provider portability
+- [Providers](providers.md) — OpenAI, Gemini, Anthropic, Groq, Ollama, and provider portability
 - [Usage tracking](usage-tracking.md) — Token usage and cost estimation
 - [Plugins](plugins/overview.md) — 10 built-in plugins for guardrails and control
-- [Examples](examples/index.md) — Practical patterns (**[Groq quickstart](examples/groq-quickstart.md)**, **[Ollama quickstart](examples/ollama-quickstart.md)**)
+- [Examples](examples/index.md) — Practical patterns (**[Anthropic quickstart](examples/anthropic-quickstart.md)**, **[Groq quickstart](examples/groq-quickstart.md)**, **[Ollama quickstart](examples/ollama-quickstart.md)**)

@@ -1,6 +1,6 @@
 # Example: Basic Agent
 
-Patterns with **OpenAI** and **Gemini**. For **Groq** or **local Ollama**, use the same `Agent(...)` shape — see [Groq quickstart](groq-quickstart.md) and [Ollama quickstart](ollama-quickstart.md) (**alpha**).
+Patterns with **OpenAI** and **Gemini**. For **Groq**, **Anthropic Claude** (**alpha**), or **local Ollama** (**alpha**), use the same `Agent(...)` shape — see [Groq quickstart](groq-quickstart.md), [Anthropic quickstart](anthropic-quickstart.md), and [Ollama quickstart](ollama-quickstart.md).
 
 *Updated for v0.7.6: `prompt` is now mandatory.*
 
@@ -128,8 +128,9 @@ asyncio.run(main())
 
 ## See also
 
-- [Quickstart](../quickstart.md) — Full setup guide (Groq + Ollama sections)
+- [Quickstart](../quickstart.md) — Full setup guide (Anthropic + Groq + Ollama sections)
 - [Context management](../context-management.md) — Context window management guide
 - [Gemini quickstart](gemini-quickstart.md) — All three gearbox modes with Gemini
+- [Anthropic quickstart](anthropic-quickstart.md) — Claude (**alpha**)
 - [Groq quickstart](groq-quickstart.md) — Cloud inference (**beta**)
 - [Ollama quickstart](ollama-quickstart.md) — Local inference (**alpha**)

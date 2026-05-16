@@ -2,8 +2,22 @@
 
 All notable changes to NucleusIQ are documented in the [CHANGELOG.md](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md) in the repository root.
 
+## Preview — Anthropic Claude (**alpha**)
+
+Shipped under **[Unreleased](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md)** until the next tagged core release:
+
+- **`nucleusiq-anthropic` 0.1.0a1** — **`BaseAnthropic`**, **`AnthropicLLMParams`** (**`top_k`**, beta headers, **`extra_headers`**), Messages API wiring, **`@tool`** loops, streaming (**`StreamEvent`**), native **JSON Schema** structured outputs (**`output_config.format`**) when the model supports them; SDK errors → **`nucleusiq.llms.errors`** with **`retry_policy`** (**`Retry-After`** aware). Requires **`nucleusiq>=0.7.10`**, **`anthropic>=0.40,<1`**. **100+** unit tests in CI.
+
+### Documentation
+
+- **[Anthropic provider](../python/nucleusiq/guides/anthropic-provider.md)** — Alpha announcement, capability matrix, env, structured-output caveats.
+- **[Anthropic quickstart](../python/nucleusiq/examples/anthropic-quickstart.md)** — DIRECT / STANDARD / AUTONOMOUS snippets.
+
+Runnable scripts: **`src/providers/llms/anthropic/examples/agents/`** (`01`–`09`) plus **`output_parsers/anthropic_native_structured_example.py`**.
+
 ## Recent releases
 
+- **[Unreleased / Anthropic alpha](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#unreleased)** — **`nucleusiq-anthropic` 0.1.0a1** (**Messages API**, official **`anthropic`** SDK)
 - **[0.7.10](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#0710)** — **`nucleusiq[http]`** optional extra + **`urllib3`** lock hygiene; structured-output resolver (**Ollama** / Groq); **`nucleusiq-ollama` 0.1.0a1** (**alpha**, **`nucleusiq>=0.7.10`**)
 - **[0.7.9](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#079)** — **`retry_policy`** (429 **`Retry-After`** across Groq/OpenAI/Gemini), **`nucleusiq-groq` 0.1.0b1** public beta (`strict_model_capabilities`, streaming-open parity); **`nucleusiq-openai` 0.6.4**, **`nucleusiq-gemini` 0.2.6** (`nucleusiq>=0.7.9`)
 - **[0.7.8](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#078)** — Run-local context state (workspace, evidence, lexical corpus), L4.5 activation, phase/evidence gate, synthesis package, tool-result serialization fix, autonomous Critic/Refiner wiring; **`nucleusiq-groq` 0.1.0a1** (since superseded by **0.1.0b1**)

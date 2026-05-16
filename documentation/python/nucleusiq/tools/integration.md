@@ -1,6 +1,6 @@
 # Tool integration patterns
 
-Every pattern below uses the **mandatory** `prompt=` argument (see [migration notes](../learn/migration-notes.md)). Swap **`BaseOpenAI`**, **`BaseGemini`**, **`BaseGroq`** (`async_mode=True`), **`BaseOllama`** (`async_mode=True`), and model names to match your provider — see [Providers](../providers.md), [Groq provider](../guides/groq-provider.md), and [Ollama provider](../guides/ollama-provider.md).
+Every pattern below uses the **mandatory** `prompt=` argument (see [migration notes](../learn/migration-notes.md)). Swap **`BaseOpenAI`**, **`BaseGemini`**, **`BaseAnthropic`** (`async_mode=True`), **`BaseGroq`** (`async_mode=True`), **`BaseOllama`** (`async_mode=True`), and model names to match your provider — see [Providers](../providers.md), [Anthropic provider](../guides/anthropic-provider.md), [Groq provider](../guides/groq-provider.md), and [Ollama provider](../guides/ollama-provider.md).
 
 ## Pattern 1: @tool decorator + file tools
 
@@ -223,5 +223,7 @@ asyncio.run(main())
 
 - [Tools overview](../tools.md) — All tool types
 - [`@tool` decorator](tool-decorator.md) — Create tools from functions
+- [Anthropic provider](../guides/anthropic-provider.md) — Alpha Messages API, structured-output caveats
+- [Groq provider](../guides/groq-provider.md) — Beta Chat Completions patterns
 - [Ollama provider](../guides/ollama-provider.md) — Alpha limits, **`think`**, structured output
 - [MCP integration guide](../guides/mcp-integration.md) — Full MCP setup

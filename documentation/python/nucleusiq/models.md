@@ -8,6 +8,7 @@ NucleusIQ uses a **provider-agnostic** `BaseLLM` interface. Swap providers witho
 |----------|---------|---------|
 | OpenAI | `nucleusiq-openai` | `pip install nucleusiq-openai` |
 | Google Gemini | `nucleusiq-gemini` | `pip install nucleusiq-gemini` |
+| Anthropic Claude | `nucleusiq-anthropic` | `pip install nucleusiq-anthropic` |
 | Groq | `nucleusiq-groq` | `pip install nucleusiq-groq` |
 | Ollama | `nucleusiq-ollama` | `pip install nucleusiq-ollama` |
 | Mock (testing) | Built-in | `from nucleusiq.core.llms.mock_llm import MockLLM` |
@@ -28,6 +29,14 @@ NucleusIQ uses a **provider-agnostic** `BaseLLM` interface. Swap providers witho
     from nucleusiq_gemini import BaseGemini
 
     llm = BaseGemini(model_name="gemini-2.5-flash")
+    ```
+
+=== "Anthropic"
+
+    ```python
+    from nucleusiq_anthropic import BaseAnthropic
+
+    llm = BaseAnthropic(model_name="claude-3-5-sonnet-20241022", async_mode=True)
     ```
 
 === "Groq"
@@ -79,6 +88,12 @@ NucleusIQ uses a **provider-agnostic** `BaseLLM` interface. Swap providers witho
 | `gemini-1.5-pro` | 2M tokens | No |
 | `gemini-1.5-flash` | 1M tokens | No |
 
+### Anthropic (Claude)
+
+Model IDs are **org-specific** — use [**Models API**](https://platform.claude.com/docs/en/api/models/list) or the monorepo helper **`09_anthropic_list_models.py`**. Examples often default to **`claude-3-5-sonnet-20241022`**.
+
+Alpha package **`nucleusiq-anthropic` 0.1.0a1** requires **`nucleusiq>=0.7.10`** and the official **`anthropic`** SDK (`>=0.40,<1`). See [Anthropic provider guide](guides/anthropic-provider.md).
+
 ### Groq
 
 Groq rotates **Llama**, **Mixtral**, **Qwen**, **GPT-OSS**, and other checkpoints frequently — see [Groq models](https://console.groq.com/docs/models). Typical starter IDs:
@@ -119,7 +134,7 @@ config = AgentConfig(
 agent = Agent(
     name="configured-agent",
     prompt=ZeroShotPrompt().configure(system="You are a helpful assistant."),
-    llm=llm,  # e.g. BaseOpenAI / BaseGemini / BaseGroq / BaseOllama from the sections above
+    llm=llm,  # e.g. BaseOpenAI / BaseGemini / BaseAnthropic / BaseGroq / BaseOllama from the sections above
     config=config,
 )
 ```
@@ -150,6 +165,18 @@ Use provider-specific parameter classes for advanced settings:
         ),
     )
     ```
+
+=== "Anthropic"
+
+    ```python
+    from nucleusiq.llms.llm_params import LLMParams
+
+    config = AgentConfig(
+        llm_params=LLMParams(temperature=0.5, max_output_tokens=1024),
+    )
+    ```
+
+    **`AnthropicLLMParams`** (**`top_k`**, beta headers) attaches to **`BaseAnthropic`** — see [Anthropic provider](guides/anthropic-provider.md).
 
 === "Groq"
 
@@ -204,6 +231,17 @@ Override parameters for a single execution:
     )
     ```
 
+=== "Anthropic"
+
+    ```python
+    from nucleusiq.llms.llm_params import LLMParams
+
+    result = await agent.execute(
+        task,
+        llm_params=LLMParams(temperature=0.0, max_output_tokens=512),
+    )
+    ```
+
 === "Groq"
 
     ```python
@@ -231,6 +269,7 @@ Override parameters for a single execution:
 - [Providers](providers.md) — Provider architecture and portability
 - [OpenAI provider guide](guides/openai-provider.md) — OpenAI-specific features
 - [Gemini provider guide](guides/gemini-provider.md) — Gemini-specific features
+- [Anthropic provider guide](guides/anthropic-provider.md) — Claude Messages API (**alpha**), structured outputs, retries
 - [Groq provider guide](guides/groq-provider.md) — Groq Chat Completions (beta), **`strict_model_capabilities`**, rate limits
 - [Ollama provider guide](guides/ollama-provider.md) — Ollama alpha, **`think`**, structured output cautions
 - [Install](install.md) — Setup instructions

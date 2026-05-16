@@ -25,6 +25,10 @@ nucleusiq-groq       # Provider package (public beta)
 nucleusiq-ollama     # Provider package (alpha)
 ├── BaseOllama       # Implements BaseLLM (Ollama /api/chat)
 └── OllamaLLMParams  # Extends LLMParams
+
+nucleusiq-anthropic  # Provider package (alpha)
+├── BaseAnthropic    # Implements BaseLLM (Claude Messages API)
+└── AnthropicLLMParams  # top_k, anthropic_beta, extra_headers (merged on BaseAnthropic)
 ```
 
 ## Usage
@@ -41,6 +45,14 @@ nucleusiq-ollama     # Provider package (alpha)
     ```python
     from nucleusiq_gemini import BaseGemini
     llm = BaseGemini(model_name="gemini-2.5-flash")
+    ```
+
+=== "Anthropic"
+
+    ```python
+    from nucleusiq_anthropic import BaseAnthropic
+
+    llm = BaseAnthropic(model_name="claude-3-5-sonnet-20241022", async_mode=True)
     ```
 
 === "Groq"
@@ -94,6 +106,19 @@ Three levels of control — use what you need:
     )
     ```
 
+=== "Anthropic"
+
+    ```python
+    from nucleusiq.agents.config import AgentConfig
+    from nucleusiq.llms.llm_params import LLMParams
+
+    config = AgentConfig(
+        llm_params=LLMParams(temperature=0.2, max_output_tokens=1024),
+    )
+    ```
+
+    Use **`AnthropicLLMParams`** on **`BaseAnthropic`** for **`top_k`** / beta headers — see [Anthropic provider](../guides/anthropic-provider.md).
+
 === "Groq"
 
     ```python
@@ -133,7 +158,7 @@ These parameters work across all providers:
 | `max_output_tokens` | Maximum tokens in the response |
 | `top_p` | Nucleus sampling threshold |
 
-Provider-specific parameters (for example **`reasoning_effort`** for OpenAI, **`thinking_config`** for Gemini, **`parallel_tool_calls`** for Groq, **`think`** / **`keep_alive`** for Ollama) are defined in the provider's **`LLMParams`** subclass.
+Provider-specific parameters (for example **`reasoning_effort`** for OpenAI, **`thinking_config`** for Gemini, **`parallel_tool_calls`** for Groq, **`think`** / **`keep_alive`** for Ollama, **`top_k`** / beta headers for Anthropic **`AnthropicLLMParams`**) are defined in the provider's **`LLMParams`** subclass **or** on **`BaseAnthropic`** as documented in the Anthropic guide.
 
 ## Error contract
 
@@ -152,6 +177,7 @@ except RateLimitError:
 ## See also
 
 - [Providers](../providers.md) — Full provider architecture
+- [Anthropic provider guide](../guides/anthropic-provider.md) — Claude Messages API (**alpha**), **`nucleusiq>=0.7.10`**
 - [Ollama provider guide](../guides/ollama-provider.md) — Ollama alpha (**`nucleusiq>=0.7.10`**)
 - [Groq provider guide](../guides/groq-provider.md) — Groq Chat Completions (beta), **`retry_policy`** alignment (**v0.7.9+**)
 - [Models](../models.md) — Available models per provider
