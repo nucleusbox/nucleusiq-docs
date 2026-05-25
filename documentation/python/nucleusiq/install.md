@@ -69,6 +69,30 @@ NucleusIQ providers live in independent packages. Install the ones you need:
     pip install nucleusiq nucleusiq-openai nucleusiq-gemini nucleusiq-groq
     ```
 
+## Tool adapters
+
+=== "MCP (Model Context Protocol)"
+
+    ```bash
+    # Recommended — through the core extras
+    pip install "nucleusiq[mcp]" nucleusiq-anthropic     # or any provider
+
+    # Or pin the adapter directly
+    pip install "nucleusiq>=0.7.11" "nucleusiq-mcp==0.1.0b1"
+    ```
+
+    **Beta** — universal MCP adapter built on the official **`mcp`** SDK. Works with **every** provider (OpenAI, Anthropic, Gemini, Groq, Ollama). Supports **stdio + Streamable HTTP + SSE** transports and Bearer / OAuth 2.1 / Env / custom-header auth. Requires **`nucleusiq>=0.7.11`** and **`mcp>=1.27,<2`**. See the [MCP integration guide](guides/mcp-integration.md).
+
+    **Node.js + `npx` 18+** are required if you connect to **stdio** servers shipped as `@modelcontextprotocol/server-...` npm packages.
+
+=== "Legacy (OpenAI server-side MCP)"
+
+    ```bash
+    pip install nucleusiq nucleusiq-openai
+    ```
+
+    Uses **`OpenAITool.mcp(...)`** from `nucleusiq-openai`. The MCP server is reached by **OpenAI's Responses API**, not your process. OpenAI provider only — for cross-provider use, prefer **`nucleusiq-mcp`** above. See **[MCP integration guide → When to use which](guides/mcp-integration.md#when-to-use-which)**.
+
 ### Optional dependencies
 
 ```bash
@@ -106,6 +130,11 @@ try:
     print(f"nucleusiq-ollama: {version('nucleusiq-ollama')}")
 except PackageNotFoundError:
     print("nucleusiq-ollama: (not installed)")
+
+try:
+    print(f"nucleusiq-mcp: {version('nucleusiq-mcp')}")
+except PackageNotFoundError:
+    print("nucleusiq-mcp: (not installed)")
 ```
 
 ## Environment variables
@@ -147,6 +176,17 @@ except PackageNotFoundError:
     # export OLLAMA_MODEL=llama3.2
     ```
 
+=== "MCP (server-specific)"
+
+    ```bash
+    # MCP servers each have their own env requirements. Common ones:
+    export GITHUB_PERSONAL_ACCESS_TOKEN=ghp_...   # @modelcontextprotocol/server-github
+    export SLACK_BOT_TOKEN=xoxb-...                # mcp.slack.com
+    # OAuth servers — handled by the OAuthAuth strategy at runtime; no env required.
+    ```
+
+    See the **[MCP integration guide](guides/mcp-integration.md)** for the four auth strategies (`BearerAuth`, `OAuthAuth`, `EnvAuth`, `CustomHeadersAuth`).
+
 Or create a `.env` file in your project root:
 
 ```
@@ -166,12 +206,13 @@ NucleusIQ is a monorepo with independently installable packages:
 
 | Package | Version | Description | Depends on |
 |---------|---------|-------------|-----------|
-| `nucleusiq` | **0.7.10** | Core framework; optional **`nucleusiq[http]`**; structured-output resolver recognizes Groq / Ollama; **`get_provider_from_llm`** detects **`BaseAnthropic`** for Claude (**alpha** package ships next to core — pin **`nucleusiq>=0.7.10`**) | — |
+| `nucleusiq` | **0.7.11** | Core framework; optional **`nucleusiq[http]`**, **`nucleusiq[mcp]`**; **`ExpandableTool`** protocol + parallel-safe **`Agent.initialize()`** + **`ToolCallRecord.source`** plumbing; structured-output resolver recognizes Groq / Ollama / Anthropic | — |
 | `nucleusiq-openai` | **0.6.4** | OpenAI provider | `nucleusiq>=0.7.9` |
 | `nucleusiq-gemini` | **0.2.6** | Google Gemini provider | `nucleusiq>=0.7.9` |
 | `nucleusiq-anthropic` | **0.1.0a1** (alpha) | Claude Messages API (`anthropic` SDK) | `nucleusiq>=0.7.10`, `anthropic>=0.40,<1` |
 | `nucleusiq-groq` | **0.1.0b1** (beta) | Groq Chat Completions (`groq` SDK) | `nucleusiq>=0.7.9`, `groq>=1.2,<2` |
 | `nucleusiq-ollama` | **0.1.0a1** (alpha) | Ollama `/api/chat` (`ollama` SDK) | `nucleusiq>=0.7.10`, `ollama>=0.5,<1` |
+| `nucleusiq-mcp` | **0.1.0b1** (beta) | Universal Model Context Protocol adapter (official `mcp` SDK); stdio + Streamable HTTP + SSE; OAuth/Bearer/Env auth | `nucleusiq>=0.7.11`, `mcp>=1.27,<2` |
 
 Install the core first, then add providers as needed.
 
@@ -205,6 +246,10 @@ uv venv && uv sync --all-groups
 
 # Ollama provider (alpha)
 cd ../ollama
+uv venv && uv sync --all-groups
+
+# MCP tool adapter (beta — universal Model Context Protocol client)
+cd ../../tools/mcp
 uv venv && uv sync --all-groups
 ```
 

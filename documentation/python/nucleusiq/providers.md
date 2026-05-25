@@ -18,6 +18,16 @@ NucleusIQ uses provider packages so your agent code stays stable while model bac
 | `nucleusiq-groq` | Inference provider | **Beta** — Groq Chat Completions (`groq` SDK); **`nucleusiq>=0.7.9`** | `pip install nucleusiq-groq` |
 | `nucleusiq-ollama` | Inference provider | **Alpha** — Ollama **`/api/chat`** (`ollama` SDK); **`nucleusiq>=0.7.10`** | `pip install nucleusiq-ollama` |
 
+## Tool adapters
+
+NucleusIQ also ships **tool adapters** — provider-agnostic packages that expose external systems as `BaseTool` instances. They work with **every** LLM provider listed above.
+
+| Package | Category | Status | Install |
+|---------|----------|--------|---------|
+| `nucleusiq-mcp` | Tool adapter | **Beta** — Universal **[Model Context Protocol](https://modelcontextprotocol.io/)** client built on the official `mcp` SDK; stdio + Streamable HTTP + SSE transports; Bearer / OAuth 2.1 / Env / custom auth; **`nucleusiq>=0.7.11`** | `pip install "nucleusiq[mcp]"` |
+
+See the **[MCP integration guide](guides/mcp-integration.md)** for the full universal-adapter walkthrough and the comparison to **OpenAI's server-side MCP** path.
+
 ## Planned providers
 
 | Package | Category | Target |
@@ -156,13 +166,30 @@ Each provider can expose server-side tools:
 
 | Provider | Native tools |
 |----------|-------------|
-| OpenAI | `code_interpreter`, `file_search`, `web_search`, `image_generation`, `mcp`, `computer_use` |
+| OpenAI | `code_interpreter`, `file_search`, `web_search`, `image_generation`, `mcp` (server-side), `computer_use` |
 | Gemini | `google_search`, `code_execution`, `url_context`, `google_maps` |
 | Anthropic | **Alpha:** framework **`@tool`** / local tools — Claude **server-side** tools (**`web_search`**, …) are **not** wired yet ([Anthropic provider](guides/anthropic-provider.md)) |
 | Groq | **Phase A:** framework **`@tool`** / local function tools only — Groq built-in/hosted tools are **not** wired yet (see [Groq provider](guides/groq-provider.md)) |
 | Ollama | **Alpha:** framework **`@tool`** / function tools via Ollama **`/api/chat`** — no separate “native tool” factory yet ([Ollama provider](guides/ollama-provider.md)) |
 
 Native tools are accessed via provider-specific factories (`OpenAITool`, `GeminiTool`) and can be mixed with framework-level tools in the same agent.
+
+### Cross-provider tools via `nucleusiq-mcp`
+
+When you need a tool to work across **every** provider, use the **MCP tool adapter** — it exposes any [Model Context Protocol](https://modelcontextprotocol.io/) server (GitHub, Slack, Postgres, Stripe, your own) as one or more `BaseTool` instances. Same agent code, same plugins, same tracing — no provider-specific tool factory.
+
+```python
+from nucleusiq_mcp import MCPTool
+
+agent = Agent(
+    ...,
+    llm=BaseAnthropic(model_name="claude-haiku-4-5", async_mode=True),  # or any provider
+    tools=[MCPTool("npx -y @modelcontextprotocol/server-github", auth=os.environ["GITHUB_TOKEN"])],
+)
+await agent.initialize()
+```
+
+See the **[MCP integration guide](guides/mcp-integration.md)** for full coverage.
 
 ## Error handling
 
@@ -171,11 +198,12 @@ All providers map SDK errors to NucleusIQ's [framework-level error taxonomy](cor
 ## Compatibility
 
 - The core package is versioned independently from provider packages.
-- Provider packages declare their minimum **`nucleusiq`** version (for example **`nucleusiq>=0.7.9`** for OpenAI / Gemini / Groq wheels published with that floor; **`nucleusiq-ollama`** and **`nucleusiq-anthropic`** require **`>=0.7.10`**).
+- Provider packages declare their minimum **`nucleusiq`** version (for example **`nucleusiq>=0.7.9`** for OpenAI / Gemini / Groq wheels published with that floor; **`nucleusiq-ollama`** and **`nucleusiq-anthropic`** require **`>=0.7.10`**; **`nucleusiq-mcp`** requires **`>=0.7.11`**).
 - Always keep provider versions compatible with your installed `nucleusiq` version.
 
 ## See also
 
+- [MCP integration guide](guides/mcp-integration.md) — Universal Model Context Protocol adapter (**beta**), works with every provider
 - [Anthropic provider guide](guides/anthropic-provider.md) — Claude Messages API (**alpha**), structured outputs, examples
 - [Ollama provider guide](guides/ollama-provider.md) — Ollama alpha scope, env, **`think`**, examples
 - [Groq provider guide](guides/groq-provider.md) — Groq Chat Completions, beta scope, rate limits, examples

@@ -2,11 +2,12 @@
 
 Tools let the agent interact with external systems — files, APIs, databases — by calling functions you define.
 
-NucleusIQ provides three ways to create tools:
+NucleusIQ provides **four** ways to create tools:
 
 1. **`@tool` decorator** — create tools from plain functions (recommended for most cases)
 2. **`BaseTool` subclass** — full control with custom initialization and execution
 3. **Provider native tools** — server-side tools from OpenAI and Gemini (**Anthropic**, Groq, and **Ollama** route tool calls through **`@tool`** / function tools in Phase A — see [Tool integration patterns](tools/integration.md))
+4. **MCP tool adapter (beta)** — connect any [Model Context Protocol](https://modelcontextprotocol.io/) server (GitHub, Slack, Postgres, Stripe, your own) as native `BaseTool` instances via **`nucleusiq-mcp`** — works across **every** LLM provider; supports stdio + Streamable HTTP + SSE transports and OAuth 2.1 / Bearer / Env / custom auth. See the [MCP integration guide](guides/mcp-integration.md).
 
 ## @tool decorator (v0.6.0+)
 
@@ -162,6 +163,41 @@ agent = Agent(
 )
 ```
 
+## MCP tool adapter (`nucleusiq-mcp`)
+
+The **universal MCP adapter** turns any Model Context Protocol server into native `BaseTool` instances during **`Agent.initialize()`**. It works across **every** provider — OpenAI, Anthropic, Gemini, Groq, Ollama.
+
+```python
+import os
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+from nucleusiq_anthropic import BaseAnthropic
+from nucleusiq_mcp import MCPTool
+
+agent = Agent(
+    name="github-researcher",
+    prompt=ZeroShotPrompt().configure(system="Use the MCP tools when you need GitHub data."),
+    llm=BaseAnthropic(model_name="claude-haiku-4-5", async_mode=True),
+    tools=[
+        # Transport auto-detected (stdio); env vars forwarded
+        MCPTool(
+            "npx -y @modelcontextprotocol/server-github",
+            auth=os.environ["GITHUB_PERSONAL_ACCESS_TOKEN"],
+        ),
+    ],
+    config=AgentConfig(execution_mode=ExecutionMode.STANDARD, enable_tracing=True),
+)
+
+await agent.initialize()           # discover and connect MCP tools
+result = await agent.execute(...)
+
+for tc in result.tool_calls:
+    print(tc.name, "<-", tc.source)   # e.g. "list_issues  <-  mcp://server=github (path=A)"
+```
+
+See the **[MCP integration guide](guides/mcp-integration.md)** for transports (stdio, Streamable HTTP, SSE), auth strategies (Bearer, OAuth 2.1, Env, Custom), filtering/renaming, graceful degradation, and the **[MCP quickstart](examples/mcp-quickstart.md)** for copy-paste patterns.
+
 ## Mixing tool types
 
 All tool types can be mixed in a single agent:
@@ -198,7 +234,9 @@ agent = Agent(
 - [`@tool` decorator guide](tools/tool-decorator.md) — Full decorator documentation
 - [Built-in tools](tools/built-in.md) — File tool details
 - [File handling guide](guides/file-handling.md) — Attachment vs Tool vs Both
+- [MCP integration guide](guides/mcp-integration.md) — Universal Model Context Protocol adapter (**beta**)
+- [MCP quickstart](examples/mcp-quickstart.md) — Copy-paste MCP patterns across providers
 - [Anthropic provider](guides/anthropic-provider.md) — Claude Messages API (**alpha**)
-- [Tool integration patterns](tools/integration.md) — Advanced patterns (includes **Anthropic** alpha)
+- [Tool integration patterns](tools/integration.md) — Advanced patterns (includes MCP + **Anthropic** alpha)
 - [Ollama provider](guides/ollama-provider.md) — Capability matrix for local inference (**alpha**)
 - [Attachments](attachments.md) — File-as-context for prompts

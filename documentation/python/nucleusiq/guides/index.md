@@ -5,7 +5,7 @@ Implementation-focused guides for common production patterns.
 - [Strategy](strategy.md) — Gearbox strategy and mode selection
 - [Agent guide](agent.md) — Agent lifecycle and configuration
 - [Agent config guide](agent-config.md) — AgentConfig deep dive
-- [MCP integration](mcp-integration.md) — Model Context Protocol setup
+- [MCP integration](mcp-integration.md) — **Model Context Protocol** universal adapter (**beta** `nucleusiq-mcp` 0.1.0b1, **`nucleusiq>=0.7.11`**) + legacy OpenAI server-side path
 - [File handling](file-handling.md) — Attachment vs Tool vs Both
 
 ## Provider guides

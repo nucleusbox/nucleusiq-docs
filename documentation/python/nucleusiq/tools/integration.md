@@ -150,7 +150,67 @@ agent = Agent(
 )
 ```
 
-## Pattern 6: MCP integration (OpenAI)
+## Pattern 6a: Universal MCP adapter (`nucleusiq-mcp`)
+
+*New in v0.7.11 — works with **every** provider (OpenAI, Anthropic, Gemini, Groq, Ollama).*
+
+```python
+import os
+import asyncio
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.agents.task import Task
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+from nucleusiq.plugins.builtin import HumanApprovalPlugin, ToolGuardPlugin
+from nucleusiq_anthropic import BaseAnthropic
+from nucleusiq_mcp import MCPTool
+
+
+async def main():
+    agent = Agent(
+        name="ops",
+        prompt=ZeroShotPrompt().configure(
+            system="You are an operations agent. Use tools across systems.",
+        ),
+        llm=BaseAnthropic(model_name="claude-haiku-4-5", async_mode=True),
+        tools=[
+            # Transport auto-detected: stdio (npx) + Streamable HTTP (URL)
+            MCPTool(
+                "npx -y @modelcontextprotocol/server-github",
+                auth=os.environ["GITHUB_PERSONAL_ACCESS_TOKEN"],
+            ),
+            MCPTool(
+                "https://mcp.stripe.com/mcp",
+                auth=os.environ["STRIPE_API_KEY"],
+                on_connect_failure="skip",      # boot even if this server is down
+            ),
+        ],
+        plugins=[
+            ToolGuardPlugin(allowed_tools=["list_issues", "list_invoices", "search_customer"]),
+            HumanApprovalPlugin(require_approval_for=["refund_charge"]),
+        ],
+        config=AgentConfig(execution_mode=ExecutionMode.STANDARD, enable_tracing=True),
+    )
+
+    await agent.initialize()        # opens MCP connections in parallel + discovers tools
+    result = await agent.execute(
+        Task(id="ops-1", objective="Find open P0 issues and check the linked Stripe invoices."),
+    )
+    print(result.output)
+
+    # Each tool call carries its MCP origin
+    for tc in result.tool_calls:
+        print(tc.name, "<-", tc.source)
+
+
+asyncio.run(main())
+```
+
+See the **[MCP integration guide](../guides/mcp-integration.md)** for transports, auth strategies (Bearer / OAuth 2.1 / Env / Custom), filtering, `ping()`, and the **[MCP quickstart](../examples/mcp-quickstart.md)** for more copy-paste recipes.
+
+## Pattern 6b: Legacy OpenAI server-side MCP
+
+If you're on OpenAI and want OpenAI's Responses API to hold the MCP connection itself:
 
 ```python
 from nucleusiq.agents import Agent
@@ -174,6 +234,8 @@ agent = Agent(
     config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
 )
 ```
+
+See **[MCP integration guide → When to use which](../guides/mcp-integration.md#when-to-use-which)** for trade-offs between Pattern 6a (universal) and Pattern 6b (OpenAI server-side).
 
 ## Pattern 7: `@tool` + local Ollama (alpha)
 
@@ -221,9 +283,10 @@ asyncio.run(main())
 
 ## See also
 
-- [Tools overview](../tools.md) — All tool types
+- [Tools overview](../tools.md) — All four tool types
 - [`@tool` decorator](tool-decorator.md) — Create tools from functions
+- [MCP integration guide](../guides/mcp-integration.md) — Universal MCP adapter (**beta** `nucleusiq-mcp`), transports, auth, observability
+- [MCP quickstart](../examples/mcp-quickstart.md) — Copy-paste MCP patterns across providers
 - [Anthropic provider](../guides/anthropic-provider.md) — Alpha Messages API, structured-output caveats
 - [Groq provider](../guides/groq-provider.md) — Beta Chat Completions patterns
 - [Ollama provider](../guides/ollama-provider.md) — Alpha limits, **`think`**, structured output
-- [MCP integration guide](../guides/mcp-integration.md) — Full MCP setup

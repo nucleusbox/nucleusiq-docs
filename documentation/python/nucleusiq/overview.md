@@ -2,7 +2,7 @@
 
 > NucleusIQ is an open-source, agent-first Python framework with execution modes, built-in tools, and provider-agnostic LLM support — so you can build agents that adapt to your workflow without lock-in.
 
-NucleusIQ is the practical way to build AI agents that work in real environments. Connect to OpenAI, Google Gemini, **Anthropic Claude**, Groq, **Ollama** (local inference), or MockLLM for testing — with the same agent code. NucleusIQ provides three execution modes, built-in file tools, the `@tool` decorator, memory strategies, plugins, streaming, structured output, usage tracking, cost estimation, and **context window management**.
+NucleusIQ is the practical way to build AI agents that work in real environments. Connect to OpenAI, Google Gemini, **Anthropic Claude**, Groq, **Ollama** (local inference), or MockLLM for testing — with the same agent code. NucleusIQ provides three execution modes, built-in file tools, the `@tool` decorator, **a universal [MCP](https://modelcontextprotocol.io/) tool adapter** (**`nucleusiq-mcp`** — beta), memory strategies, plugins, streaming, structured output, usage tracking, cost estimation, and **context window management**.
 
 !!! tip "Direct vs Standard vs Autonomous"
     NucleusIQ uses the **Gearbox Strategy** — three execution modes that scale from simple chat to autonomous reasoning:
@@ -199,8 +199,8 @@ See the [Install](install.md) and [Quickstart](quickstart.md) guides to get star
 
 -   :material-wrench: **Flexible tools**
     ---
-    `@tool` decorator, built-in file tools, and provider native tools (Google Search, Code Execution, etc.).
-    [:octicons-arrow-right-24: Tools](tools.md)
+    `@tool` decorator, built-in file tools, provider native tools, and the universal **MCP adapter** (**beta**) for GitHub, Slack, Postgres, Stripe, and any custom MCP server.
+    [:octicons-arrow-right-24: Tools](tools.md) · [:octicons-arrow-right-24: MCP](guides/mcp-integration.md)
 
 -   :material-memory: **Context management**
     ---

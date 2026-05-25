@@ -121,6 +121,7 @@ nav:
     - Anthropic quickstart: python/nucleusiq/examples/anthropic-quickstart.md
     - Groq quickstart: python/nucleusiq/examples/groq-quickstart.md
     - Ollama quickstart: python/nucleusiq/examples/ollama-quickstart.md
+    - MCP quickstart: python/nucleusiq/examples/mcp-quickstart.md
   - Reference:
     - reference/index.md
     - Changelog: reference/changelog.md

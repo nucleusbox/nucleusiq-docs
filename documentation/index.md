@@ -74,6 +74,21 @@ Choose your path based on where you are today:
 
 ## What's new in v0.7.x
 
+### v0.7.11 + MCP tool adapter (beta)
+
+!!! success "New tool-adapter package — `nucleusiq-mcp` 0.1.0b1 (Beta)"
+
+    **Universal [Model Context Protocol](https://modelcontextprotocol.io/) adapter** — plug any MCP server (GitHub, Slack, Postgres, Stripe, your own) into a NucleusIQ agent in one line, across **any** LLM provider (OpenAI, Anthropic, Gemini, Groq, Ollama). Built on the **official `mcp` SDK**.
+
+    - **Transports**: **`stdio`** + **Streamable HTTP** + **SSE** (auto-detected).
+    - **Auth**: **`BearerAuth`**, **`OAuthAuth`** (OAuth 2.1 + PKCE), **`EnvAuth`**, **`CustomHeadersAuth`** — typed strategies + `auth="..."` shorthand.
+    - **Resilience**: **`on_connect_failure="skip"`**, **`health_check=True`**, runtime **`MCPTool.ping()`**.
+    - **Observability**: every tool call carries **`source="mcp://server=<name> ..."`** for tracing.
+    - **Core 0.7.11** adds the **`ExpandableTool`** protocol + parallel-safe **`Agent.initialize()`** + **`ToolCallRecord.source`** plumbing.
+    - **Tests**: 235 unit (**98.68%** coverage) + 13 live integration tests across all three transports.
+
+    [MCP integration guide](python/nucleusiq/guides/mcp-integration.md){ .md-button .md-button--primary } · [MCP quickstart](python/nucleusiq/examples/mcp-quickstart.md){ .md-button } · [Changelog](reference/changelog.md){ .md-button }
+
 ### Anthropic Claude (alpha preview)
 
 !!! info "New provider package — `nucleusiq-anthropic` 0.1.0a1"
@@ -177,7 +192,7 @@ Choose your path based on where you are today:
 - **AgentResult response contract** — typed, immutable Pydantic model
 - **Gemini tool-calling fixes** — `$ref`/`$defs` inlining
 
-Current packages: `nucleusiq` **0.7.10**, `nucleusiq-openai` **0.6.4**, `nucleusiq-gemini` **0.2.6**, `nucleusiq-anthropic` **0.1.0a1** (optional **alpha** preview), `nucleusiq-groq` **0.1.0b1** (optional beta), `nucleusiq-ollama` **0.1.0a1** (optional alpha)
+Current packages: `nucleusiq` **0.7.11**, `nucleusiq-openai` **0.6.4**, `nucleusiq-gemini` **0.2.6**, `nucleusiq-anthropic` **0.1.0a1** (optional **alpha** preview), `nucleusiq-groq` **0.1.0b1** (optional beta), `nucleusiq-ollama` **0.1.0a1** (optional alpha), `nucleusiq-mcp` **0.1.0b1** (optional **beta** tool adapter)
 
 See the [full changelog](reference/changelog.md).
 

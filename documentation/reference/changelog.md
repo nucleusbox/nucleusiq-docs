@@ -2,6 +2,30 @@
 
 All notable changes to NucleusIQ are documented in the [CHANGELOG.md](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md) in the repository root.
 
+## v0.7.11 + MCP tool adapter (**beta**)
+
+### Packages
+
+| Package | Version | What's new |
+|---------|---------|-----------|
+| `nucleusiq` | **0.7.11** | **`ExpandableTool`** protocol — any tool factory (like **`MCPTool`**) can expand into many **`BaseTool`** instances during **`Agent.initialize()`** without the core knowing about specifics; parallel-safe **`Agent.initialize()`** with **`asyncio.gather(return_exceptions=True)`** and **`BaseException`**-safe cleanup; **`ToolCallRecord.source`** plumbed end-to-end from tool → tracer for **`mcp://`** origin tagging; optional **`nucleusiq[mcp]`** extras |
+| `nucleusiq-mcp` | **0.1.0b1** | **New beta** — universal **[Model Context Protocol](https://modelcontextprotocol.io/)** adapter on the official **`mcp`** SDK; supports **stdio + Streamable HTTP + SSE** transports (auto-detected); auth strategies **`BearerAuth`**, **`OAuthAuth`** (OAuth 2.1 + PKCE), **`EnvAuth`**, **`CustomHeadersAuth`** with shorthand **`auth="..."`**; **`on_connect_failure="raise"|"skip"`** + **`health_check=True`** + **`MCPTool.ping()`**; decorator filters **`@mcp_tool_filter`**; per-server source attribution on every tool call; **235** unit tests (**98.68%** coverage) + **13** live integration tests across all three transports; requires **`nucleusiq>=0.7.11`**, **`mcp>=1.27,<2`** |
+
+### Highlights
+
+- **One `MCPTool` line per server** — transport auto-detected, auth typed or shorthand, env vars forwarded for stdio.
+- **Works with every LLM provider** — OpenAI, Anthropic, Gemini, Groq, Ollama, Mock.
+- **Source attribution** — every `ToolCallRecord` produced by an MCP tool carries **`source="mcp://server=<name> (path=A)"`** for observability.
+- **Resilient initialization** — multiple MCP servers connect in parallel; one bad peer no longer leaks tasks or skips cleanup.
+- **Plugin guardrails apply** — **`ToolGuardPlugin`**, **`HumanApprovalPlugin`**, **`ToolCallLimitPlugin`** all work on MCP tools because they are normal **`BaseTool`** instances.
+
+### Documentation
+
+- **[MCP integration guide](../python/nucleusiq/guides/mcp-integration.md)** — Beta announcement, transports, auth strategies, filtering, OAuth, observability, comparison vs OpenAI server-side MCP.
+- **[MCP quickstart](../python/nucleusiq/examples/mcp-quickstart.md)** — Seven copy-paste patterns: stdio, HTTP + Bearer, multi-server, filter/rename, graceful degradation, source tracing, plugin guardrails.
+
+Runnable scripts: **`src/providers/tools/mcp/examples/`** (`01_basic_stdio.py` … `08_full_agent_with_llm.py`). Notebook demo: **`notebooks/agents/mcp_tools_showcase.ipynb`** (Windows-friendly Streamable HTTP path).
+
 ## Preview — Anthropic Claude (**alpha**)
 
 Shipped under **[Unreleased](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md)** until the next tagged core release:
@@ -17,6 +41,7 @@ Runnable scripts: **`src/providers/llms/anthropic/examples/agents/`** (`01`–`0
 
 ## Recent releases
 
+- **[0.7.11 + MCP beta](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md)** — **`nucleusiq` 0.7.11** (`ExpandableTool` protocol, parallel-safe init, `ToolCallRecord.source`) + **`nucleusiq-mcp` 0.1.0b1** beta (universal MCP adapter, stdio + HTTP + SSE, OAuth/Bearer/Env/Custom auth)
 - **[Unreleased / Anthropic alpha](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#unreleased)** — **`nucleusiq-anthropic` 0.1.0a1** (**Messages API**, official **`anthropic`** SDK)
 - **[0.7.10](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#0710)** — **`nucleusiq[http]`** optional extra + **`urllib3`** lock hygiene; structured-output resolver (**Ollama** / Groq); **`nucleusiq-ollama` 0.1.0a1** (**alpha**, **`nucleusiq>=0.7.10`**)
 - **[0.7.9](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#079)** — **`retry_policy`** (429 **`Retry-After`** across Groq/OpenAI/Gemini), **`nucleusiq-groq` 0.1.0b1** public beta (`strict_model_capabilities`, streaming-open parity); **`nucleusiq-openai` 0.6.4**, **`nucleusiq-gemini` 0.2.6** (`nucleusiq>=0.7.9`)

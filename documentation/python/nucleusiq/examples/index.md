@@ -29,6 +29,11 @@ Detailed practical examples for common NucleusIQ workflows.
 - [Groq provider guide](../guides/groq-provider.md) — Beta scope, **429** / **`Retry-After`**, **`strict_model_capabilities`**, repo scripts
 - [Ollama provider guide](../guides/ollama-provider.md) — Alpha scope, **`think`**, structured-output + tools caveat, repo matrix
 
+## Tool adapter examples
+
+- [MCP quickstart](mcp-quickstart.md) — Universal **Model Context Protocol** adapter across **every** provider (**`nucleusiq-mcp` 0.1.0b1**, **`nucleusiq>=0.7.11`** — **beta**): single stdio server, HTTP + Bearer auth, multi-server, filter/rename, graceful degradation, source tracing, plugin guardrails
+- [MCP integration guide](../guides/mcp-integration.md) — Beta announcement, transports (stdio + Streamable HTTP + SSE), auth strategies (Bearer / OAuth 2.1 / Env / Custom), filtering, `ping()`, comparison vs OpenAI server-side MCP
+
 !!! tip "Which page for Anthropic (Claude)?"
 
     Start with **[Anthropic quickstart](anthropic-quickstart.md)**; use **[Anthropic provider](../guides/anthropic-provider.md)** for install pins, env vars, limitations, and CI-tested examples.
@@ -41,6 +46,10 @@ Detailed practical examples for common NucleusIQ workflows.
 
     Start with **[Groq quickstart](groq-quickstart.md)** for copy-paste snippets; use **[Groq provider](../guides/groq-provider.md)** for deeper operational guidance.
 
+!!! tip "Which page for MCP?"
+
+    Start with **[MCP quickstart](mcp-quickstart.md)** for copy-paste recipes (stdio + HTTP, multi-server, tracing); use **[MCP integration guide](../guides/mcp-integration.md)** for the full beta scope, OAuth, decorator filters, and graceful degradation.
+
 ## Repository examples
 
 Full runnable scripts are available in the GitHub repository:
@@ -51,4 +60,5 @@ Full runnable scripts are available in the GitHub repository:
 - [Anthropic examples](https://github.com/nucleusbox/NucleusIQ/tree/main/src/providers/llms/anthropic/examples) — DIRECT through AUTONOMOUS, streaming, native structured demo (**alpha**)
 - [Groq examples](https://github.com/nucleusbox/NucleusIQ/tree/main/src/providers/inference/groq/examples) — Direct through Autonomous + structured output
 - [Ollama examples](https://github.com/nucleusbox/NucleusIQ/tree/main/src/providers/inference/ollama/examples) — Smoke, Direct, streaming live, capabilities matrix (**alpha**)
-- [Notebooks](https://github.com/nucleusbox/NucleusIQ/tree/main/notebooks) — Jupyter notebooks for context management showcase and more
+- [MCP examples](https://github.com/nucleusbox/NucleusIQ/tree/main/src/providers/tools/mcp/examples) — Eight runnable examples: stdio, HTTP + auth, multi-server, OAuth, error handling, health check, decorator filters, full agent with LLM (**beta**)
+- [Notebooks](https://github.com/nucleusbox/NucleusIQ/tree/main/notebooks) — Jupyter notebooks: context management showcase, **`mcp_tools_showcase.ipynb`** (Windows-friendly Streamable HTTP demo), and more

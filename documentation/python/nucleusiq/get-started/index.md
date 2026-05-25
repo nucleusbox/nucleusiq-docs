@@ -29,3 +29,7 @@ Same **`Agent`** code works across packages — pick an install tab in [Installa
 - [Anthropic provider](../guides/anthropic-provider.md) · [Anthropic quickstart](../examples/anthropic-quickstart.md) — Claude Messages API (**alpha** `nucleusiq-anthropic`, **`nucleusiq>=0.7.10`**)
 - [Groq provider](../guides/groq-provider.md) · [Groq quickstart](../examples/groq-quickstart.md) — cloud (**beta** `nucleusiq-groq`)
 - [Ollama provider](../guides/ollama-provider.md) · [Ollama quickstart](../examples/ollama-quickstart.md) — local / self-hosted (**alpha** `nucleusiq-ollama`, **`nucleusiq>=0.7.10`**)
+
+## Tool adapters
+
+- [MCP integration guide](../guides/mcp-integration.md) · [MCP quickstart](../examples/mcp-quickstart.md) — Universal **Model Context Protocol** adapter (**beta** `nucleusiq-mcp` 0.1.0b1, **`nucleusiq>=0.7.11`**); works with **every** provider. Plug GitHub, Slack, Postgres, Stripe, or any custom MCP server into an agent in one line.
