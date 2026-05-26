@@ -1,10 +1,11 @@
 # MCP integration (Model Context Protocol)
 
-!!! success "Beta release — `nucleusiq-mcp` 0.1.0b1"
+!!! success "🟢 Stable — `nucleusiq-mcp` 0.1.0 (v0.7.12)"
 
-    **`nucleusiq-mcp` 0.1.0b1** is now available as a **PyPI beta** (**`Development Status :: 4 - Beta`**). It is a **universal Model Context Protocol** adapter built on the **official `mcp` SDK** that turns any MCP server (GitHub, Slack, Postgres, Stripe, your own) into native NucleusIQ tools.
+    **`nucleusiq-mcp` 0.1.0** ships as **`Development Status :: 5 - Production/Stable`** in v0.7.12 — the same Phase 0–3 surface as `0.1.0b1` (no API changes), just promoted out of beta. It is a **universal Model Context Protocol** adapter built on the **official `mcp` SDK** that turns any MCP server (GitHub, Slack, Postgres, Stripe, your own) into native NucleusIQ tools.
 
-    - **Requires** **`nucleusiq>=0.7.11`** and **`mcp>=1.27,<2`**.
+    - **Requires** **`nucleusiq>=0.7.12`** and **`mcp>=1.27,<2`**.
+    - **235 unit tests (98.68% coverage) + 13 live integration tests** across all three transports.
     - **API is stable** for the 0.1.x line — feature-additive changes only; breaking changes will go through a `0.2.0` major.
 
 NucleusIQ has **two complementary MCP integration paths**. This page covers both and tells you when to use which.
@@ -28,7 +29,7 @@ NucleusIQ's universal adapter turns each MCP **tool** into a `BaseTool`, so your
 
 ## Universal adapter (`nucleusiq-mcp`)
 
-### What ships in 0.1.0b1
+### What ships in 0.1.0 Stable
 
 | Capability | Supported |
 |------------|-----------|
@@ -47,13 +48,13 @@ NucleusIQ's universal adapter turns each MCP **tool** into a `BaseTool`, so your
 
 ### What's not (yet) in scope
 
-- **MCP resources & prompts** — only **tools** are wired in 0.1.0b1. We treat MCP "prompts" as message lists; reach for NucleusIQ's own prompt framework (`PromptFactory`, `PromptTechnique`) for templating, few-shot, RAG, etc.
+- **MCP resources & prompts** — only **tools** are wired in 0.1.0. We treat MCP "prompts" as message lists; reach for NucleusIQ's own prompt framework (`PromptFactory`, `PromptTechnique`) for templating, few-shot, RAG, etc.
 - **Server hosting** — `nucleusiq-mcp` is a **client/adapter only**. To author an MCP server, use the [official MCP SDK directly](https://github.com/modelcontextprotocol/python-sdk).
 - **Sampling / progress callbacks** — planned for 0.2.x once usage patterns settle.
 
 ### Prerequisites
 
-1. **Python** **`>=3.10`** with `nucleusiq>=0.7.11`.
+1. **Python** **`>=3.10`** with `nucleusiq>=0.7.12`.
 2. **Node.js + `npx`** if you're connecting to **stdio** servers that ship as `@modelcontextprotocol/...` npm packages (most reference servers do).
 3. The MCP server itself (a local command, a URL, or a token).
 
@@ -64,7 +65,7 @@ NucleusIQ's universal adapter turns each MCP **tool** into a `BaseTool`, so your
 pip install "nucleusiq[mcp]" nucleusiq-anthropic     # or any provider
 
 # Or pin the adapter directly
-pip install "nucleusiq>=0.7.11" "nucleusiq-mcp==0.1.0b1"
+pip install "nucleusiq>=0.7.12" "nucleusiq-mcp>=0.1.0,<0.2"
 ```
 
 ### Quick start

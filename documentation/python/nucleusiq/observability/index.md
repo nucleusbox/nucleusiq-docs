@@ -4,6 +4,14 @@ Track and optimize runtime behavior, token usage, costs, and context management.
 
 NucleusIQ provides built-in observability primitives that let you inspect what happened during an agent execution — every LLM call, every tool invocation, token counts, estimated dollar costs, and context window management metrics.
 
+!!! success "New in v0.7.12 — provider-agnostic native-tool observability"
+
+    Every traced tool call now carries a **`ToolCallRecord.executed_by: Literal["local", "provider"]`** field that distinguishes locally-run tools (`@tool` functions, `MCPTool`, `FileReadTool`, …) from **server-executed** ones (Anthropic `web_search`, OpenAI `code_interpreter`, Gemini `google_search`, Groq compound tools, …).
+
+    **`LLMCallRecord`** gained six new fields populated by every provider in this release: **`provider`**, **`request_id`**, **`organization_id`**, **`stop_reason`**, **`cache_read_input_tokens`**, **`cache_creation_input_tokens`**, and a generic **`metadata`** dict.
+
+    All additive — no breaking changes. See [Native-tool observability (v0.7.12)](#native-tool-observability-v0712) below.
+
 ## ObservabilityConfig
 
 *New in v0.7.6*
@@ -142,6 +150,64 @@ if result.autonomous:
 | `result.memory_snapshot` | `MemorySnapshot | None` | Conversation messages and token count at execution end |
 | `result.autonomous` | `AutonomousDetail | None` | Decomposition, sub-task names, validation records, critic scores |
 | `result.llm_calls[].prompt_technique` | `str | None` | Which prompt strategy was used (e.g. `zero_shot`) |
+
+## Native-tool observability (v0.7.12)
+
+*New in v0.7.12 — `ToolCallRecord.executed_by` + six new fields on `LLMCallRecord`.*
+
+### Splitting local vs server-executed tools
+
+```python
+result = await agent.execute(task)
+
+local    = [tc for tc in result.tool_calls if tc.executed_by == "local"]
+provider = [tc for tc in result.tool_calls if tc.executed_by == "provider"]
+
+print(f"Local-run tools:    {len(local)} (cost: your compute)")
+print(f"Provider-run tools: {len(provider)} (cost: LLM tokens / premium)")
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `tool_call.executed_by` | `Literal["local", "provider"]` | `"local"` for `@tool`, `MCPTool`, built-ins. `"provider"` for any tool surfaced via `server_tool_calls` on the LLM response (Anthropic, OpenAI, Gemini, Groq). |
+| `tool_call.tool_name` | `str` | Canonical tool name (provider-side suffixes like `_call` are stripped). |
+| `tool_call.tool_call_id` | `str` | Provider-side id (`srvtoolu_…` for Anthropic, etc.) — useful for cross-system correlation. |
+
+### Enriched `LLMCallRecord` fields
+
+Every traced LLM call now carries provider-agnostic enrichment fields:
+
+```python
+for rec in result.llm_calls:
+    print(
+        f"round={rec.round}  provider={rec.provider}  "
+        f"stop_reason={rec.stop_reason}  "
+        f"prompt={rec.prompt_tokens}  "
+        f"cache_read={rec.cache_read_input_tokens}  "
+        f"cache_create={rec.cache_creation_input_tokens}  "
+        f"request_id={rec.request_id}"
+    )
+```
+
+| Field | Type | Populated by |
+|-------|------|--------------|
+| `provider` | `str \| None` | `"anthropic"`, `"openai"`, `"google"`, `"groq"`, `"ollama"` — set centrally in `base_mode.py` via `get_provider_from_llm()` |
+| `request_id` | `str \| None` | Provider-side response id (Anthropic `message.id`, OpenAI `response.id`, …) — useful for cross-system correlation |
+| `organization_id` | `str \| None` | Best-effort header extraction (Anthropic `anthropic-organization-id`, OpenAI `openai-organization`) |
+| `stop_reason` | `str \| None` | Provider-reported finish reason (`end_turn` / `max_tokens` / `tool_use` / `stop` / …) |
+| `cache_read_input_tokens` | `int` | Anthropic prompt-cache reads; bucketed separately from `prompt_tokens` |
+| `cache_creation_input_tokens` | `int` | Anthropic prompt-cache writes |
+| `metadata` | `dict[str, Any]` | Generic bag for provider-specific extras (e.g. Gemini `safetyRatings`, OpenAI `logprobs`) |
+
+!!! tip "How it's wired"
+
+    The core `nucleusiq/core/agents/modes/base_mode.py` agent loop centrally detects the provider for every LLM call (`get_provider_from_llm(agent.llm)`) and threads it into `build_llm_call_record` / `build_llm_call_record_from_stream`. The same hook pulls `server_tool_calls` off every LLM response and feeds them through the generic `build_server_tool_call_records()` helper, so adding a new provider only needs to populate its own `server_tool_calls` list — observability is automatic.
+
+### See also
+
+- [Native server tools](../guides/native-server-tools.md) — how each provider populates `server_tool_calls`
+- [Prompt caching](../guides/prompt-caching.md) — `cache_read_input_tokens`, `cache_creation_input_tokens`
+- [Extended thinking](../guides/extended-thinking.md) — `stop_reason` reading
 
 ## Context Telemetry
 

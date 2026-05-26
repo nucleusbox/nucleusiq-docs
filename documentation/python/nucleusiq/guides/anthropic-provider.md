@@ -1,41 +1,48 @@
 # Anthropic (Claude) provider
 
-!!! danger "Alpha announcement"
+!!! success "🟢 Stable — `nucleusiq-anthropic` 0.2.0 (Phase B feature-complete)"
 
-    **`nucleusiq-anthropic` 0.1.0a1** is now available as a **PyPI pre-release** (**`Development Status :: 3 - Alpha`**). It wires **[Anthropic](https://www.anthropic.com/) Claude** through NucleusIQ using the **Messages API** and the official **`anthropic`** Python SDK (**`AsyncAnthropic` / `Anthropic`**).
+    **`nucleusiq-anthropic` 0.2.0** ships as **`Development Status :: 5 - Production/Stable`** (first stable line; semver applies from here). It connects **Claude** to NucleusIQ through the **Messages API** and the official **`anthropic`** Python SDK (**`AsyncAnthropic` / `Anthropic`**), with full Phase B feature parity.
 
-    - **Requires** **`nucleusiq>=0.7.10`** and **`anthropic>=0.40,<1`**.
-    - **Treat as experimental:** APIs and defaults may change before a stable track. **Pin versions** for anything important.
+    - **Requires** **`nucleusiq>=0.7.12`** and **`anthropic>=0.40,<1`**.
+    - **151 unit tests + 6 live integration tests, 95.91% coverage** (gate ≥ 95%).
+    - All Phase B features are covered by both unit tests and live API tests.
 
-Use this guide for **capabilities, limits, environment variables, and operational notes**. Copy-paste workflows live in the **[Anthropic quickstart](../examples/anthropic-quickstart.md)**.
+Use this guide as the canonical reference for **capabilities, environment, parameters, and operational notes**. Copy-paste workflows live in the [Anthropic quickstart](../examples/anthropic-quickstart.md). Conceptual deep-dives on **native server tools**, **prompt caching**, and **extended thinking** live on their own pages.
 
-## Why Claude + NucleusIQ
+## What's in 0.2.0 (Phase B)
 
-Claude’s **Messages API** uses **`tool_use` / `tool_result`** blocks and different streaming events than OpenAI Chat Completions. **`BaseAnthropic`** adapts that surface to NucleusIQ’s **`BaseLLM`** so your **`Agent`**, execution modes, **`@tool`** tools, streaming, and structured-output wiring stay **familiar** — without maintaining a brittle “pretend it’s OpenAI” shim.
+| Capability | Status |
+|------------|--------|
+| Messages API (`POST /v1/messages`) — `BaseAnthropic.call` / `call_stream` → `StreamEvent` | ✅ |
+| `@tool` / local function tools | ✅ |
+| Streaming (tokens, `THINKING` events, `tool_call_start` / `tool_call_end`, `COMPLETE` with metadata) | ✅ |
+| Structured output (**JSON Schema** → Messages `output_config.format`) — tools + format gracefully fall back to function-style tools with a warning | ✅ |
+| Sampling — `temperature`, `max_output_tokens`, `top_p` (auto-elided when temperature is set on incompatible SKUs) | ✅ via framework `LLMParams` |
+| Errors / retries — SDK exceptions mapped to `nucleusiq.llms.errors`, `Retry-After` + capped backoff via shared `retry_policy` | ✅ |
+| **`AnthropicTool` native server tools** — `web_search()`, `web_fetch()`, `code_execution()` with dated wire types + auto beta headers | ✅ **New in 0.2.0** |
+| **Prompt caching** — `cache_system=True` / `cache_tools=True` emit `cache_control: ephemeral` blocks on the wire | ✅ **New in 0.2.0** |
+| **Extended thinking** — `thinking="low"|"medium"|"high"|"max"` or full dict | ✅ **New in 0.2.0** |
+| **`strict_tools=True`** + **`disable_parallel_tool_use=True`** | ✅ **New in 0.2.0** |
+| **Server-tool observability** — `AnthropicLLMResponse.server_tool_calls` populated from `server_tool_use` + per-tool `*_tool_result` blocks; surfaced as `ToolCallRecord(executed_by="provider")` by the core agent loop | ✅ **New in 0.2.0** |
+| **`LLMCallRecord` enrichment** — `provider="anthropic"`, `request_id`, `organization_id`, `stop_reason`, `cache_read_input_tokens`, `cache_creation_input_tokens` | ✅ **New in 0.2.0** |
+| Multimodal image messages (HTTP / data URLs) | ✅ via translation layer |
 
-## What’s in this alpha
+### Not in 0.2.0 (deferred)
 
-| Capability | Supported |
-|------------|-----------|
-| Messages API (`POST /v1/messages`) | Yes |
-| **`BaseAnthropic.call` / `call_stream`** → **`StreamEvent`** | Yes |
-| **`@tool`** / local function tools | Yes |
-| Structured output (**JSON Schema** → Messages **`output_config.format`**) | Yes — model / API must support it; combining **`response_format`** with **tools** drops structured output with a **warning** (same pattern as Groq / Ollama); **`call_stream`** ignores **`response_format`** with a **warning** |
-| **`AnthropicLLMParams`** | **`top_k`**, **`anthropic_beta`**, **`extra_headers`** (merged on the client) |
-| Sampling (**`temperature`**, **`max_output_tokens`**, …) | Use framework **`LLMParams`** on **`AgentConfig.llm_params`** (merged into each call). The adapter omits **`top_p`** when **`temperature`** is set where needed to avoid **400** mutual-exclusion errors on newer Claude SKUs. |
-| Errors / retries | SDK exceptions mapped to **`nucleusiq.llms.errors`**; **`Retry-After`** + exponential backoff via shared **`retry_policy`** (**v0.7.9+** core) |
-| Multimodal images (HTTP / data URLs in messages) | Wired in the translation layer (see monorepo provider README for caveats) |
-
-### Not in this alpha yet
-
-- **Native / server-side Claude tools** (web search, code execution, etc.) — **`NATIVE_TOOL_TYPES`** is **empty**; no **`AnthropicTool`** factory yet. Use **`@tool`** for Phase A.
-- Full **observability** enrichment on **`LLMCallRecord`** (request ids, org headers, …) — planned polish.
-- **Bedrock / Vertex / Foundry** backends — direct Anthropic API only for v1 scope.
+- **Anthropic Phase C** — Memory tool / `computer_use` / `bash` — planned for **`nucleusiq-anthropic 0.3.x`**.
+- **Bedrock / Vertex / Foundry** backends — direct Anthropic API only for the stable line.
 
 ## Prerequisites
 
 1. **[Anthropic Console](https://console.anthropic.com/)** API key (**`ANTHROPIC_API_KEY`**).
-2. A **model id** your organization can call. Defaults in examples often use **`claude-3-5-sonnet-20241022`**; if you see **`404` / model not found**, discover ids with the repo script **`09_anthropic_list_models.py`** and set **`ANTHROPIC_MODEL`**.
+2. A **model id** your organization can call. Phase B features (native tools, prompt caching, extended thinking) require **Claude Sonnet 4 / Opus 4 / 3.7-Sonnet** or newer.
+
+!!! tip "Pick a Phase-B-capable model"
+
+    The Phase B examples and live integration tests default to **`claude-sonnet-4-5-20250929`** because it supports every Phase B feature (`web_search`, `code_execution`, `cache_*`, `thinking`).
+
+    If you see **`404 model_not_found`**, discover the model ids available on your key with `examples/agents/09_anthropic_list_models.py` and override via `ANTHROPIC_PHASE_B_MODEL=<id>`.
 
 ## Installation
 
@@ -43,10 +50,10 @@ Claude’s **Messages API** uses **`tool_use` / `tool_result`** blocks and diffe
 pip install nucleusiq nucleusiq-anthropic
 ```
 
-Pin the alpha for reproducible builds:
+Pin the stable line for reproducible builds:
 
 ```bash
-pip install "nucleusiq>=0.7.10" "nucleusiq-anthropic==0.1.0a1"
+pip install "nucleusiq>=0.7.12" "nucleusiq-anthropic>=0.2.0,<0.3"
 ```
 
 ## Environment
@@ -54,14 +61,15 @@ pip install "nucleusiq>=0.7.10" "nucleusiq-anthropic==0.1.0a1"
 | Variable | Purpose |
 |----------|---------|
 | **`ANTHROPIC_API_KEY`** | Required for live calls unless you pass **`api_key="..."`** to **`BaseAnthropic`**. |
-| **`ANTHROPIC_MODEL`** | Optional default model id for examples (**`claude-3-5-sonnet-20241022`** if unset). |
+| **`ANTHROPIC_MODEL`** | Optional default model id for examples. |
+| **`ANTHROPIC_PHASE_B_MODEL`** | Optional model id used by the Phase B examples / integration tests (default `claude-sonnet-4-5-20250929`). |
 
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...
-# export ANTHROPIC_MODEL=claude-sonnet-4-20250514   # example — use IDs valid for your key
+export ANTHROPIC_PHASE_B_MODEL=claude-sonnet-4-5-20250929   # or your accessible Phase B model
 ```
 
-## Quick start (Direct)
+## Quick start (DIRECT)
 
 Use **`BaseAnthropic(..., async_mode=True)`**, **`AgentConfig`** with **`LLMParams`** for sampling, and **`await agent.initialize()`** before **`execute()`** (matches **[`01_anthropic_direct.py`](https://github.com/nucleusbox/NucleusIQ/blob/main/src/providers/llms/anthropic/examples/agents/01_anthropic_direct.py)**).
 
@@ -78,7 +86,7 @@ from nucleusiq_anthropic import BaseAnthropic
 
 
 async def main() -> None:
-    model = os.getenv("ANTHROPIC_MODEL", "claude-3-5-sonnet-20241022")
+    model = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-5-20250929")
     llm = BaseAnthropic(model_name=model, async_mode=True)
 
     agent = Agent(
@@ -103,6 +111,79 @@ async def main() -> None:
 asyncio.run(main())
 ```
 
+## Phase B at a glance
+
+=== "Native server tools"
+
+    Server tools run **inside Anthropic's infrastructure** — you don't execute them, you just declare them.
+
+    ```python
+    from nucleusiq_anthropic import AnthropicTool, BaseAnthropic
+
+    llm = BaseAnthropic(model_name="claude-sonnet-4-5-20250929", async_mode=True)
+
+    result = await llm.call(
+        model="claude-sonnet-4-5-20250929",
+        messages=[{"role": "user", "content": "Use code_execution to compute Fib(12)."}],
+        tools=[AnthropicTool.code_execution()],
+        max_output_tokens=512,
+    )
+    print(result.choices[0].message.content)
+    for stc in result.server_tool_calls:
+        print(stc.name, stc.id, stc.result)
+    ```
+
+    → Full reference on the [Native server tools](native-server-tools.md) page.
+
+=== "Prompt caching"
+
+    Reuse expensive system prompts across calls — Anthropic serves cached prefixes at a fraction of the cost.
+
+    ```python
+    from nucleusiq_anthropic import AnthropicLLMParams, BaseAnthropic
+
+    llm = BaseAnthropic(
+        model_name="claude-sonnet-4-5-20250929",
+        async_mode=True,
+        llm_params=AnthropicLLMParams(cache_system=True, cache_tools=True),
+    )
+    ```
+
+    → Full reference on the [Prompt caching](prompt-caching.md) page.
+
+=== "Extended thinking"
+
+    Give Claude a token budget to reason internally before responding.
+
+    ```python
+    from nucleusiq_anthropic import AnthropicLLMParams, BaseAnthropic
+
+    llm = BaseAnthropic(
+        model_name="claude-sonnet-4-5-20250929",
+        async_mode=True,
+        llm_params=AnthropicLLMParams(thinking="medium"),  # 8 000 token budget
+    )
+    # NOTE: max_output_tokens MUST exceed thinking.budget_tokens
+    # and temperature MUST be 1.0 when thinking is enabled.
+    ```
+
+    → Full reference on the [Extended thinking](extended-thinking.md) page.
+
+=== "Server-tool observability"
+
+    The framework emits `ToolCallRecord(executed_by="provider")` for every server-side tool call **automatically** — no configuration required.
+
+    ```python
+    result = await agent.execute(task)
+    for tc in result.tool_calls:
+        print(tc.tool_name, tc.executed_by)
+    # → web_search       provider
+    # → code_execution   provider
+    # → my_local_fn      local
+    ```
+
+    → Full reference on the [Observability guide](../observability/index.md).
+
 ## Provider-specific parameters
 
 Pass **Claude-only** knobs on **`BaseAnthropic`** via **`AnthropicLLMParams`** (not on **`AgentConfig`**):
@@ -111,61 +192,96 @@ Pass **Claude-only** knobs on **`BaseAnthropic`** via **`AnthropicLLMParams`** (
 from nucleusiq_anthropic import AnthropicLLMParams, BaseAnthropic
 
 llm = BaseAnthropic(
-    model_name="claude-3-5-sonnet-20241022",
+    model_name="claude-sonnet-4-5-20250929",
     async_mode=True,
     llm_params=AnthropicLLMParams(
         top_k=40,
-        anthropic_beta="your-beta-flag-if-needed",
+        anthropic_beta="user-beta-flag-if-needed",
         extra_headers={"X-Custom": "value"},
+
+        # Phase B
+        thinking="medium",                # "low"|"medium"|"high"|"max" or dict
+        cache_system=True,                # cache_control on system prompt
+        cache_tools=True,                 # cache_control on last tool def
+        strict_tools=True,                # strict JSON schema on custom tools
+        disable_parallel_tool_use=True,   # one tool call per turn
     ),
 )
 ```
 
-Keep **temperature / max tokens** on **`AgentConfig(llm_params=LLMParams(...))`** as in the quick start.
+Keep **temperature / max tokens** on **`AgentConfig(llm_params=LLMParams(...))`**.
+
+!!! warning "Extended thinking constraints"
+
+    When `thinking` is enabled Anthropic enforces:
+
+    - `temperature` **must** be `1.0` (not 0.0).
+    - `max_output_tokens` **must** be **strictly greater than** `thinking.budget_tokens` (budgets: low=2000, medium=8000, high=32000, max=64000).
+
+    A `400 invalid_request_error` will mention `max_tokens must be greater than thinking.budget_tokens` if you violate this.
 
 ## Structured output
 
-When your Claude model supports **native structured outputs**, set **`response_format=`** on **`Agent`** (Pydantic model, dataclass, **`TypedDict`**, or schema dict). The adapter maps this to Messages **`output_config.format`** and parses JSON into your type.
+When your Claude model supports **native structured outputs**, set **`response_format=`** on **`Agent`** (Pydantic model, dataclass, `TypedDict`, or schema dict). The adapter maps this to Messages `output_config.format` and parses JSON into your type.
 
 !!! warning "Tools + structured output"
 
-    If the agent also has **tools**, structured output is **dropped** for that call path with a **warning** — align with **[Structured output](../structured-output.md)** and test without tools first.
+    If the agent also has **tools**, structured output is **dropped** for that call path with a warning — align with [Structured output](../structured-output.md) and test without tools first.
 
-Streaming (**`call_stream`**) does **not** apply **`response_format`**; you’ll see a **warning** if it’s set.
+Streaming (`call_stream`) does **not** apply `response_format`; you'll see a warning if it's set.
 
-See **`examples/output_parsers/anthropic_native_structured_example.py`** in the monorepo for an **Agent + native JSON schema** demo.
-
-## Imports
+## Public API
 
 ```python
 from nucleusiq_anthropic import (
-    AnthropicLLMParams,
-    BaseAnthropic,
-    NATIVE_TOOL_TYPES,
+    AnthropicLLMParams,         # extended Phase B knobs (thinking, cache_*, strict_tools)
+    AnthropicTool,              # factory for native server tools
+    BaseAnthropic,              # the LLM wrapper
+    NATIVE_TOOL_TYPES,          # frozenset {"web_search","web_fetch","code_execution"}
+    NATIVE_TOOL_WIRE_TYPES,     # dated wire identifiers
+    NATIVE_TOOL_BETA_HEADERS,   # required anthropic-beta tokens
+    ServerToolCall,             # Pydantic model for server-executed tools
+    ThinkingEffort,             # Literal["low","medium","high","max"]
     to_anthropic_tool_definition,
 )
 ```
 
-**`NATIVE_TOOL_TYPES`** is **empty** in alpha — prefer **`@tool`** and **`to_anthropic_tool_definition`** for debugging schemas (**`08_anthropic_tool_schema.py`** is offline-only).
-
 ## Runnable examples
 
-Clone **[NucleusIQ](https://github.com/nucleusbox/NucleusIQ)** and run from **`src/providers/llms/anthropic`**:
+Clone **[NucleusIQ](https://github.com/nucleusbox/NucleusIQ)** and run from `src/providers/llms/anthropic`:
 
 ```bash
 uv sync --group full   # or pip install -e . from that directory + core
+
+# Phase A (always-works baseline)
 uv run python examples/agents/01_anthropic_direct.py
 uv run python examples/agents/03_anthropic_standard_tools.py
 uv run python examples/agents/05_anthropic_stream.py
-uv run python examples/agents/09_anthropic_list_models.py  # discover model IDs
+uv run python examples/agents/09_anthropic_list_models.py
+
+# Phase B (require ANTHROPIC_PHASE_B_MODEL = Sonnet 4.5 / Opus 4 etc.)
+uv run python examples/agents/10_anthropic_native_tools.py
+uv run python examples/agents/11_anthropic_prompt_caching.py
+uv run python examples/agents/12_anthropic_extended_thinking.py
 ```
 
-Full parity table: **[examples/README.md](https://github.com/nucleusbox/NucleusIQ/blob/main/src/providers/llms/anthropic/examples/README.md)**.
+## Live integration tests
+
+```bash
+cd src/providers/llms/anthropic
+uv run pytest tests/integration -m integration -q
+# 6 tests: web_search, code_execution, prompt caching,
+# extended thinking (low + medium), disable_parallel_tool_use
+```
+
+Live tests skip cleanly if your `ANTHROPIC_API_KEY` lacks access to the configured Phase B model.
 
 ## See also
 
-- [Anthropic quickstart](../examples/anthropic-quickstart.md) — Three gears + optional structured output pointers
-- [Structured output](../structured-output.md) — Resolver + **`get_provider_from_llm`** (**`anthropic`**)
-- [Installation](../install.md) — Package matrix
-- [Providers](../providers.md) — Portability overview
-- [Error handling](../core-concepts/error-handling.md) — Shared exception families + retries
+- [Native server tools](native-server-tools.md) — `web_search`, `web_fetch`, `code_execution`
+- [Prompt caching](prompt-caching.md) — `cache_system`, `cache_tools`, cost wins
+- [Extended thinking](extended-thinking.md) — `thinking` budgets and constraints
+- [Observability](../observability/index.md) — `executed_by`, `cache_read_input_tokens`, `stop_reason`
+- [Anthropic quickstart](../examples/anthropic-quickstart.md) — copy-paste flows
+- [Structured output](../structured-output.md) — resolver + `get_provider_from_llm`
+- [Error handling](../core-concepts/error-handling.md) — shared exception families + retries

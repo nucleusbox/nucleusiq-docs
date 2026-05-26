@@ -2,16 +2,32 @@
 
 Implementation-focused guides for common production patterns.
 
+## Core guides
+
 - [Strategy](strategy.md) — Gearbox strategy and mode selection
 - [Agent guide](agent.md) — Agent lifecycle and configuration
-- [Agent config guide](agent-config.md) — AgentConfig deep dive
-- [MCP integration](mcp-integration.md) — **Model Context Protocol** universal adapter (**beta** `nucleusiq-mcp` 0.1.0b1, **`nucleusiq>=0.7.11`**) + legacy OpenAI server-side path
+- [Agent config guide](agent-config.md) — `AgentConfig` deep dive
+- [MCP integration](mcp-integration.md) — **Model Context Protocol** universal adapter — **🟢 `nucleusiq-mcp` 0.1.0 Stable**, `nucleusiq>=0.7.12` + legacy OpenAI server-side path
 - [File handling](file-handling.md) — Attachment vs Tool vs Both
 
 ## Provider guides
 
-- [OpenAI provider](openai-provider.md) — Chat Completions, Responses API, native tools
-- [Gemini provider](gemini-provider.md) — Google Gemini with native tools, thinking, and multimodal
-- [Anthropic provider](anthropic-provider.md) — Claude **Messages API** (`anthropic` SDK), tools, streaming, structured outputs — **`nucleusiq-anthropic` 0.1.0a1** (**alpha**), **`nucleusiq>=0.7.10`**
-- [Groq provider](groq-provider.md) — Groq Chat Completions (`groq` SDK), local tools, streaming, structured output — **`nucleusiq-groq` 0.1.0b1** (beta), **`nucleusiq>=0.7.9`**
-- [Ollama provider](ollama-provider.md) — Local / remote **[Ollama](https://ollama.com/)** (`ollama` SDK), tools, streaming, structured output, **`think`** — **`nucleusiq-ollama` 0.1.0a1** (**alpha**), **`nucleusiq>=0.7.10`**
+| Provider | Package | Version | Status |
+|----------|---------|---------|--------|
+| [OpenAI](openai-provider.md) | `nucleusiq-openai` | **0.7.0** | 🟢 Stable — Chat Completions, Responses API, native tools (web_search / code_interpreter / file_search), native-tool observability |
+| [Gemini](gemini-provider.md) | `nucleusiq-gemini` | **0.3.0** | 🟢 Stable — google_search / code_execution server-tool observability, thinking, multimodal |
+| [Anthropic](anthropic-provider.md) | `nucleusiq-anthropic` | **0.2.0** | 🟢 Stable — **Phase B feature-complete** (native tools, prompt caching, extended thinking) |
+| [Groq](groq-provider.md) | `nucleusiq-groq` | **0.1.0** | 🟢 Stable — Chat Completions, local tools, streaming, server-tool emission stub |
+| [Ollama](ollama-provider.md) | `nucleusiq-ollama` | **0.2.0** | 🟢 Stable — chat, streaming, tools, structured output, **vision** |
+
+All providers require `nucleusiq>=0.7.12`.
+
+## Cross-cutting concepts (new in v0.7.12)
+
+!!! tip "Pair with the Anthropic provider guide"
+
+    These three pages explain features that are exposed through `nucleusiq-anthropic 0.2.0` but the **observability** they surface (`executed_by="provider"`, `cache_*_tokens`, `stop_reason`, `request_id`) applies uniformly across **every** provider in v0.7.12.
+
+- [Native server tools](native-server-tools.md) — `web_search` / `code_execution` / `google_search` / `file_search` — local vs provider execution.
+- [Prompt caching](prompt-caching.md) — Anthropic `cache_system` / `cache_tools` and reading `cache_read_input_tokens`.
+- [Extended thinking](extended-thinking.md) — Claude `thinking="low"|"medium"|"high"|"max"` and its hard constraints.

@@ -2,11 +2,15 @@
 
 The **`nucleusiq-groq`** package adds **[Groq](https://groq.com/)** inference to NucleusIQ using Groq’s **OpenAI-compatible Chat Completions** API and Groq’s official **[`groq`](https://github.com/groq/groq-python)** Python SDK (`AsyncGroq` / `Groq`).
 
-**Status:** **0.1.0b1** (public **beta** on PyPI, Trove `Development Status :: 4 - Beta`). Requires **`nucleusiq>=0.7.9`**.
+!!! success "🟢 Stable — `nucleusiq-groq` 0.1.0"
 
-!!! warning "Phase A scope"
+    `nucleusiq-groq` graduates from beta to **`Development Status :: 5 - Production/Stable`** in v0.7.12. Requires **`nucleusiq>=0.7.12`**. **79 unit tests, 92.51% coverage.**
 
-    This release focuses on **Chat Completions**, **local function tools**, **streaming**, **structured output** (where the model supports `json_schema`), and **retries** (including **429** / **`Retry-After`** on chat *and* stream **open**). **Not wired yet:** Groq **Responses API**, **built-in/hosted tools** (constants exist for future work), **remote MCP** — see the design tracker below.
+    **New in 0.1.0:** `LLMCallRecord.provider="groq"` enrichment + native-tool observability emission stub — Groq's `message.executed_tools` field is parsed into `GroqLLMResponse.server_tool_calls`, ready for the central agent loop to surface as `ToolCallRecord(executed_by="provider")` once Groq's hosted-tool Responses API lands in `nucleusiq-groq 0.2.x`.
+
+!!! info "Phase A scope (still applies in stable line)"
+
+    Chat Completions, local function tools, streaming, structured output (`json_schema` where supported), and retries (429 / `Retry-After` on chat **and** stream **open**). **Phase B** — Groq Responses API, hosted tools, remote MCP — is deferred to **`nucleusiq-groq 0.2.x`**.
 
 ## Installation
 
@@ -14,10 +18,10 @@ The **`nucleusiq-groq`** package adds **[Groq](https://groq.com/)** inference to
 pip install nucleusiq nucleusiq-groq
 ```
 
-Pin the beta explicitly if you need reproducible builds:
+Pin the stable line for reproducible builds:
 
 ```bash
-pip install "nucleusiq>=0.7.9" "nucleusiq-groq==0.1.0b1"
+pip install "nucleusiq>=0.7.12" "nucleusiq-groq>=0.1.0,<0.2"
 ```
 
 ## API keys and defaults

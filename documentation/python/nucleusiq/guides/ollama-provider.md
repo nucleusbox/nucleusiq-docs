@@ -2,20 +2,22 @@
 
 Run **[Ollama](https://ollama.com/)** models (local daemon or a reachable HTTP API) through NucleusIQ using the official **`ollama`** Python SDK — **no LangChain**.
 
-!!! danger "Alpha release"
+!!! success "🟢 Stable — `nucleusiq-ollama` 0.2.0"
 
-    **`nucleusiq-ollama` 0.1.0a1** is a **PyPI pre-release** (**`Development Status :: 3 - Alpha`**). APIs and behavior may change. Requires **`nucleusiq>=0.7.10`** (structured-output resolver wiring). Treat as **experimental** for production.
+    **`nucleusiq-ollama` 0.2.0** ships as **`Development Status :: 5 - Production/Stable`** (first stable line). Requires **`nucleusiq>=0.7.12`**. **98 unit tests, 99.85% coverage**.
 
-## What you get (Phase A)
+## What you get in 0.2.0
 
 | Capability | Supported |
 |------------|-----------|
-| Chat (`/api/chat`) | Yes |
-| Streaming (`StreamEvent`, tokens + metadata) | Yes |
-| **`@tool`** / function tools | Yes |
-| Structured output (`format` / JSON schema) | Yes — combining **`response_format`** with **tools** drops format with a **warning** (same caution pattern as Groq) |
-| **`think`** (reasoning / **`THINKING`** stream events) | Yes |
-| Vision / embeddings | **Not wired** in **`BaseOllama`** yet |
+| Chat (`/api/chat`) | ✅ |
+| Streaming (`StreamEvent`, tokens + metadata) | ✅ |
+| **`@tool`** / function tools | ✅ |
+| Structured output (`format` / JSON schema) | ✅ — combining `response_format` with tools drops format with a warning (same caution pattern as Groq) |
+| **`think`** (reasoning / **`THINKING`** stream events) | ✅ |
+| **Vision (image messages)** | ✅ **New in 0.2.0** |
+| **`LLMCallRecord.provider="ollama"`** enrichment | ✅ **New in 0.2.0** |
+| Embeddings | _Out of scope for this stable line._ |
 
 ## Prerequisites
 
@@ -28,10 +30,10 @@ Run **[Ollama](https://ollama.com/)** models (local daemon or a reachable HTTP A
 pip install nucleusiq nucleusiq-ollama
 ```
 
-Pin the alpha explicitly when reproducibility matters:
+Pin the stable line for reproducible builds:
 
 ```bash
-pip install "nucleusiq>=0.7.10" "nucleusiq-ollama==0.1.0a1"
+pip install "nucleusiq>=0.7.12" "nucleusiq-ollama>=0.2.0,<0.3"
 ```
 
 Dependency: **`ollama>=0.5.0,<1.0`**.
@@ -121,7 +123,66 @@ agent = Agent(
 )
 ```
 
-There are **no Ollama “native server tools”** wired like Gemini **`GoogleTool`** — local **`@tool`** only in this alpha.
+There are **no Ollama "native server tools"** like Gemini's `GoogleTool` — local `@tool` only.
+
+## Vision (image messages) — new in 0.2.0
+
+The `_shared/wire.py` `sanitize_messages` helper now splits OpenAI-style multimodal `content` lists into Ollama's chat-message shape: text parts become the `content` string, and `image_url` parts whose URL is a `data:image/*;base64,…` URL are decoded into Ollama's `images` field.
+
+=== "OpenAI-style multimodal `content`"
+
+    ```python
+    messages = [
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "What's in this image?"},
+                {
+                    "type": "image_url",
+                    "image_url": {"url": "data:image/png;base64,iVBORw0K..."},
+                },
+            ],
+        }
+    ]
+    ```
+
+=== "Raw Ollama `images` block (passthrough)"
+
+    ```python
+    messages = [
+        {
+            "role": "user",
+            "content": "What's in this image?",
+            "images": ["iVBORw0K..."],  # raw base64 strings
+        }
+    ]
+    ```
+
+=== "Mixed `image` content block"
+
+    ```python
+    messages = [
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "Describe this:"},
+                {"type": "image", "data": "iVBORw0K..."},   # raw base64
+            ],
+        }
+    ]
+    ```
+
+!!! warning "HTTP image URLs are skipped"
+
+    Anything that isn't a `data:` URL (e.g. `https://example.com/cat.png`) triggers a **warning** and is omitted from the request — NucleusIQ does **not** fetch remote images on your behalf. Encode the image client-side as `data:image/...;base64,...` before sending.
+
+!!! tip "Multi-modal model required"
+
+    Vision requires a multimodal Ollama model — for example `llama3.2-vision`, `llava`, or `bakllava`. Pull it first:
+
+    ```bash
+    ollama pull llama3.2-vision
+    ```
 
 ## OllamaLLMParams
 

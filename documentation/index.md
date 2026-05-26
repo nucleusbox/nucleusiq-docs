@@ -72,30 +72,68 @@ Choose your path based on where you are today:
 
 ---
 
-## What's new in v0.7.x
+## What's new in v0.7.12 — coordinated stable release ✨
 
-### v0.7.11 + MCP tool adapter (beta)
+!!! success "Every alpha/beta provider promoted to Stable in one coordinated release"
 
-!!! success "New tool-adapter package — `nucleusiq-mcp` 0.1.0b1 (Beta)"
+    **v0.7.12** is the largest release since the project began — a single, coordinated promotion that takes every alpha/beta provider to its **first stable line** and ships the **cross-cutting native-tool observability** that powers it.
 
-    **Universal [Model Context Protocol](https://modelcontextprotocol.io/) adapter** — plug any MCP server (GitHub, Slack, Postgres, Stripe, your own) into a NucleusIQ agent in one line, across **any** LLM provider (OpenAI, Anthropic, Gemini, Groq, Ollama). Built on the **official `mcp` SDK**.
+    | Package | Before | Now | Status |
+    |---------|--------|-----|--------|
+    | **`nucleusiq`** | `0.7.11` | **`0.7.12`** | 🟢 Core release |
+    | **`nucleusiq-anthropic`** | `0.1.0a1` (alpha) | **`0.2.0`** | 🟢 **Stable** — Phase B feature-complete |
+    | **`nucleusiq-ollama`** | `0.1.0a1` (alpha) | **`0.2.0`** | 🟢 **Stable** — + vision wire |
+    | **`nucleusiq-groq`** | `0.1.0b1` (beta) | **`0.1.0`** | 🟢 **Stable** |
+    | **`nucleusiq-mcp`** | `0.1.0b1` (beta) | **`0.1.0`** | 🟢 **Stable** |
+    | **`nucleusiq-openai`** | `0.6.4` | **`0.7.0`** | 🟢 Stable (native-tool obs) |
+    | **`nucleusiq-gemini`** | `0.2.6` | **`0.3.0`** | 🟢 Stable (native-tool obs) |
+
+    All providers floor on `nucleusiq>=0.7.12`. **3,705+ tests passing across the monorepo** (incl. 6 live Anthropic Phase B tests against the real API). After this release the project returns to a bug-fix / single-provider cadence.
+
+    [Release notes — v0.7.12](reference/release-notes/v0.7.12.md){ .md-button .md-button--primary } · [Changelog](reference/changelog.md){ .md-button }
+
+!!! info "Anthropic 0.2.0 Stable — Phase B feature-complete 🚀"
+
+    `nucleusiq-anthropic` graduates from alpha to **Production/Stable** with full Phase B support: **native server tools**, **prompt caching**, **extended thinking**, and **first-class server-tool observability**.
+
+    - **`AnthropicTool` factory** — `web_search()`, `web_fetch()`, `code_execution()` with dated wire types and auto `anthropic-beta` headers.
+    - **Prompt caching** — `cache_system=True` / `cache_tools=True` cuts repeated-prompt token cost dramatically.
+    - **Extended thinking** — `thinking="low"|"medium"|"high"|"max"` resolved to a token budget at wire time.
+    - **Server-tool observability** — `server_tool_use` + per-tool `*_tool_result` blocks (`code_execution_tool_result`, `web_search_tool_result`, …) surface as `ServerToolCall` + `ToolCallRecord(executed_by="provider")` automatically.
+    - 3 runnable Phase B example scripts + 6 **live** integration tests against the real Anthropic API.
+    - **151 unit tests, 95.91% coverage** (gate ≥ 95%).
+
+    [Anthropic provider guide](python/nucleusiq/guides/anthropic-provider.md){ .md-button } · [Native server tools](python/nucleusiq/guides/native-server-tools.md){ .md-button } · [Prompt caching](python/nucleusiq/guides/prompt-caching.md){ .md-button } · [Extended thinking](python/nucleusiq/guides/extended-thinking.md){ .md-button }
+
+!!! tip "Provider-agnostic native-tool observability in core"
+
+    A new field on every traced tool call — `ToolCallRecord.executed_by: Literal["local","provider"]` — lets you split locally-run tools from provider-executed ones (Anthropic `web_search`, OpenAI `code_interpreter` / `file_search` / `web_search`, Gemini `google_search` / `code_execution`, Groq compound tools) **with one query**.
+
+    `LLMCallRecord` also gained `provider`, `request_id`, `organization_id`, `stop_reason`, `cache_read_input_tokens`, `cache_creation_input_tokens`, and a generic `metadata` dict — populated by every provider in this release.
+
+    [Observability guide](python/nucleusiq/observability/index.md){ .md-button .md-button--primary }
+
+!!! example "Ollama 0.2.0 Stable — vision wire"
+
+    `nucleusiq-ollama` graduates to Stable. The wire layer now splits OpenAI-style multimodal `content` lists into Ollama's `message.content` + `message.images` fields, with proper handling of `data:image/...;base64,...` URLs and warnings for HTTP image URLs.
+
+    [Ollama provider guide](python/nucleusiq/guides/ollama-provider.md){ .md-button }
+
+## What was new in v0.7.11
+
+### MCP tool adapter (now Stable in v0.7.12)
+
+!!! success "`nucleusiq-mcp` 0.1.0 — Stable (was beta in v0.7.11)"
+
+    **Universal [Model Context Protocol](https://modelcontextprotocol.io/) adapter** — plug any MCP server (GitHub, Slack, Postgres, Stripe, your own) into a NucleusIQ agent in one line, across **any** LLM provider. Built on the **official `mcp` SDK**.
 
     - **Transports**: **`stdio`** + **Streamable HTTP** + **SSE** (auto-detected).
     - **Auth**: **`BearerAuth`**, **`OAuthAuth`** (OAuth 2.1 + PKCE), **`EnvAuth`**, **`CustomHeadersAuth`** — typed strategies + `auth="..."` shorthand.
     - **Resilience**: **`on_connect_failure="skip"`**, **`health_check=True`**, runtime **`MCPTool.ping()`**.
     - **Observability**: every tool call carries **`source="mcp://server=<name> ..."`** for tracing.
-    - **Core 0.7.11** adds the **`ExpandableTool`** protocol + parallel-safe **`Agent.initialize()`** + **`ToolCallRecord.source`** plumbing.
     - **Tests**: 235 unit (**98.68%** coverage) + 13 live integration tests across all three transports.
 
-    [MCP integration guide](python/nucleusiq/guides/mcp-integration.md){ .md-button .md-button--primary } · [MCP quickstart](python/nucleusiq/examples/mcp-quickstart.md){ .md-button } · [Changelog](reference/changelog.md){ .md-button }
-
-### Anthropic Claude (alpha preview)
-
-!!! info "New provider package — `nucleusiq-anthropic` 0.1.0a1"
-
-    **Claude** via the **Messages API** and official **`anthropic`** Python SDK — **`BaseAnthropic`**, **`@tool`** loops, streaming, native **JSON Schema** outputs when supported, and **`retry_policy`**-aware errors. Requires **`nucleusiq>=0.7.10`**. Ships from **[Unreleased](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#unreleased)** until the next tagged release.
-
-    [Anthropic provider](python/nucleusiq/guides/anthropic-provider.md){ .md-button } · [Anthropic quickstart](python/nucleusiq/examples/anthropic-quickstart.md){ .md-button } · [Changelog — preview](reference/changelog.md){ .md-button }
+    [MCP integration guide](python/nucleusiq/guides/mcp-integration.md){ .md-button .md-button--primary } · [MCP quickstart](python/nucleusiq/examples/mcp-quickstart.md){ .md-button }
 
 ### v0.7.10 (latest tagged core)
 
@@ -192,7 +230,7 @@ Choose your path based on where you are today:
 - **AgentResult response contract** — typed, immutable Pydantic model
 - **Gemini tool-calling fixes** — `$ref`/`$defs` inlining
 
-Current packages: `nucleusiq` **0.7.11**, `nucleusiq-openai` **0.6.4**, `nucleusiq-gemini` **0.2.6**, `nucleusiq-anthropic` **0.1.0a1** (optional **alpha** preview), `nucleusiq-groq` **0.1.0b1** (optional beta), `nucleusiq-ollama` **0.1.0a1** (optional alpha), `nucleusiq-mcp` **0.1.0b1** (optional **beta** tool adapter)
+Current packages (all 🟢 Stable as of **v0.7.12** / 2026-05-26): `nucleusiq` **0.7.12**, `nucleusiq-openai` **0.7.0**, `nucleusiq-gemini` **0.3.0**, `nucleusiq-anthropic` **0.2.0**, `nucleusiq-groq` **0.1.0**, `nucleusiq-ollama` **0.2.0**, `nucleusiq-mcp` **0.1.0**. All providers floor on `nucleusiq>=0.7.12`.
 
 See the [full changelog](reference/changelog.md).
 

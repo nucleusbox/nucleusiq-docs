@@ -2,10 +2,22 @@
 
 The NucleusIQ OpenAI provider (`nucleusiq-openai`) integrates OpenAI's Chat Completions and Responses API with automatic routing between them.
 
+!!! success "🟢 `nucleusiq-openai` 0.7.0 (v0.7.12)"
+
+    Requires **`nucleusiq>=0.7.12`**. **232 unit tests** passing.
+
+    **New in 0.7.0** — native-tool observability: `web_search_call`, `code_interpreter_call`, `file_search_call`, `computer_use_call`, and `image_generation_call` items from the Responses API are normalised into `_LLMResponse.server_tool_calls` (name normalised by stripping the `_call` suffix). The core agent loop then emits `ToolCallRecord(executed_by="provider")` for each one. `LLMCallRecord.provider="openai"` is populated automatically. See [Native server tools](native-server-tools.md) and [Observability](../observability/index.md).
+
 ## Installation
 
 ```bash
 pip install nucleusiq nucleusiq-openai
+```
+
+Pin the stable line:
+
+```bash
+pip install "nucleusiq>=0.7.12" "nucleusiq-openai>=0.7.0,<0.8"
 ```
 
 Set your API key:

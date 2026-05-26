@@ -88,11 +88,16 @@ nav:
     - Agent Config: python/nucleusiq/guides/agent-config.md
     - MCP Integration: python/nucleusiq/guides/mcp-integration.md
     - File handling: python/nucleusiq/guides/file-handling.md
-    - OpenAI provider: python/nucleusiq/guides/openai-provider.md
-    - Gemini provider: python/nucleusiq/guides/gemini-provider.md
-    - Anthropic provider: python/nucleusiq/guides/anthropic-provider.md
-    - Groq provider: python/nucleusiq/guides/groq-provider.md
-    - Ollama provider: python/nucleusiq/guides/ollama-provider.md
+    - Provider guides:
+      - OpenAI: python/nucleusiq/guides/openai-provider.md
+      - Gemini: python/nucleusiq/guides/gemini-provider.md
+      - Anthropic: python/nucleusiq/guides/anthropic-provider.md
+      - Groq: python/nucleusiq/guides/groq-provider.md
+      - Ollama: python/nucleusiq/guides/ollama-provider.md
+    - Cross-cutting concepts:
+      - Native server tools: python/nucleusiq/guides/native-server-tools.md
+      - Prompt caching (Anthropic): python/nucleusiq/guides/prompt-caching.md
+      - Extended thinking (Anthropic): python/nucleusiq/guides/extended-thinking.md
   - Tools:
     - python/nucleusiq/tools/index.md
     - Overview: python/nucleusiq/tools.md
@@ -124,6 +129,8 @@ nav:
     - MCP quickstart: python/nucleusiq/examples/mcp-quickstart.md
   - Reference:
     - reference/index.md
+    - Release notes:
+      - v0.7.12 (latest): reference/release-notes/v0.7.12.md
     - Changelog: reference/changelog.md
 
 extra:

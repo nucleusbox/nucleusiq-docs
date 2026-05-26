@@ -2,7 +2,46 @@
 
 All notable changes to NucleusIQ are documented in the [CHANGELOG.md](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md) in the repository root.
 
-## v0.7.11 + MCP tool adapter (**beta**)
+## v0.7.12 — coordinated stable release (2026-05-26)
+
+!!! success "Every alpha/beta provider promoted to Stable in one release"
+
+    The largest release since the project began. See the dedicated [v0.7.12 release notes](release-notes/v0.7.12.md) for the full deep-dive.
+
+### Packages
+
+| Package | Version | What's new |
+|---------|---------|-----------|
+| `nucleusiq` | **0.7.12** | Central `provider` detection + `ToolCallRecord.executed_by="local"\|"provider"`; `LLMCallRecord` gains `provider`, `request_id`, `organization_id`, `stop_reason`, `cache_read_input_tokens`, `cache_creation_input_tokens`, `metadata`; new `build_server_tool_call_records` observability helper |
+| `nucleusiq-anthropic` | **0.2.0** | 🟢 **Stable** — Phase B complete: `AnthropicTool.web_search()` / `web_fetch()` / `code_execution()`, prompt caching (`cache_system` / `cache_tools`), extended thinking (`thinking="low"\|"medium"\|"high"\|"max"`), `strict_tools`, `disable_parallel_tool_use`; server-tool observability via `server_tool_use` + per-tool `*_tool_result` parsing; **151 unit + 6 live integration tests, 95.91% coverage** |
+| `nucleusiq-ollama` | **0.2.0** | 🟢 **Stable** — vision wire: OpenAI-style multimodal `content` lists split into Ollama's `content` + `images`, `data:` URL decoding, HTTP-URL warning; provider tag on `LLMCallRecord`; **98 unit tests, 99.85% coverage** |
+| `nucleusiq-groq` | **0.1.0** | 🟢 **Stable** — `message.executed_tools` parsed into `GroqLLMResponse.server_tool_calls`; provider tag; **79 unit tests, 92.51% coverage** |
+| `nucleusiq-mcp` | **0.1.0** | 🟢 **Stable** — promoted from beta (same Phase 0–3 surface); **235 unit + 13 live integration tests, 98.68% coverage** |
+| `nucleusiq-openai` | **0.7.0** | 🟢 Stable — native-tool observability via `ServerToolCall` (`web_search_call`, `code_interpreter_call`, `file_search_call`, `computer_use_call`, `image_generation_call`); **232 unit tests** |
+| `nucleusiq-gemini` | **0.3.0** | 🟢 Stable — native-tool observability (`executable_code` + `code_execution_result` → `code_execution`; `grounding_metadata` → `google_search`); **292 unit tests** |
+
+All providers floor on `nucleusiq>=0.7.12`. After v0.7.12 the project returns to a **bug-fix / single-provider cadence**.
+
+### Highlights
+
+- 🧠 Anthropic Phase B with **6 live integration tests** against the real API.
+- 🔎 Provider-agnostic `executed_by` field on every `ToolCallRecord` — split local vs provider execution with a single query, across **every** provider.
+- 👁️ Ollama vision messages now Just Work — paste OpenAI-style multimodal `content` lists and `nucleusiq-ollama` converts them to the right wire shape.
+- 📊 Six new fields on `LLMCallRecord` for cost analysis (`cache_read_input_tokens`, `cache_creation_input_tokens`) and cross-system correlation (`provider`, `request_id`, `organization_id`, `stop_reason`).
+- ✅ **3 705+ tests passing across the monorepo.**
+
+### Documentation
+
+- **[v0.7.12 release notes](release-notes/v0.7.12.md)** — the deep-dive page
+- **[Anthropic provider](../python/nucleusiq/guides/anthropic-provider.md)** — full Phase B reference
+- **[Native server tools](../python/nucleusiq/guides/native-server-tools.md)** — cross-cutting concept
+- **[Prompt caching](../python/nucleusiq/guides/prompt-caching.md)**
+- **[Extended thinking](../python/nucleusiq/guides/extended-thinking.md)**
+- **[Observability — native-tool observability (v0.7.12)](../python/nucleusiq/observability/index.md#native-tool-observability-v0712)** — new `executed_by` + `LLMCallRecord` fields
+- **[Ollama provider](../python/nucleusiq/guides/ollama-provider.md)** — vision wire
+- **[MCP integration](../python/nucleusiq/guides/mcp-integration.md)** — 0.1.0 Stable
+
+## v0.7.11 + MCP tool adapter (now Stable in v0.7.12)
 
 ### Packages
 
