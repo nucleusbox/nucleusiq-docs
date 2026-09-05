@@ -2,7 +2,7 @@
 
 Detailed practical examples for common NucleusIQ workflows.
 
-*Updated for v0.7.10+: mandatory `prompt=` and current pins; **Anthropic Claude** (**alpha**) examples live under [Anthropic quickstart](anthropic-quickstart.md). See [migration notes](../learn/migration-notes.md) if upgrading.*
+*Updated for v0.7.13: mandatory `prompt=` and current pins. New **[OpenAI-compatible quickstart](openai-compatible-quickstart.md)** for self-hosted / BYOM. See [migration notes](../learn/migration-notes.md) if upgrading.*
 
 ## Getting started
 
@@ -21,18 +21,24 @@ Detailed practical examples for common NucleusIQ workflows.
 
 ## Provider examples
 
+- [OpenAI-compatible quickstart](openai-compatible-quickstart.md) — Self-hosted vLLM / SGLang / llama.cpp / LM Studio / Azure OpenAI **v1** (**`nucleusiq-openai-compatible` 0.1.0**, **`nucleusiq>=0.7.13`**)
 - [Gemini quickstart](gemini-quickstart.md) — Google Gemini with all three execution modes
-- [Anthropic quickstart](anthropic-quickstart.md) — Claude DIRECT / STANDARD / AUTONOMOUS (**`nucleusiq-anthropic` 0.1.0a1**, **`nucleusiq>=0.7.10`** — **alpha**)
-- [Groq quickstart](groq-quickstart.md) — Groq DIRECT / STANDARD / AUTONOMOUS (**`nucleusiq-groq` 0.1.0b1**, **`nucleusiq>=0.7.9`**)
-- [Ollama quickstart](ollama-quickstart.md) — Local Ollama DIRECT / STANDARD (**`nucleusiq-ollama` 0.1.0a1**, **`nucleusiq>=0.7.10`** — **alpha**)
-- [Anthropic provider guide](../guides/anthropic-provider.md) — Alpha announcement, Messages API scope, structured-output caveats, runnable **`src/providers/llms/anthropic/examples`**
-- [Groq provider guide](../guides/groq-provider.md) — Beta scope, **429** / **`Retry-After`**, **`strict_model_capabilities`**, repo scripts
-- [Ollama provider guide](../guides/ollama-provider.md) — Alpha scope, **`think`**, structured-output + tools caveat, repo matrix
+- [Anthropic quickstart](anthropic-quickstart.md) — Claude DIRECT / STANDARD / AUTONOMOUS (**`nucleusiq-anthropic` 0.2.1**, **`nucleusiq>=0.7.12`**)
+- [Groq quickstart](groq-quickstart.md) — Groq DIRECT / STANDARD / AUTONOMOUS (**`nucleusiq-groq` 0.1.1**, **`nucleusiq>=0.7.12`**)
+- [Ollama quickstart](ollama-quickstart.md) — Native Ollama DIRECT / STANDARD (**`nucleusiq-ollama` 0.2.1**, **`nucleusiq>=0.7.12`**)
+- [OpenAI-compatible provider](../guides/openai-compatible-provider.md) — Engines, auth, `validate()`, structured-output policy
+- [Anthropic provider guide](../guides/anthropic-provider.md) — Phase B native tools, prompt caching, extended thinking
+- [Groq provider guide](../guides/groq-provider.md) — **429** / **`Retry-After`**, **`strict_model_capabilities`**, repo scripts
+- [Ollama provider guide](../guides/ollama-provider.md) — Native `/api/chat`, **`think`**, vision, structured-output + tools caveat
 
 ## Tool adapter examples
 
-- [MCP quickstart](mcp-quickstart.md) — Universal **Model Context Protocol** adapter across **every** provider (**`nucleusiq-mcp` 0.1.0b1**, **`nucleusiq>=0.7.11`** — **beta**): single stdio server, HTTP + Bearer auth, multi-server, filter/rename, graceful degradation, source tracing, plugin guardrails
-- [MCP integration guide](../guides/mcp-integration.md) — Beta announcement, transports (stdio + Streamable HTTP + SSE), auth strategies (Bearer / OAuth 2.1 / Env / Custom), filtering, `ping()`, comparison vs OpenAI server-side MCP
+- [MCP quickstart](mcp-quickstart.md) — Universal **Model Context Protocol** adapter across **every** provider (**`nucleusiq-mcp` 0.1.1**, **`nucleusiq>=0.7.12`**): stdio, HTTP + Bearer, multi-server, filter/rename, graceful degradation, source tracing, plugin guardrails
+- [MCP integration guide](../guides/mcp-integration.md) — Transports, auth strategies, filtering, `ping()`, comparison vs OpenAI server-side MCP
+
+!!! tip "Which page for self-hosted / BYOM?"
+
+    Start with **[OpenAI-compatible quickstart](openai-compatible-quickstart.md)**; use **[OpenAI-compatible provider](../guides/openai-compatible-provider.md)** for engines, auth, `validate()`, and Azure OpenAI v1 limits.
 
 !!! tip "Which page for Anthropic (Claude)?"
 
@@ -48,7 +54,7 @@ Detailed practical examples for common NucleusIQ workflows.
 
 !!! tip "Which page for MCP?"
 
-    Start with **[MCP quickstart](mcp-quickstart.md)** for copy-paste recipes (stdio + HTTP, multi-server, tracing); use **[MCP integration guide](../guides/mcp-integration.md)** for the full beta scope, OAuth, decorator filters, and graceful degradation.
+    Start with **[MCP quickstart](mcp-quickstart.md)** for copy-paste recipes (stdio + HTTP, multi-server, tracing); use **[MCP integration guide](../guides/mcp-integration.md)** for transports, OAuth, decorator filters, and graceful degradation.
 
 ## Repository examples
 
@@ -56,9 +62,10 @@ Full runnable scripts are available in the GitHub repository:
 
 - [Core examples](https://github.com/nucleusbox/NucleusIQ/tree/main/src/nucleusiq/examples)
 - [OpenAI examples](https://github.com/nucleusbox/NucleusIQ/tree/main/src/providers/llms/openai/examples)
+- [OpenAI-compatible examples](https://github.com/nucleusbox/NucleusIQ/tree/main/src/providers/inference/openai_compatible/examples)
 - [Gemini examples](https://github.com/nucleusbox/NucleusIQ/tree/main/src/providers/llms/gemini/examples)
-- [Anthropic examples](https://github.com/nucleusbox/NucleusIQ/tree/main/src/providers/llms/anthropic/examples) — DIRECT through AUTONOMOUS, streaming, native structured demo (**alpha**)
+- [Anthropic examples](https://github.com/nucleusbox/NucleusIQ/tree/main/src/providers/llms/anthropic/examples) — DIRECT through AUTONOMOUS, streaming, native structured demo
 - [Groq examples](https://github.com/nucleusbox/NucleusIQ/tree/main/src/providers/inference/groq/examples) — Direct through Autonomous + structured output
-- [Ollama examples](https://github.com/nucleusbox/NucleusIQ/tree/main/src/providers/inference/ollama/examples) — Smoke, Direct, streaming live, capabilities matrix (**alpha**)
-- [MCP examples](https://github.com/nucleusbox/NucleusIQ/tree/main/src/providers/tools/mcp/examples) — Eight runnable examples: stdio, HTTP + auth, multi-server, OAuth, error handling, health check, decorator filters, full agent with LLM (**beta**)
+- [Ollama examples](https://github.com/nucleusbox/NucleusIQ/tree/main/src/providers/inference/ollama/examples) — Smoke, Direct, streaming live, capabilities matrix
+- [MCP examples](https://github.com/nucleusbox/NucleusIQ/tree/main/src/providers/tools/mcp/examples) — Eight runnable examples: stdio, HTTP + auth, multi-server, OAuth, error handling, health check, decorator filters, full agent with LLM
 - [Notebooks](https://github.com/nucleusbox/NucleusIQ/tree/main/notebooks) — Jupyter notebooks: context management showcase, **`mcp_tools_showcase.ipynb`** (Windows-friendly Streamable HTTP demo), and more

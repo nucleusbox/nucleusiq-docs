@@ -1,6 +1,8 @@
 # Structured output
 
-Parse agent responses into typed schemas using Pydantic, dataclass, or TypedDict. Works with **OpenAI**, **Gemini**, **Anthropic** (**`nucleusiq-anthropic` 0.1.0a1**, **`nucleusiq>=0.7.10`**) when Claude exposes native **JSON Schema** structured outputs via Messages **`output_config.format`**, **Groq** (`nucleusiq-groq` **0.1.0b1**, **`nucleusiq>=0.7.9`**) when the Groq model supports **`json_schema`**, and **Ollama** via **`nucleusiq-ollama` 0.1.0a1** (**alpha**) when your Ollama model / server supports structured **`format`**. Combining **`response_format`** with **tools** drops native structured output with a **warning** on several backends — test tool-free paths first. Guides: [Anthropic provider](guides/anthropic-provider.md), [Groq provider](guides/groq-provider.md), [Ollama provider](guides/ollama-provider.md).
+Parse agent responses into typed schemas using Pydantic, dataclass, or TypedDict. Works with **OpenAI**, **Gemini**, **Anthropic**, **Groq**, **Ollama** (native `format`), and **OpenAI-compatible** servers (vLLM, SGLang, …).
+
+**`OutputMode.AUTO` always resolves to NATIVE** — "hand the schema to the adapter". The adapter decides whether the server can enforce JSON schema. Combining **`response_format`** with **tools** drops native structured output with a **warning** on several backends — test tool-free paths first. Guides: [OpenAI-compatible provider](guides/openai-compatible-provider.md), [Anthropic provider](guides/anthropic-provider.md), [Groq provider](guides/groq-provider.md), [Ollama provider](guides/ollama-provider.md).
 
 ## Pydantic model (recommended)
 
@@ -97,6 +99,29 @@ You can also get structured output directly from the LLM without an agent:
     )
     ```
 
+=== "OpenAI-compatible"
+
+    ```python
+    from nucleusiq_openai_compatible import OpenAICompatibleLLM
+    from pydantic import BaseModel
+
+    class MovieReview(BaseModel):
+        title: str
+        rating: float
+        summary: str
+
+    llm = OpenAICompatibleLLM(
+        base_url="http://127.0.0.1:8000/v1",
+        model="gemma-4-27b-it",
+        context_window=32_768,
+        engine="vllm",
+    )
+    result = await llm.call(
+        messages=[{"role": "user", "content": "Review the movie Inception"}],
+        response_format=MovieReview,
+    )
+    ```
+
 ## Supported formats
 
 | Format | How it works |
@@ -108,18 +133,20 @@ You can also get structured output directly from the LLM without an agent:
 ## Provider implementation
 
 - **OpenAI** — Uses `response_format` with JSON schema enforcement.
+- **OpenAI-compatible** — Engine preset decides. vLLM / SGLang send `response_format`. Ollama `/v1` and `generic` inject the schema into the prompt (`PromptPolicy`). Combined `tools` + schema on vLLM is rewritten so tool calls are not suppressed. See [OpenAI-compatible provider](guides/openai-compatible-provider.md).
 - **Gemini** — Uses `response_mime_type: "application/json"` with `response_json_schema`.
-- **Anthropic** — Messages **`output_config.format`** with JSON Schema when the model/API supports native structured outputs (**`nucleusiq-anthropic`**, **alpha**); **`response_format`** is skipped when **tools** are present (**warning**); streaming ignores **`response_format`** (**warning**). See [Anthropic provider](guides/anthropic-provider.md).
-- **Groq** — Chat Completions **`json_schema`** when the checkpoint supports it (**`nucleusiq-groq`** beta). Same tools + structured-output interaction caveats as other backends — see [Groq provider](guides/groq-provider.md).
-- **Ollama** — Native **`format`** when the server/model supports it (**`nucleusiq-ollama`**, **alpha**). See [Ollama provider](guides/ollama-provider.md).
+- **Anthropic** — Messages **`output_config.format`** with JSON Schema when the model/API supports native structured outputs; **`response_format`** is skipped when **tools** are present (**warning**); streaming ignores **`response_format`** (**warning**). See [Anthropic provider](guides/anthropic-provider.md).
+- **Groq** — Chat Completions **`json_schema`** when the checkpoint supports it. Same tools + structured-output interaction caveats as other backends — see [Groq provider](guides/groq-provider.md).
+- **Ollama** — Native **`format`** when the server/model supports it (**`nucleusiq-ollama`**). For the `/v1` shim, use **`nucleusiq-openai-compatible`** instead. See [Ollama provider](guides/ollama-provider.md).
 
 All wired providers aim for the same typed **`Agent`** result at the framework layer when native mode succeeds.
 
 ## See also
 
 - [Agents](agents.md) — Agent configuration
-- [Anthropic provider](guides/anthropic-provider.md) — Claude Messages API structured outputs (**alpha**)
-- [Groq provider](guides/groq-provider.md) — Groq structured outputs (beta)
-- [Ollama provider](guides/ollama-provider.md) — Ollama structured **`format`** (**alpha**)
+- [OpenAI-compatible provider](guides/openai-compatible-provider.md) — Engine presets and degradation policies
+- [Anthropic provider](guides/anthropic-provider.md) — Claude Messages API structured outputs
+- [Groq provider](guides/groq-provider.md) — Groq structured outputs
+- [Ollama provider](guides/ollama-provider.md) — Ollama structured **`format`**
 - [Gemini provider](guides/gemini-provider.md) — Gemini structured output details
 - [Quickstart](quickstart.md) — Basic usage

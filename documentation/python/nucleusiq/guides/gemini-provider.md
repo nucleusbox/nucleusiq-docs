@@ -2,9 +2,9 @@
 
 The NucleusIQ Gemini provider (`nucleusiq-gemini`) integrates Google's Gemini models using the official `google-genai` SDK (GA).
 
-!!! success "🟢 `nucleusiq-gemini` 0.3.0 (v0.7.12)"
+!!! success "🟢 `nucleusiq-gemini` 0.3.1 (v0.7.13)"
 
-    Requires **`nucleusiq>=0.7.12`**. **292 unit tests** passing.
+    Requires **`nucleusiq>=0.7.12`**. **292 unit tests** passing. Declares `PROVIDER_NAME` and `pydantic`. README examples now use valid `Agent(prompt=...)`.
 
     **New in 0.3.0** — native-tool observability: `executable_code` + `code_execution_result` parts on a candidate pair into a single `code_execution` `ServerToolCall`; `grounding_metadata` (Google Search grounding) surfaces as a `google_search` record. The core agent loop emits `ToolCallRecord(executed_by="provider")` automatically. `LLMCallRecord.provider="google"` is populated by the central observability hook. See [Native server tools](native-server-tools.md) and [Observability](../observability/index.md).
 
@@ -17,7 +17,7 @@ pip install nucleusiq nucleusiq-gemini
 Pin the stable line:
 
 ```bash
-pip install "nucleusiq>=0.7.12" "nucleusiq-gemini>=0.3.0,<0.4"
+pip install "nucleusiq>=0.7.12" "nucleusiq-gemini>=0.3.1,<0.4"
 ```
 
 Set your API key:

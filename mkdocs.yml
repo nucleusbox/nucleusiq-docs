@@ -90,6 +90,7 @@ nav:
     - File handling: python/nucleusiq/guides/file-handling.md
     - Provider guides:
       - OpenAI: python/nucleusiq/guides/openai-provider.md
+      - OpenAI-compatible: python/nucleusiq/guides/openai-compatible-provider.md
       - Gemini: python/nucleusiq/guides/gemini-provider.md
       - Anthropic: python/nucleusiq/guides/anthropic-provider.md
       - Groq: python/nucleusiq/guides/groq-provider.md
@@ -126,11 +127,13 @@ nav:
     - Anthropic quickstart: python/nucleusiq/examples/anthropic-quickstart.md
     - Groq quickstart: python/nucleusiq/examples/groq-quickstart.md
     - Ollama quickstart: python/nucleusiq/examples/ollama-quickstart.md
+    - OpenAI-compatible quickstart: python/nucleusiq/examples/openai-compatible-quickstart.md
     - MCP quickstart: python/nucleusiq/examples/mcp-quickstart.md
   - Reference:
     - reference/index.md
     - Release notes:
-      - v0.7.12 (latest): reference/release-notes/v0.7.12.md
+      - v0.7.13 (latest): reference/release-notes/v0.7.13.md
+      - v0.7.12: reference/release-notes/v0.7.12.md
     - Changelog: reference/changelog.md
 
 extra:

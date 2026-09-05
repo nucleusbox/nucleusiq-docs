@@ -2,16 +2,16 @@
 
 Use **local or hosted [Ollama](https://ollama.com/)** with NucleusIQ through **`nucleusiq-ollama`**.
 
-!!! danger "Alpha"
+!!! success "Stable"
 
-    **`nucleusiq-ollama` 0.1.0a1** is **alpha** — pre-release APIs. Requires **`nucleusiq>=0.7.10`**. Always **`pip install "nucleusiq>=0.7.10" "nucleusiq-ollama>=0.1.0a1"`** (or pin **`==0.1.0a1`**). See **[Ollama provider](../guides/ollama-provider.md)** for limitations.
+    **`nucleusiq-ollama` 0.2.1** — native `/api/chat`. Requires **`nucleusiq>=0.7.12`**. For Ollama's OpenAI `/v1` shim, use the [OpenAI-compatible quickstart](openai-compatible-quickstart.md) instead.
 
 **Pattern:** **`BaseOllama(..., async_mode=True)`**, **`await agent.initialize()`**, mandatory **`prompt=`**.
 
 ## Setup
 
 ```bash
-pip install "nucleusiq>=0.7.10" "nucleusiq-ollama>=0.1.0a1"
+pip install "nucleusiq>=0.7.12" "nucleusiq-ollama>=0.2.1,<0.3"
 # Ensure Ollama is running and you have pulled a model, e.g.:
 # ollama pull llama3.2
 ```

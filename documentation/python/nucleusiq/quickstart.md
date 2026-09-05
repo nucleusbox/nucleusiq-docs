@@ -60,6 +60,47 @@ asyncio.run(main())
 
 Set `OPENAI_API_KEY` in your environment or `.env` file.
 
+## With OpenAI-compatible (self-hosted / BYOM)
+
+New in **v0.7.13**. Point the same `Agent` at vLLM, SGLang, llama.cpp, LM Studio, or any Chat Completions server. Requires **`nucleusiq>=0.7.13`** and **`nucleusiq-openai-compatible`**. Full guide: [OpenAI-compatible provider](guides/openai-compatible-provider.md).
+
+```python
+import asyncio
+
+from nucleusiq.agents import Agent
+from nucleusiq.agents.config import AgentConfig, ExecutionMode
+from nucleusiq.agents.task import Task
+from nucleusiq.prompts.zero_shot import ZeroShotPrompt
+from nucleusiq_openai_compatible import OpenAICompatibleLLM
+
+
+async def main():
+    llm = OpenAICompatibleLLM(
+        base_url="http://127.0.0.1:8000/v1",
+        model="gemma-4-27b-it",
+        context_window=32_768,
+        engine="vllm",
+    )
+    agent = Agent(
+        name="Assistant",
+        prompt=ZeroShotPrompt().configure(
+            system="You are a helpful assistant.",
+        ),
+        llm=llm,
+        config=AgentConfig(execution_mode=ExecutionMode.STANDARD),
+    )
+    await agent.initialize()
+    result = await agent.execute(
+        Task(id="q-compat-1", objective="What is the capital of France?"),
+    )
+    print(result.output)
+
+
+asyncio.run(main())
+```
+
+`api_key` is optional — omit it for an unauthenticated local server. Azure OpenAI **v1** uses `engine="azure"` and `HeaderAuth("api-key", ...)`. Do **not** use `nucleusiq-openai` (`BaseOpenAI`) for self-hosted servers.
+
 ## With Gemini
 
 ```python
@@ -89,7 +130,7 @@ Set `GEMINI_API_KEY` in your environment or `.env` file.
 
 ## With Groq
 
-Public beta inference provider — **`nucleusiq-groq` 0.1.0b1** on **`nucleusiq>=0.7.9`**. Uses Groq’s official **`groq`** SDK; pass **`async_mode=True`** on **`BaseGroq`**. Calling **`await agent.initialize()`** before **`execute()`** matches the runnable scripts in the monorepo. See also **[Groq quickstart](examples/groq-quickstart.md)** and **[Groq provider guide](guides/groq-provider.md)**.
+**`nucleusiq-groq` 0.1.1** on **`nucleusiq>=0.7.12`**. Uses Groq’s official **`groq`** SDK; pass **`async_mode=True`** on **`BaseGroq`**. Calling **`await agent.initialize()`** before **`execute()`** matches the runnable scripts in the monorepo. See also **[Groq quickstart](examples/groq-quickstart.md)** and **[Groq provider guide](guides/groq-provider.md)**.
 
 ```python
 import asyncio
@@ -131,9 +172,9 @@ Set **`GROQ_API_KEY`** in your environment or `.env` file. Full scope, **429** /
 
 ## With Anthropic (Claude)
 
-!!! warning "Alpha provider"
+!!! success "Stable provider"
 
-    **`nucleusiq-anthropic` 0.1.0a1** — pre-release. Requires **`nucleusiq>=0.7.10`**, **`anthropic>=0.40,<1`**. Set **`ANTHROPIC_API_KEY`**; optional **`ANTHROPIC_MODEL`** if the default id is not enabled for your org.
+    **`nucleusiq-anthropic` 0.2.1** — Phase B complete. Requires **`nucleusiq>=0.7.12`**, **`anthropic>=0.40,<1`**. Set **`ANTHROPIC_API_KEY`**; optional **`ANTHROPIC_MODEL`** if the default id is not enabled for your org.
 
 Uses **`BaseAnthropic`** + **`async_mode=True`**, framework **`LLMParams`** on **`AgentConfig`** for sampling, and **`await agent.initialize()`** before **`execute()`**, matching the monorepo scripts. More patterns: **[Anthropic quickstart](examples/anthropic-quickstart.md)** and **[Anthropic provider](guides/anthropic-provider.md)**.
 
@@ -180,9 +221,9 @@ asyncio.run(main())
 
 ## With Ollama
 
-!!! warning "Alpha provider"
+!!! success "Stable provider"
 
-    **`nucleusiq-ollama` 0.1.0a1** — pre-release. Requires **`nucleusiq>=0.7.10`**. Run an **Ollama** daemon locally or point **`OLLAMA_HOST`** at a reachable API: `ollama pull <model>` first.
+    **`nucleusiq-ollama` 0.2.1** — native `/api/chat`. Requires **`nucleusiq>=0.7.12`**. Run an **Ollama** daemon locally or point **`OLLAMA_HOST`** at a reachable API: `ollama pull <model>` first. For Ollama's OpenAI `/v1` shim, use [OpenAI-compatible](guides/openai-compatible-provider.md) instead.
 
 Uses **`BaseOllama`** + **`async_mode=True`** and **`await agent.initialize()`** like the monorepo scripts. More patterns: **[Ollama quickstart](examples/ollama-quickstart.md)** and **[Ollama provider](guides/ollama-provider.md)**.
 
@@ -318,7 +359,7 @@ See [Context management](context-management.md) for the full guide.
 - [Prompts](prompts.md) — Prompt techniques and the mandatory prompt system
 - [Context management](context-management.md) — Context window management
 - [Tools](tools.md) — Built-in tools, `@tool` decorator, and provider native tools
-- [Providers](providers.md) — OpenAI, Gemini, Anthropic, Groq, Ollama, and provider portability
+- [Providers](providers.md) — OpenAI, OpenAI-compatible, Gemini, Anthropic, Groq, Ollama, and provider portability
 - [Usage tracking](usage-tracking.md) — Token usage and cost estimation
 - [Plugins](plugins/overview.md) — 10 built-in plugins for guardrails and control
-- [Examples](examples/index.md) — Practical patterns (**[Anthropic quickstart](examples/anthropic-quickstart.md)**, **[Groq quickstart](examples/groq-quickstart.md)**, **[Ollama quickstart](examples/ollama-quickstart.md)**)
+- [Examples](examples/index.md) — Practical patterns (**[OpenAI-compatible quickstart](examples/openai-compatible-quickstart.md)**, **[Anthropic quickstart](examples/anthropic-quickstart.md)**, **[Groq quickstart](examples/groq-quickstart.md)**, **[Ollama quickstart](examples/ollama-quickstart.md)**)

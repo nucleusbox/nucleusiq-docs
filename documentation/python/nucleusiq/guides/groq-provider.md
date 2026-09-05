@@ -2,9 +2,9 @@
 
 The **`nucleusiq-groq`** package adds **[Groq](https://groq.com/)** inference to NucleusIQ using Groq’s **OpenAI-compatible Chat Completions** API and Groq’s official **[`groq`](https://github.com/groq/groq-python)** Python SDK (`AsyncGroq` / `Groq`).
 
-!!! success "🟢 Stable — `nucleusiq-groq` 0.1.0"
+!!! success "🟢 Stable — `nucleusiq-groq` 0.1.1"
 
-    `nucleusiq-groq` graduates from beta to **`Development Status :: 5 - Production/Stable`** in v0.7.12. Requires **`nucleusiq>=0.7.12`**. **79 unit tests, 92.51% coverage.**
+    `nucleusiq-groq` is **`Development Status :: 5 - Production/Stable`**. Requires **`nucleusiq>=0.7.12`**. **79 unit tests, 92.51% coverage.** Declares `PROVIDER_NAME`.
 
     **New in 0.1.0:** `LLMCallRecord.provider="groq"` enrichment + native-tool observability emission stub — Groq's `message.executed_tools` field is parsed into `GroqLLMResponse.server_tool_calls`, ready for the central agent loop to surface as `ToolCallRecord(executed_by="provider")` once Groq's hosted-tool Responses API lands in `nucleusiq-groq 0.2.x`.
 
@@ -21,7 +21,7 @@ pip install nucleusiq nucleusiq-groq
 Pin the stable line for reproducible builds:
 
 ```bash
-pip install "nucleusiq>=0.7.12" "nucleusiq-groq>=0.1.0,<0.2"
+pip install "nucleusiq>=0.7.12" "nucleusiq-groq>=0.1.1,<0.2"
 ```
 
 ## API keys and defaults

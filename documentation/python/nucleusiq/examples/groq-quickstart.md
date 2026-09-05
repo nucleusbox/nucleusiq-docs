@@ -2,14 +2,14 @@
 
 Use **[Groq](https://groq.com/)** Chat Completions through **`nucleusiq-groq`** across all three execution modes.
 
-**Requirements:** **`nucleusiq>=0.7.9`**, **`nucleusiq-groq` 0.1.0b1** (public beta). Use **`BaseGroq(..., async_mode=True)`** and call **`await agent.initialize()`** before **`execute()`** so startup matches the [monorepo scripts](https://github.com/nucleusbox/NucleusIQ/tree/main/src/providers/inference/groq/examples/agents).
+**Requirements:** **`nucleusiq>=0.7.12`**, **`nucleusiq-groq` 0.1.1**. Use **`BaseGroq(..., async_mode=True)`** and call **`await agent.initialize()`** before **`execute()`** so startup matches the [monorepo scripts](https://github.com/nucleusbox/NucleusIQ/tree/main/src/providers/inference/groq/examples/agents).
 
 *Prompt refactor (v0.7.6+): `prompt` is mandatory — always pass **`ZeroShotPrompt().configure(...)`**.*
 
 ## Setup
 
 ```bash
-pip install "nucleusiq>=0.7.9" "nucleusiq-groq>=0.1.0b1"
+pip install "nucleusiq>=0.7.12" "nucleusiq-groq>=0.1.1,<0.2"
 export GROQ_API_KEY="gsk_..."
 # Optional defaults used by monorepo examples:
 # export GROQ_MODEL=llama-3.3-70b-versatile

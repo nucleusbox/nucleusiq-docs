@@ -10,23 +10,27 @@ nucleusiq (core)
 ├── LLMParams        # Common parameters
 └── MockLLM          # Built-in for testing
 
-nucleusiq-openai     # Provider package
+nucleusiq-openai     # Provider package (OpenAI cloud)
 ├── BaseOpenAI       # Implements BaseLLM
 └── OpenAILLMParams  # Extends LLMParams
+
+nucleusiq-openai-compatible  # Self-hosted / BYOM Chat Completions
+├── OpenAICompatibleLLM      # Implements BaseLLM (alias: BaseOpenAICompatible)
+└── OpenAICompatibleLLMParams
 
 nucleusiq-gemini     # Provider package
 ├── BaseGemini       # Implements BaseLLM
 └── GeminiLLMParams  # Extends LLMParams
 
-nucleusiq-groq       # Provider package (public beta)
+nucleusiq-groq       # Provider package
 ├── BaseGroq         # Implements BaseLLM (Groq Chat Completions)
 └── GroqLLMParams    # Extends LLMParams
 
-nucleusiq-ollama     # Provider package (alpha)
-├── BaseOllama       # Implements BaseLLM (Ollama /api/chat)
+nucleusiq-ollama     # Provider package (native /api/chat)
+├── BaseOllama       # Implements BaseLLM
 └── OllamaLLMParams  # Extends LLMParams
 
-nucleusiq-anthropic  # Provider package (alpha)
+nucleusiq-anthropic  # Provider package
 ├── BaseAnthropic    # Implements BaseLLM (Claude Messages API)
 └── AnthropicLLMParams  # top_k, anthropic_beta, extra_headers (merged on BaseAnthropic)
 ```
@@ -38,6 +42,19 @@ nucleusiq-anthropic  # Provider package (alpha)
     ```python
     from nucleusiq_openai import BaseOpenAI
     llm = BaseOpenAI(model_name="gpt-4o-mini")
+    ```
+
+=== "OpenAI-compatible"
+
+    ```python
+    from nucleusiq_openai_compatible import OpenAICompatibleLLM
+
+    llm = OpenAICompatibleLLM(
+        base_url="http://127.0.0.1:8000/v1",
+        model="gemma-4-27b-it",
+        context_window=32_768,
+        engine="vllm",
+    )
     ```
 
 === "Gemini"
@@ -177,8 +194,9 @@ except RateLimitError:
 ## See also
 
 - [Providers](../providers.md) — Full provider architecture
-- [Anthropic provider guide](../guides/anthropic-provider.md) — Claude Messages API (**alpha**), **`nucleusiq>=0.7.10`**
-- [Ollama provider guide](../guides/ollama-provider.md) — Ollama alpha (**`nucleusiq>=0.7.10`**)
-- [Groq provider guide](../guides/groq-provider.md) — Groq Chat Completions (beta), **`retry_policy`** alignment (**v0.7.9+**)
+- [OpenAI-compatible provider](../guides/openai-compatible-provider.md) — Self-hosted / BYOM, **`nucleusiq>=0.7.13`**
+- [Anthropic provider guide](../guides/anthropic-provider.md) — Claude Messages API, **`nucleusiq>=0.7.12`**
+- [Ollama provider guide](../guides/ollama-provider.md) — Native `/api/chat`, **`nucleusiq>=0.7.12`**
+- [Groq provider guide](../guides/groq-provider.md) — Groq Chat Completions, **`retry_policy`**
 - [Models](../models.md) — Available models per provider
 - [Error handling](error-handling.md) — Framework error taxonomy

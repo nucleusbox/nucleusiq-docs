@@ -2,6 +2,41 @@
 
 All notable changes to NucleusIQ are documented in the [CHANGELOG.md](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md) in the repository root.
 
+## v0.7.13 — OpenAI-compatible provider (2026-09-05)
+
+!!! success "Self-hosted and bring-your-own-model"
+
+    One new package for every Chat Completions server. See the dedicated [v0.7.13 release notes](release-notes/v0.7.13.md).
+
+### Packages
+
+| Package | Version | What's new |
+|---------|---------|-----------|
+| `nucleusiq` | **0.7.13** | `BaseLLM.PROVIDER_NAME` — provider identity is declared, not guessed from the class name. Dead `supports_native_output()` removed. `OutputMode.AUTO` still resolves to NATIVE (hand the schema to the adapter). |
+| `nucleusiq-openai-compatible` | **0.1.0** | 🟢 **New, Stable.** BYOM / BYOK for vLLM, SGLang, TGI, llama.cpp, LM Studio, NIM, Ollama `/v1`, Azure OpenAI v1, OpenRouter, Together, and other Chat Completions servers. Engine presets, auth strategies, `validate()`, structured-output policies. **675 tests, 99.40% coverage.** Requires `nucleusiq>=0.7.13`. |
+| `nucleusiq-openai` | **0.7.1** | Responses API usage: `input_tokens` / `output_tokens` → `prompt_tokens` / `completion_tokens`. Non-streaming `call()` no longer reports 0 tokens / $0.00. |
+| `nucleusiq-mcp` | **0.1.1** | Security floor `mcp>=1.28.1` (session auth, task isolation, WebSocket Host/Origin). |
+| `nucleusiq-gemini` | **0.3.1** | Declares `PROVIDER_NAME` and `pydantic`. README examples use valid `Agent(prompt=...)`. |
+| `nucleusiq-anthropic` | **0.2.1** | Declares `PROVIDER_NAME` plus `httpx` / `pydantic`. |
+| `nucleusiq-ollama` | **0.2.1** | same |
+| `nucleusiq-groq` | **0.1.1** | same |
+
+Only the new provider floors on `nucleusiq>=0.7.13`. **4,382 tests** passing across the monorepo.
+
+### Highlights
+
+- 🖥️ Point any existing `Agent` at **your** vLLM / SGLang / llama.cpp / LM Studio server.
+- 🔑 Bring-your-own-key: `NoAuth`, `BearerAuth`, `HeaderAuth`, or a callable resolved once per request.
+- 🧭 `await llm.validate()` checks reachability, auth, and served model names before an agent run.
+- 🔒 All 32 Dependabot advisories cleared. `mcp>=1.28.1` is the only advisory that reached published metadata.
+
+### Documentation
+
+- **[v0.7.13 release notes](release-notes/v0.7.13.md)**
+- **[OpenAI-compatible provider](../python/nucleusiq/guides/openai-compatible-provider.md)**
+- **[OpenAI-compatible quickstart](../python/nucleusiq/examples/openai-compatible-quickstart.md)**
+- Monorepo [CHANGELOG.md — 0.7.13](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#0713--2026-09-05)
+
 ## v0.7.12 — coordinated stable release (2026-05-26)
 
 !!! success "Every alpha/beta provider promoted to Stable in one release"

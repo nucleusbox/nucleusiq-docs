@@ -72,7 +72,45 @@ Choose your path based on where you are today:
 
 ---
 
-## What's new in v0.7.12 — coordinated stable release ✨
+## What's new in v0.7.13 — self-hosted and bring-your-own-model ✨
+
+!!! success "`nucleusiq-openai-compatible` 0.1.0 Stable — one adapter for every Chat Completions server"
+
+    **v0.7.13** lets you point a NucleusIQ agent at **your GPU, your model, your key**. Install one extra package and the same `Agent` / tools / memory / plugins stack talks to vLLM, SGLang, TGI, llama.cpp, LM Studio, NVIDIA NIM, Ollama `/v1`, OpenRouter, Together, and **Azure OpenAI v1**.
+
+    | Package | Version | Notes |
+    |---------|---------|-------|
+    | **`nucleusiq`** | **`0.7.13`** | Declared `BaseLLM.PROVIDER_NAME` — no more class-name guessing |
+    | **`nucleusiq-openai-compatible`** | **`0.1.0`** | 🟢 **New, Stable.** Requires `nucleusiq>=0.7.13` |
+    | **`nucleusiq-openai`** | **`0.7.1`** | Responses API usage: tokens and cost no longer report as zero |
+    | **`nucleusiq-mcp`** | **`0.1.1`** | Security floor `mcp>=1.28.1` |
+    | **`nucleusiq-gemini`** | **`0.3.1`** | `PROVIDER_NAME` + declared `pydantic` |
+    | **`nucleusiq-anthropic`** | **`0.2.1`** | `PROVIDER_NAME` + declared deps |
+    | **`nucleusiq-ollama`** | **`0.2.1`** | same |
+    | **`nucleusiq-groq`** | **`0.1.1`** | same |
+
+    Only the new provider floors on `nucleusiq>=0.7.13`. Existing OpenAI / Gemini / Anthropic / Groq / Ollama / MCP apps keep working on `>=0.7.12`. **4,382 tests** passing.
+
+    [Release notes — v0.7.13](reference/release-notes/v0.7.13.md){ .md-button .md-button--primary } · [OpenAI-compatible guide](python/nucleusiq/guides/openai-compatible-provider.md){ .md-button } · [Quickstart](python/nucleusiq/examples/openai-compatible-quickstart.md){ .md-button }
+
+```python
+from nucleusiq_openai_compatible import OpenAICompatibleLLM
+
+llm = OpenAICompatibleLLM(
+    base_url="http://gpu-node-1:8000/v1",
+    model="gemma-4-27b-it",
+    context_window=32_768,
+    engine="vllm",
+)
+```
+
+Drop that `llm` into any existing `Agent`. Tools, modes, memory, and plugins do not change.
+
+!!! warning "Azure OpenAI is v1 Chat Completions only"
+
+    Use `engine="azure"`, `base_url="https://{resource}.openai.azure.com/openai/v1"`, and `auth=HeaderAuth("api-key", ...)`. Classic `/openai/deployments/{name}?api-version=` URLs and the `AzureOpenAI` SDK are **not** used.
+
+## What was new in v0.7.12 — coordinated stable release
 
 !!! success "Every alpha/beta provider promoted to Stable in one coordinated release"
 
@@ -230,7 +268,7 @@ Choose your path based on where you are today:
 - **AgentResult response contract** — typed, immutable Pydantic model
 - **Gemini tool-calling fixes** — `$ref`/`$defs` inlining
 
-Current packages (all 🟢 Stable as of **v0.7.12** / 2026-05-26): `nucleusiq` **0.7.12**, `nucleusiq-openai` **0.7.0**, `nucleusiq-gemini` **0.3.0**, `nucleusiq-anthropic` **0.2.0**, `nucleusiq-groq` **0.1.0**, `nucleusiq-ollama` **0.2.0**, `nucleusiq-mcp` **0.1.0**. All providers floor on `nucleusiq>=0.7.12`.
+Current packages (all 🟢 Stable as of **v0.7.13** / 2026-09-05): `nucleusiq` **0.7.13**, `nucleusiq-openai-compatible` **0.1.0**, `nucleusiq-openai` **0.7.1**, `nucleusiq-gemini` **0.3.1**, `nucleusiq-anthropic` **0.2.1**, `nucleusiq-groq` **0.1.1**, `nucleusiq-ollama` **0.2.1**, `nucleusiq-mcp` **0.1.1**. The new OpenAI-compatible provider floors on `nucleusiq>=0.7.13`; the others stay on `>=0.7.12`.
 
 See the [full changelog](reference/changelog.md).
 

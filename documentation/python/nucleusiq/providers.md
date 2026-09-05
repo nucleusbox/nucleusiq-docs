@@ -12,11 +12,12 @@ NucleusIQ uses provider packages so your agent code stays stable while model bac
 
 | Package | Category | Status | Install |
 |---------|----------|--------|---------|
-| `nucleusiq-openai` | LLM provider | **Active** — Chat Completions + Responses API | `pip install nucleusiq-openai` |
-| `nucleusiq-gemini` | LLM provider | **Active** — Google GenAI SDK (GA) | `pip install nucleusiq-gemini` |
-| `nucleusiq-anthropic` | LLM provider | **Alpha** — Claude Messages API (`anthropic` SDK); **`nucleusiq>=0.7.10`** | `pip install nucleusiq-anthropic` |
-| `nucleusiq-groq` | Inference provider | **Beta** — Groq Chat Completions (`groq` SDK); **`nucleusiq>=0.7.9`** | `pip install nucleusiq-groq` |
-| `nucleusiq-ollama` | Inference provider | **Alpha** — Ollama **`/api/chat`** (`ollama` SDK); **`nucleusiq>=0.7.10`** | `pip install nucleusiq-ollama` |
+| `nucleusiq-openai` | LLM provider | 🟢 **Stable** — Chat Completions + Responses API | `pip install nucleusiq-openai` |
+| `nucleusiq-openai-compatible` | Inference provider | 🟢 **Stable** — any Chat Completions server (vLLM, SGLang, llama.cpp, LM Studio, Azure OpenAI **v1**, …); **`nucleusiq>=0.7.13`** | `pip install nucleusiq-openai-compatible` |
+| `nucleusiq-gemini` | LLM provider | 🟢 **Stable** — Google GenAI SDK (GA) | `pip install nucleusiq-gemini` |
+| `nucleusiq-anthropic` | LLM provider | 🟢 **Stable** — Claude Messages API (`anthropic` SDK); **`nucleusiq>=0.7.12`** | `pip install nucleusiq-anthropic` |
+| `nucleusiq-groq` | Inference provider | 🟢 **Stable** — Groq Chat Completions (`groq` SDK); **`nucleusiq>=0.7.12`** | `pip install nucleusiq-groq` |
+| `nucleusiq-ollama` | Inference provider | 🟢 **Stable** — Ollama **native `/api/chat`** (`ollama` SDK); **`nucleusiq>=0.7.12`** | `pip install nucleusiq-ollama` |
 
 ## Tool adapters
 
@@ -24,7 +25,7 @@ NucleusIQ also ships **tool adapters** — provider-agnostic packages that expos
 
 | Package | Category | Status | Install |
 |---------|----------|--------|---------|
-| `nucleusiq-mcp` | Tool adapter | **Beta** — Universal **[Model Context Protocol](https://modelcontextprotocol.io/)** client built on the official `mcp` SDK; stdio + Streamable HTTP + SSE transports; Bearer / OAuth 2.1 / Env / custom auth; **`nucleusiq>=0.7.11`** | `pip install "nucleusiq[mcp]"` |
+| `nucleusiq-mcp` | Tool adapter | 🟢 **Stable** — Universal **[Model Context Protocol](https://modelcontextprotocol.io/)** client built on the official `mcp` SDK; stdio + Streamable HTTP + SSE; Bearer / OAuth 2.1 / Env / custom auth; **`nucleusiq>=0.7.12`**, **`mcp>=1.28.1`** | `pip install "nucleusiq[mcp]"` |
 
 See the **[MCP integration guide](guides/mcp-integration.md)** for the full universal-adapter walkthrough and the comparison to **OpenAI's server-side MCP** path.
 
@@ -53,7 +54,16 @@ llm = BaseOpenAI(model_name="gpt-4o")
 # from nucleusiq_gemini import BaseGemini
 # llm = BaseGemini(model_name="gemini-2.5-flash")
 
-# Or Anthropic Claude — Messages API (alpha package; async_mode=True)
+# Or a self-hosted / OpenAI-compatible server (vLLM, SGLang, llama.cpp, …)
+# from nucleusiq_openai_compatible import OpenAICompatibleLLM
+# llm = OpenAICompatibleLLM(
+#     base_url="http://gpu-node-1:8000/v1",
+#     model="gemma-4-27b-it",
+#     context_window=32_768,
+#     engine="vllm",
+# )
+
+# Or Anthropic Claude — Messages API (async_mode=True)
 # from nucleusiq_anthropic import BaseAnthropic
 # llm = BaseAnthropic(model_name="claude-3-5-sonnet-20241022", async_mode=True)
 
@@ -61,7 +71,7 @@ llm = BaseOpenAI(model_name="gpt-4o")
 # from nucleusiq_groq import BaseGroq
 # llm = BaseGroq(model_name="llama-3.3-70b-versatile", async_mode=True)
 
-# Or Ollama — local / hosted daemon (alpha package; async_mode=True)
+# Or Ollama — native /api/chat (async_mode=True)
 # from nucleusiq_ollama import BaseOllama
 # llm = BaseOllama(model_name="llama3.2", async_mode=True)
 
@@ -158,6 +168,19 @@ Each provider has its own `LLMParams` subclass for provider-specific settings:
     )
     ```
 
+=== "OpenAI-compatible"
+
+    ```python
+    from nucleusiq_openai_compatible import OpenAICompatibleLLMParams
+
+    config = AgentConfig(
+        llm_params=OpenAICompatibleLLMParams(
+            temperature=0.7,
+            max_output_tokens=1024,
+        ),
+    )
+    ```
+
 Common parameters (`temperature`, `max_output_tokens`, `top_p`) are defined in the base `LLMParams` and work across all providers.
 
 ## Provider-native tools
@@ -168,9 +191,10 @@ Each provider can expose server-side tools:
 |----------|-------------|
 | OpenAI | `code_interpreter`, `file_search`, `web_search`, `image_generation`, `mcp` (server-side), `computer_use` |
 | Gemini | `google_search`, `code_execution`, `url_context`, `google_maps` |
-| Anthropic | **Alpha:** framework **`@tool`** / local tools — Claude **server-side** tools (**`web_search`**, …) are **not** wired yet ([Anthropic provider](guides/anthropic-provider.md)) |
-| Groq | **Phase A:** framework **`@tool`** / local function tools only — Groq built-in/hosted tools are **not** wired yet (see [Groq provider](guides/groq-provider.md)) |
-| Ollama | **Alpha:** framework **`@tool`** / function tools via Ollama **`/api/chat`** — no separate “native tool” factory yet ([Ollama provider](guides/ollama-provider.md)) |
+| Anthropic | `AnthropicTool.web_search()` / `web_fetch()` / `code_execution()` plus framework `@tool` ([Anthropic provider](guides/anthropic-provider.md)) |
+| Groq | Framework `@tool` / local function tools — Groq hosted tools are not wired yet ([Groq provider](guides/groq-provider.md)) |
+| Ollama | Framework `@tool` via native `/api/chat` — no separate native-tool factory ([Ollama provider](guides/ollama-provider.md)) |
+| OpenAI-compatible | Framework `@tool` over Chat Completions `tools` — no hosted-tool factory ([OpenAI-compatible provider](guides/openai-compatible-provider.md)) |
 
 Native tools are accessed via provider-specific factories (`OpenAITool`, `GeminiTool`) and can be mixed with framework-level tools in the same agent.
 
@@ -198,16 +222,17 @@ All providers map SDK errors to NucleusIQ's [framework-level error taxonomy](cor
 ## Compatibility
 
 - The core package is versioned independently from provider packages.
-- Provider packages declare their minimum **`nucleusiq`** version (for example **`nucleusiq>=0.7.9`** for OpenAI / Gemini / Groq wheels published with that floor; **`nucleusiq-ollama`** and **`nucleusiq-anthropic`** require **`>=0.7.10`**; **`nucleusiq-mcp`** requires **`>=0.7.11`**).
+- Provider packages declare their minimum **`nucleusiq`** version. **`nucleusiq-openai-compatible`** requires **`>=0.7.13`**. The other first-party providers floor on **`>=0.7.12`**.
 - Always keep provider versions compatible with your installed `nucleusiq` version.
 
 ## See also
 
-- [MCP integration guide](guides/mcp-integration.md) — Universal Model Context Protocol adapter (**beta**), works with every provider
-- [Anthropic provider guide](guides/anthropic-provider.md) — Claude Messages API (**alpha**), structured outputs, examples
-- [Ollama provider guide](guides/ollama-provider.md) — Ollama alpha scope, env, **`think`**, examples
-- [Groq provider guide](guides/groq-provider.md) — Groq Chat Completions, beta scope, rate limits, examples
+- [OpenAI-compatible provider](guides/openai-compatible-provider.md) — Self-hosted / BYOM Chat Completions
+- [MCP integration guide](guides/mcp-integration.md) — Universal Model Context Protocol adapter, works with every provider
+- [Anthropic provider guide](guides/anthropic-provider.md) — Claude Messages API, Phase B native tools
+- [Ollama provider guide](guides/ollama-provider.md) — Native `/api/chat`, vision, **`think`**
+- [Groq provider guide](guides/groq-provider.md) — Groq Chat Completions, rate limits
 - [Gemini provider guide](guides/gemini-provider.md) — Full Gemini integration details
-- [OpenAI provider guide](guides/openai-provider.md) — Full OpenAI integration details
+- [OpenAI provider guide](guides/openai-provider.md) — OpenAI cloud, Responses API, hosted tools
 - [Models](models.md) — Provider-agnostic model usage
 - [Install](install.md) — Setup instructions

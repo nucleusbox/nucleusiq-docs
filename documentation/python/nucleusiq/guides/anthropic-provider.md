@@ -1,8 +1,8 @@
 # Anthropic (Claude) provider
 
-!!! success "🟢 Stable — `nucleusiq-anthropic` 0.2.0 (Phase B feature-complete)"
+!!! success "🟢 Stable — `nucleusiq-anthropic` 0.2.1 (Phase B feature-complete)"
 
-    **`nucleusiq-anthropic` 0.2.0** ships as **`Development Status :: 5 - Production/Stable`** (first stable line; semver applies from here). It connects **Claude** to NucleusIQ through the **Messages API** and the official **`anthropic`** Python SDK (**`AsyncAnthropic` / `Anthropic`**), with full Phase B feature parity.
+    **`nucleusiq-anthropic` 0.2.1** ships as **`Development Status :: 5 - Production/Stable`**. It connects **Claude** to NucleusIQ through the **Messages API** and the official **`anthropic`** Python SDK (**`AsyncAnthropic` / `Anthropic`**), with full Phase B feature parity. Declares `PROVIDER_NAME` plus `httpx` / `pydantic`.
 
     - **Requires** **`nucleusiq>=0.7.12`** and **`anthropic>=0.40,<1`**.
     - **151 unit tests + 6 live integration tests, 95.91% coverage** (gate ≥ 95%).
@@ -53,7 +53,7 @@ pip install nucleusiq nucleusiq-anthropic
 Pin the stable line for reproducible builds:
 
 ```bash
-pip install "nucleusiq>=0.7.12" "nucleusiq-anthropic>=0.2.0,<0.3"
+pip install "nucleusiq>=0.7.12" "nucleusiq-anthropic>=0.2.1,<0.3"
 ```
 
 ## Environment

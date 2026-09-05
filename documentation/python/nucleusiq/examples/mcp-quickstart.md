@@ -2,9 +2,9 @@
 
 Connect any **[Model Context Protocol](https://modelcontextprotocol.io/)** server (GitHub, Slack, Postgres, Stripe, your own) to a NucleusIQ agent — across **any LLM provider** — using **`nucleusiq-mcp`**.
 
-!!! success "Beta"
+!!! success "Stable"
 
-    **`nucleusiq-mcp` 0.1.0b1** — public **beta**. Requires **`nucleusiq>=0.7.11`** and **`mcp>=1.27,<2`**. API is stable for the 0.1.x line.
+    **`nucleusiq-mcp` 0.1.1** — **Stable**. Requires **`nucleusiq>=0.7.12`** and **`mcp>=1.28.1,<2`**. API is stable for the 0.1.x line.
 
 **Pattern:** create one or more **`MCPTool`** instances → pass them in `tools=[...]` → call **`await agent.initialize()`** to open the connections and discover tools → run **`agent.execute(...)`** as usual.
 
@@ -13,7 +13,7 @@ For the **why** and the **scope** (transports, auth strategies, decorator filter
 ## Setup
 
 ```bash
-pip install "nucleusiq>=0.7.11" "nucleusiq-mcp==0.1.0b1" nucleusiq-anthropic
+pip install "nucleusiq>=0.7.12" "nucleusiq-mcp>=0.1.1,<0.2" nucleusiq-anthropic
 # Or via the core extras
 # pip install "nucleusiq[mcp]" nucleusiq-anthropic
 

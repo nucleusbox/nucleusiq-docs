@@ -32,9 +32,10 @@ A step-by-step learning sequence for new NucleusIQ users.
 
 - [Provider portability](../providers.md) — Same agent code, different LLM
 - [Gemini quickstart example](../examples/gemini-quickstart.md) — All three modes with Gemini
-- [Anthropic quickstart](../examples/anthropic-quickstart.md) — Claude Messages API (**alpha**)
-- [Groq quickstart](../examples/groq-quickstart.md) — Cloud inference (**beta**)
-- [Ollama quickstart](../examples/ollama-quickstart.md) — Local **`/api/chat`** (**alpha**)
+- [OpenAI-compatible quickstart](../examples/openai-compatible-quickstart.md) — Self-hosted / BYOM Chat Completions
+- [Anthropic quickstart](../examples/anthropic-quickstart.md) — Claude Messages API
+- [Groq quickstart](../examples/groq-quickstart.md) — Cloud inference
+- [Ollama quickstart](../examples/ollama-quickstart.md) — Native **`/api/chat`**
 
 ## Next steps
 

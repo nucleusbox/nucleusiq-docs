@@ -1,10 +1,10 @@
 # MCP integration (Model Context Protocol)
 
-!!! success "🟢 Stable — `nucleusiq-mcp` 0.1.0 (v0.7.12)"
+!!! success "🟢 Stable — `nucleusiq-mcp` 0.1.1 (v0.7.13)"
 
-    **`nucleusiq-mcp` 0.1.0** ships as **`Development Status :: 5 - Production/Stable`** in v0.7.12 — the same Phase 0–3 surface as `0.1.0b1` (no API changes), just promoted out of beta. It is a **universal Model Context Protocol** adapter built on the **official `mcp` SDK** that turns any MCP server (GitHub, Slack, Postgres, Stripe, your own) into native NucleusIQ tools.
+    **`nucleusiq-mcp` 0.1.1** is the same Phase 0–3 surface as `0.1.0`, with the security floor raised to **`mcp>=1.28.1`** (session auth, task isolation, WebSocket Host/Origin). It is a **universal Model Context Protocol** adapter built on the **official `mcp` SDK** that turns any MCP server (GitHub, Slack, Postgres, Stripe, your own) into native NucleusIQ tools.
 
-    - **Requires** **`nucleusiq>=0.7.12`** and **`mcp>=1.27,<2`**.
+    - **Requires** **`nucleusiq>=0.7.12`** and **`mcp>=1.28.1,<2`**.
     - **235 unit tests (98.68% coverage) + 13 live integration tests** across all three transports.
     - **API is stable** for the 0.1.x line — feature-additive changes only; breaking changes will go through a `0.2.0` major.
 

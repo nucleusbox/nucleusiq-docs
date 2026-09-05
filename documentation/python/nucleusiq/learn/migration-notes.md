@@ -4,19 +4,52 @@
 
 | Package | Version | Requires |
 |---------|---------|----------|
-| `nucleusiq` | **0.7.10** | — |
-| `nucleusiq-openai` | **0.6.4** | `nucleusiq>=0.7.9` |
-| `nucleusiq-gemini` | **0.2.6** | `nucleusiq>=0.7.9` |
-| `nucleusiq-anthropic` | **0.1.0a1** (alpha) | `nucleusiq>=0.7.10`, `anthropic>=0.40,<1` |
-| `nucleusiq-groq` | **0.1.0b1** (beta) | `nucleusiq>=0.7.9`, `groq>=1.2,<2` |
-| `nucleusiq-ollama` | **0.1.0a1** (alpha) | `nucleusiq>=0.7.10`, `ollama>=0.5,<1` |
+| `nucleusiq` | **0.7.13** | — |
+| `nucleusiq-openai-compatible` | **0.1.0** | `nucleusiq>=0.7.13` |
+| `nucleusiq-openai` | **0.7.1** | `nucleusiq>=0.7.12` |
+| `nucleusiq-gemini` | **0.3.1** | `nucleusiq>=0.7.12` |
+| `nucleusiq-anthropic` | **0.2.1** | `nucleusiq>=0.7.12`, `anthropic>=0.40,<1` |
+| `nucleusiq-groq` | **0.1.1** | `nucleusiq>=0.7.12`, `groq>=1.2,<2` |
+| `nucleusiq-ollama` | **0.2.1** | `nucleusiq>=0.7.12`, `ollama>=0.5,<1` |
+| `nucleusiq-mcp` | **0.1.1** | `nucleusiq>=0.7.12`, `mcp>=1.28.1,<2` |
 
 ```bash
-pip install --upgrade nucleusiq nucleusiq-openai nucleusiq-gemini
-pip install --upgrade "nucleusiq-groq>=0.1.0b1"
-pip install --upgrade "nucleusiq>=0.7.10" "nucleusiq-ollama>=0.1.0a1"
-pip install --upgrade "nucleusiq-anthropic>=0.1.0a1"
+pip install --upgrade "nucleusiq>=0.7.13"
+pip install --upgrade nucleusiq-openai nucleusiq-gemini nucleusiq-anthropic nucleusiq-groq nucleusiq-ollama nucleusiq-mcp
+pip install nucleusiq-openai-compatible   # only if you need self-hosted / BYOM
 ```
+
+## From v0.7.12 to v0.7.13
+
+v0.7.13 is **backward compatible** for existing `Agent` code. Upgrade core when you adopt **`nucleusiq-openai-compatible`**, want Responses API usage accounting on OpenAI, or want the MCP security floor.
+
+### Packages
+
+- **`nucleusiq` 0.7.13** — `BaseLLM.PROVIDER_NAME`. `get_provider_from_llm()` reads the declaration first; class-name matching is only a fallback. Dead `supports_native_output()` removed (it was never a public export). **`OutputMode.AUTO` still resolves to NATIVE.**
+- **`nucleusiq-openai-compatible` 0.1.0** — **new**. Requires **`nucleusiq>=0.7.13`** because the pre-0.7.13 class-name matcher would treat `OpenAICompatibleLLM` as `"openai"`.
+- **`nucleusiq-openai` 0.7.1** — Responses API path maps `input_tokens` / `output_tokens` to `prompt_tokens` / `completion_tokens`.
+- **`nucleusiq-mcp` 0.1.1** — `mcp>=1.28.1`.
+- Other providers **0.x.1** — declare `PROVIDER_NAME` and the deps they actually import.
+
+```bash
+pip install --upgrade "nucleusiq>=0.7.13"
+pip install nucleusiq-openai-compatible
+```
+
+### Highlights
+
+| Area | Change |
+|------|--------|
+| **Self-hosted / BYOM** | New [OpenAI-compatible provider](../guides/openai-compatible-provider.md) — vLLM, SGLang, llama.cpp, LM Studio, Azure OpenAI **v1**. |
+| **Provider identity** | Adapters declare `PROVIDER_NAME`. No application-code change. |
+| **OpenAI usage** | Responses API runs no longer report 0 tokens / $0.00. |
+| **MCP security** | Floor raised to `mcp>=1.28.1`. |
+
+Do **not** point `BaseOpenAI(base_url=...)` at a self-hosted server. Use `OpenAICompatibleLLM`.
+
+Azure is **v1 Chat Completions only** (`https://{resource}.openai.azure.com/openai/v1`). Classic deployment URLs and the `AzureOpenAI` SDK are not used.
+
+Upstream: **[CHANGELOG.md — 0.7.13](https://github.com/nucleusbox/NucleusIQ/blob/main/CHANGELOG.md#0713--2026-09-05)**. [Release notes](../../../reference/release-notes/v0.7.13.md).
 
 ## Adopting Anthropic Claude (alpha)
 

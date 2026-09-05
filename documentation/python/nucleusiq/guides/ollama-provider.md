@@ -2,9 +2,11 @@
 
 Run **[Ollama](https://ollama.com/)** models (local daemon or a reachable HTTP API) through NucleusIQ using the official **`ollama`** Python SDK — **no LangChain**.
 
-!!! success "🟢 Stable — `nucleusiq-ollama` 0.2.0"
+!!! success "🟢 Stable — `nucleusiq-ollama` 0.2.1"
 
-    **`nucleusiq-ollama` 0.2.0** ships as **`Development Status :: 5 - Production/Stable`** (first stable line). Requires **`nucleusiq>=0.7.12`**. **98 unit tests, 99.85% coverage**.
+    **`nucleusiq-ollama` 0.2.1** ships as **`Development Status :: 5 - Production/Stable`**. Requires **`nucleusiq>=0.7.12`**. **98 unit tests, 99.85% coverage**. Declares `PROVIDER_NAME = "ollama"`.
+
+    Talking to Ollama through its **OpenAI `/v1` shim**? Use [`nucleusiq-openai-compatible`](openai-compatible-provider.md) with `engine="ollama"`. That shim accepts `json_schema` and ignores it — this package uses the native `format` field instead.
 
 ## What you get in 0.2.0
 
@@ -33,7 +35,7 @@ pip install nucleusiq nucleusiq-ollama
 Pin the stable line for reproducible builds:
 
 ```bash
-pip install "nucleusiq>=0.7.12" "nucleusiq-ollama>=0.2.0,<0.3"
+pip install "nucleusiq>=0.7.12" "nucleusiq-ollama>=0.2.1,<0.3"
 ```
 
 Dependency: **`ollama>=0.5.0,<1.0`**.
@@ -239,6 +241,7 @@ Package README: [`src/providers/inference/ollama/README.md`](https://github.com/
 ## See also
 
 - [Ollama quickstart](../examples/ollama-quickstart.md) — Copy-paste gears  
+- [OpenAI-compatible provider](openai-compatible-provider.md) — Ollama `/v1` shim  
 - [Providers](../providers.md) — Portability  
 - [Models](../models.md) — Parameter tabs  
 - [Installation](../install.md) — **`nucleusiq[http]`** optional extra (**v0.7.10**)  

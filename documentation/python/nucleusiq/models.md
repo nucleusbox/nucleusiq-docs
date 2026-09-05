@@ -78,6 +78,18 @@ NucleusIQ uses a **provider-agnostic** `BaseLLM` interface. Swap providers witho
 | `o3-mini` | Reasoning, cost-effective |
 | `o4-mini` | Latest reasoning model |
 
+### OpenAI-compatible (self-hosted / BYOM)
+
+Model ids are **whatever the server advertises** (`--served-model-name`, LM Studio catalog, Azure **deployment name**). Declare `context_window` to match `--max-model-len`. See [OpenAI-compatible provider](guides/openai-compatible-provider.md).
+
+| Example | Typical engine |
+|---------|----------------|
+| `gemma-4-27b-it` | `vllm` / `sglang` |
+| `local-model` | `llamacpp` / `lmstudio` |
+| Azure deployment name | `azure` (v1 URL only) |
+
+**`nucleusiq-openai-compatible` 0.1.0** requires **`nucleusiq>=0.7.13`**.
+
 ### Gemini
 
 | Model | Context | Thinking |
@@ -92,7 +104,7 @@ NucleusIQ uses a **provider-agnostic** `BaseLLM` interface. Swap providers witho
 
 Model IDs are **org-specific** — use [**Models API**](https://platform.claude.com/docs/en/api/models/list) or the monorepo helper **`09_anthropic_list_models.py`**. Examples often default to **`claude-3-5-sonnet-20241022`**.
 
-Alpha package **`nucleusiq-anthropic` 0.1.0a1** requires **`nucleusiq>=0.7.10`** and the official **`anthropic`** SDK (`>=0.40,<1`). See [Anthropic provider guide](guides/anthropic-provider.md).
+**`nucleusiq-anthropic` 0.2.1** requires **`nucleusiq>=0.7.12`** and the official **`anthropic`** SDK (`>=0.40,<1`). See [Anthropic provider guide](guides/anthropic-provider.md).
 
 ### Groq
 
@@ -103,7 +115,7 @@ Groq rotates **Llama**, **Mixtral**, **Qwen**, **GPT-OSS**, and other checkpoint
 | `llama-3.3-70b-versatile` | Chat + local tools |
 | `openai/gpt-oss-20b` | Structured output demos (`json_schema`) |
 
-Beta package **`nucleusiq-groq` 0.1.0b1** requires **`nucleusiq>=0.7.9`** and ships against the official **`groq`** Python SDK (`>=1.2,<2`).
+**`nucleusiq-groq` 0.1.1** requires **`nucleusiq>=0.7.12`** and ships against the official **`groq`** Python SDK (`>=1.2,<2`).
 
 ### Ollama
 
@@ -114,7 +126,7 @@ Model ids are **whatever your Ollama server exposes** (`ollama list`). Typical l
 | `llama3.2` | General chat + tools (examples default) |
 | `mistral`, `qwen2.5`, … | Swap names per your catalog |
 
-Alpha package **`nucleusiq-ollama` 0.1.0a1** requires **`nucleusiq>=0.7.10`** and uses the official **`ollama`** SDK (`>=0.5,<1`). See [Ollama provider guide](guides/ollama-provider.md).
+**`nucleusiq-ollama` 0.2.1** requires **`nucleusiq>=0.7.12`** and uses the official **`ollama`** SDK (`>=0.5,<1`). See [Ollama provider guide](guides/ollama-provider.md). For an OpenAI `/v1` shim (including Ollama's), use [OpenAI-compatible](guides/openai-compatible-provider.md) and declare `context_window` yourself.
 
 ## Parameter control
 
@@ -267,9 +279,10 @@ Override parameters for a single execution:
 ## See also
 
 - [Providers](providers.md) — Provider architecture and portability
-- [OpenAI provider guide](guides/openai-provider.md) — OpenAI-specific features
+- [OpenAI provider guide](guides/openai-provider.md) — OpenAI cloud features
+- [OpenAI-compatible provider](guides/openai-compatible-provider.md) — Self-hosted / BYOM
 - [Gemini provider guide](guides/gemini-provider.md) — Gemini-specific features
-- [Anthropic provider guide](guides/anthropic-provider.md) — Claude Messages API (**alpha**), structured outputs, retries
+- [Anthropic provider guide](guides/anthropic-provider.md) — Claude Messages API, structured outputs, retries
 - [Groq provider guide](guides/groq-provider.md) — Groq Chat Completions (beta), **`strict_model_capabilities`**, rate limits
-- [Ollama provider guide](guides/ollama-provider.md) — Ollama alpha, **`think`**, structured output cautions
+- [Ollama provider guide](guides/ollama-provider.md) — Native `/api/chat`, **`think`**, structured output cautions
 - [Install](install.md) — Setup instructions

@@ -2,11 +2,15 @@
 
 The NucleusIQ OpenAI provider (`nucleusiq-openai`) integrates OpenAI's Chat Completions and Responses API with automatic routing between them.
 
-!!! success "🟢 `nucleusiq-openai` 0.7.0 (v0.7.12)"
+!!! success "🟢 `nucleusiq-openai` 0.7.1 (v0.7.13)"
 
-    Requires **`nucleusiq>=0.7.12`**. **232 unit tests** passing.
+    Requires **`nucleusiq>=0.7.12`**. **239 unit tests** passing.
 
-    **New in 0.7.0** — native-tool observability: `web_search_call`, `code_interpreter_call`, `file_search_call`, `computer_use_call`, and `image_generation_call` items from the Responses API are normalised into `_LLMResponse.server_tool_calls` (name normalised by stripping the `_call` suffix). The core agent loop then emits `ToolCallRecord(executed_by="provider")` for each one. `LLMCallRecord.provider="openai"` is populated automatically. See [Native server tools](native-server-tools.md) and [Observability](../observability/index.md).
+    **New in 0.7.1** — Responses API usage accounting. Non-streaming `call()` no longer reports 0 tokens / $0.00. Streaming maps `input_tokens` / `output_tokens` to `prompt_tokens` / `completion_tokens`.
+
+    **Self-hosted / vLLM / Azure OpenAI v1?** Use [`nucleusiq-openai-compatible`](openai-compatible-provider.md) instead of `BaseOpenAI(base_url=...)`. This package owns OpenAI cloud (Responses API, hosted tools, tiktoken).
+
+    **0.7.0** added native-tool observability: `web_search_call`, `code_interpreter_call`, `file_search_call`, `computer_use_call`, and `image_generation_call` items from the Responses API are normalised into `_LLMResponse.server_tool_calls`. The core agent loop then emits `ToolCallRecord(executed_by="provider")`. `LLMCallRecord.provider="openai"` is populated automatically. See [Native server tools](native-server-tools.md) and [Observability](../observability/index.md).
 
 ## Installation
 
@@ -17,7 +21,7 @@ pip install nucleusiq nucleusiq-openai
 Pin the stable line:
 
 ```bash
-pip install "nucleusiq>=0.7.12" "nucleusiq-openai>=0.7.0,<0.8"
+pip install "nucleusiq>=0.7.12" "nucleusiq-openai>=0.7.1,<0.8"
 ```
 
 Set your API key:
@@ -151,6 +155,7 @@ Streaming works with both Chat Completions and Responses API.
 
 ## See also
 
+- [OpenAI-compatible provider](openai-compatible-provider.md) — Self-hosted / BYOM Chat Completions
 - [Gemini provider guide](gemini-provider.md) — Gemini integration
 - [Providers](../providers.md) — Provider portability
 - [Error handling](../core-concepts/error-handling.md) — Framework error taxonomy

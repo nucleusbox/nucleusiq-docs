@@ -2,16 +2,16 @@
 
 Use **[Anthropic](https://www.anthropic.com/) Claude** through **`nucleusiq-anthropic`** (**Messages API**, official **`anthropic`** SDK) across NucleusIQ execution modes.
 
-!!! danger "Alpha"
+!!! success "Stable"
 
-    **`nucleusiq-anthropic` 0.1.0a1** — **pre-release**. Requires **`nucleusiq>=0.7.10`**, **`anthropic>=0.40,<1`**. Pin **`==0.1.0a1`** when you need reproducible builds.
+    **`nucleusiq-anthropic` 0.2.1** — Phase B complete. Requires **`nucleusiq>=0.7.12`**, **`anthropic>=0.40,<1`**. Pin **`>=0.2.1,<0.3`** when you need reproducible builds.
 
 **Pattern:** **`BaseAnthropic(..., async_mode=True)`**, **`await agent.initialize()`**, mandatory **`prompt=`**. Sampling via **`LLMParams`** on **`AgentConfig`**; **`AnthropicLLMParams`** on **`BaseAnthropic`** for **`top_k`** / beta headers — see **[Anthropic provider](../guides/anthropic-provider.md)**.
 
 ## Setup
 
 ```bash
-pip install "nucleusiq>=0.7.10" "nucleusiq-anthropic>=0.1.0a1"
+pip install "nucleusiq>=0.7.12" "nucleusiq-anthropic>=0.2.1,<0.3"
 export ANTHROPIC_API_KEY="sk-ant-..."
 # Optional — examples default to a widely documented id; override if your org differs:
 # export ANTHROPIC_MODEL=claude-3-5-sonnet-20241022
